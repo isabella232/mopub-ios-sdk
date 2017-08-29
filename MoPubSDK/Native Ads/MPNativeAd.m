@@ -112,6 +112,11 @@
 
     MPLogDebug(@"Tracking an impression for %@.", self.adIdentifier);
     self.hasTrackedImpression = YES;
+    
+    if ([self.delegate respondsToSelector:@selector(willTrackImpressionForNativeAd:)]) {
+        [self.delegate willTrackImpressionForNativeAd:self];
+    }
+    
     [self trackMetricsForURLs:self.impressionTrackerURLs];
 }
 
@@ -124,6 +129,11 @@
 
     MPLogDebug(@"Tracking a click for %@.", self.adIdentifier);
     self.hasTrackedClick = YES;
+    
+    if ([self.delegate respondsToSelector:@selector(willTrackClickForNativeAd:)]) {
+        [self.delegate willTrackClickForNativeAd:self];
+    }
+    
     [self trackMetricsForURLs:self.clickTrackerURLs];
 
     if ([self.adAdapter respondsToSelector:@selector(trackClick)] && ![self isThirdPartyHandlingClicks]) {
