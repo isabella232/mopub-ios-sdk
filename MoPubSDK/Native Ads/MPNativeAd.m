@@ -105,6 +105,10 @@
 
 - (void)trackImpression
 {
+    if ([self.delegate respondsToSelector:@selector(willTrackImpressionForNativeAd:)]) {
+        [self.delegate willTrackImpressionForNativeAd:self];
+    }
+    
     if (self.hasTrackedImpression) {
         MPLogDebug(@"Impression already tracked.");
         return;
@@ -112,10 +116,6 @@
 
     MPLogDebug(@"Tracking an impression for %@.", self.adIdentifier);
     self.hasTrackedImpression = YES;
-    
-    if ([self.delegate respondsToSelector:@selector(willTrackImpressionForNativeAd:)]) {
-        [self.delegate willTrackImpressionForNativeAd:self];
-    }
     
     [self trackMetricsForURLs:self.impressionTrackerURLs];
 }
