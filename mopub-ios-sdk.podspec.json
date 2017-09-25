@@ -1,7 +1,7 @@
 {
   "name": "mopub-ios-sdk",
   "module_name": "MoPub",
-  "version": "4.16.22",
+  "version": "4.16.4",
   "license": {
     "type": "New BSD",
     "file": "LICENSE"
@@ -15,7 +15,7 @@
   "social_media_url": "http://twitter.com/mopub",
   "source": {
     "git": "https://github.com/HaykBrsoyan/mopub-ios-sdk.git",
-    "tag": "4.16.22"
+    "tag": "4.16.4"
   },
   "requires_arc": true,
   "platforms": {
