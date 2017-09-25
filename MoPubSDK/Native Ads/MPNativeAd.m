@@ -104,11 +104,7 @@
 }
 
 - (void)trackImpression
-{
-    if ([self.delegate respondsToSelector:@selector(willTrackImpressionForNativeAd:)]) {
-        [self.delegate willTrackImpressionForNativeAd:self];
-    }
-    
+{   
     if (self.hasTrackedImpression) {
         MPLogDebug(@"Impression already tracked.");
         return;
@@ -117,11 +113,19 @@
     MPLogDebug(@"Tracking an impression for %@.", self.adIdentifier);
     self.hasTrackedImpression = YES;
     
+    if ([self.delegate respondsToSelector:@selector(willTrackImpressionForNativeAd:)]) {
+        [self.delegate willTrackImpressionForNativeAd:self];
+    }
+    
     [self trackMetricsForURLs:self.impressionTrackerURLs];
 }
 
 - (void)trackClick
 {
+    if ([self.delegate respondsToSelector:@selector(willTrackClickForNativeAd:)]) {
+        [self.delegate willTrackClickForNativeAd:self];
+    }
+    
     if (self.hasTrackedClick) {
         MPLogDebug(@"Click already tracked.");
         return;
@@ -129,10 +133,6 @@
 
     MPLogDebug(@"Tracking a click for %@.", self.adIdentifier);
     self.hasTrackedClick = YES;
-    
-    if ([self.delegate respondsToSelector:@selector(willTrackClickForNativeAd:)]) {
-        [self.delegate willTrackClickForNativeAd:self];
-    }
     
     [self trackMetricsForURLs:self.clickTrackerURLs];
 
