@@ -6,7 +6,7 @@
     "type": "New BSD",
     "file": "LICENSE"
   },
-  "homepage": "https://github.com/HaykBrsoyan/mopub-ios-sdk.git",
+  "homepage": "https://github.com/HaykBrsoyan/mopub-ios-sdk",
   "authors": {
     "MoPub": "support@mopub.com"
   },
@@ -195,3 +195,4 @@
       "source_files": "AdNetworkSupport/Vungle/*.{h,m}"
     }
   ]
+}
