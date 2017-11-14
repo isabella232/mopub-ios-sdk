@@ -33,7 +33,7 @@
     }];
 }
 
-- (void)initializeSdkWithParameters:(NSDictionary *)parameters callback:(void(^)())completionCallback {
+- (void)initializeSdkWithParameters:(NSDictionary *)parameters callback:(void(^)(void))completionCallback {
     NSString *appId = [parameters objectForKey:@"appId"];
     if (appId == nil) {
         MPLogError(@"Invalid setup. Use the appId parameter when configuring your network in the MoPub website.");
@@ -46,7 +46,9 @@
         return;
     }
 
-    [AdColonyController initializeAdColonyCustomEventWithAppId:appId allZoneIds:allZoneIds userId:nil callback:completionCallback];
+    NSString *userId = [parameters objectForKey:@"userId"];
+
+    [AdColonyController initializeAdColonyCustomEventWithAppId:appId allZoneIds:allZoneIds userId:userId callback:completionCallback];
 }
 
 - (void)requestRewardedVideoWithCustomEventInfo:(NSDictionary *)info {
@@ -66,9 +68,10 @@
 
     // Update the user ID
     NSString *customerId = [self.delegate customerIdForRewardedVideoCustomEvent:self];
-    [AdColonyController setUserId:customerId];
+    NSMutableDictionary *newInfo = [NSMutableDictionary dictionaryWithDictionary:info];
+    newInfo[@"userId"] = customerId;
 
-    [self initializeSdkWithParameters:info callback:^{
+    [self initializeSdkWithParameters:newInfo callback:^{
 
         AdColonyInstanceMediationSettings *settings = [self.delegate instanceMediationSettingsForClass:[AdColonyInstanceMediationSettings class]];
         BOOL showPrePopup = (settings) ? settings.showPrePopup : NO;

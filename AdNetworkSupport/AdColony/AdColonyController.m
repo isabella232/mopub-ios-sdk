@@ -23,12 +23,13 @@ typedef enum {
 @property (atomic, assign) InitState initState;
 @property (atomic, retain) NSArray *callbacks;
 @property (atomic, strong) NSSet *currentAllZoneIds;
+@property (atomic, assign) BOOL testModeEnabled;
 
 @end
 
 @implementation AdColonyController
 
-+ (void)initializeAdColonyCustomEventWithAppId:(NSString *)appId allZoneIds:(NSArray *)allZoneIds userId:(NSString *)userId callback:(void(^)())callback {
++ (void)initializeAdColonyCustomEventWithAppId:(NSString *)appId allZoneIds:(NSArray *)allZoneIds userId:(NSString *)userId callback:(void(^)(void))callback {
     AdColonyController *instance = [AdColonyController sharedInstance];
 
     @synchronized (instance) {
@@ -55,11 +56,12 @@ typedef enum {
                 }
 
                 instance.currentAllZoneIds = allZoneIdsSet;
+                options.testMode = instance.testModeEnabled;
 
                 [AdColony configureWithAppID:appId zoneIDs:allZoneIds options:options completion:^(NSArray<AdColonyZone *> * _Nonnull zones) {
                     @synchronized (instance) {
                         instance.initState = INIT_STATE_INITIALIZED;
-                        for (void(^localCallback)() in instance.callbacks) {
+                        for (void(^localCallback)(void) in instance.callbacks) {
                             localCallback();
                         }
                     }
@@ -69,17 +71,32 @@ typedef enum {
     }
 }
 
-+ (void)setUserId:(NSString *)userId {
-    AdColonyGlobalMediationSettings *settings = [[MoPub sharedInstance] globalMediationSettingsForClass:[AdColonyGlobalMediationSettings class]];
-    AdColonyAppOptions *options = [AdColonyAppOptions new];
++ (void)enableClientSideTestMode {
+    AdColonyController *instance = [AdColonyController sharedInstance];
 
-    if (userId.length > 0) {
-        options.userID = userId;
-    } else if (settings && settings.customId.length > 0) {
-        options.userID = settings.customId;
+    @synchronized (instance) {
+        instance.testModeEnabled = YES;
+
+        if (instance.initState == INIT_STATE_INITIALIZED || instance.initState == INIT_STATE_INITIALIZING) {
+            AdColonyAppOptions *options = [AdColony getAppOptions];
+            options.testMode = YES;
+            [AdColony setAppOptions:options];
+        }
     }
+}
 
-    [AdColony setAppOptions:options];
++ (void)disableClientSideTestMode {
+    AdColonyController *instance = [AdColonyController sharedInstance];
+
+    @synchronized (instance) {
+        instance.testModeEnabled = NO;
+
+        if (instance.initState == INIT_STATE_INITIALIZED || instance.initState == INIT_STATE_INITIALIZING) {
+            AdColonyAppOptions *options = [AdColony getAppOptions];
+            options.testMode = NO;
+            [AdColony setAppOptions:options];
+        }
+    }
 }
 
 + (AdColonyController *)sharedInstance {
