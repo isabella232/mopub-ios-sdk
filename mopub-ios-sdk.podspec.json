@@ -1,12 +1,12 @@
 {
   "name": "mopub-ios-sdk",
   "module_name": "MoPub",
-  "version": "4.16.3",
+  "version": "4.18.1",
   "license": {
     "type": "New BSD",
     "file": "LICENSE"
   },
-  "homepage": "https://github.com/HaykBrsoyan/mopub-ios-sdk",
+  "homepage": "https://github.com/HaykBrsoyan/mopub-ios-sdk.git",
   "authors": {
     "MoPub": "support@mopub.com"
   },
@@ -15,7 +15,7 @@
   "social_media_url": "http://twitter.com/mopub",
   "source": {
     "git": "https://github.com/HaykBrsoyan/mopub-ios-sdk.git",
-    "tag": "4.16.3"
+    "tag": "4.18.1"
   },
   "requires_arc": true,
   "platforms": {
@@ -78,11 +78,10 @@
       "dependencies": {
         "mopub-ios-sdk/Core": [
 
-        ],
-        "MPUBMoatMobileAppKit": [
-          "3.2.1"
         ]
-      }
+      },
+      "vendored_frameworks": "MoPubSDK/Viewability/Moat/MPUBMoatMobileAppKit.framework",
+      "source_files": "MoPubSDK/Viewability/MOAT/*.{h,m}"
     },
     {
       "name": "AdColonyCustomEvents",
@@ -115,7 +114,7 @@
 
         ],
         "ChartboostSDK": [
-          "~> 6.0"
+          "~> 7.0"
         ]
       },
       "source_files": "AdNetworkSupport/Chartboost/*.{h,m}"
@@ -146,6 +145,18 @@
         ]
       },
       "source_files": "AdNetworkSupport/Flurry/*.{h,m}"
+    },
+    {
+      "name": "MillennialCustomEvents",
+      "dependencies": {
+        "mopub-ios-sdk/Core": [
+
+        ],
+        "MMAdSDK": [
+          "~> 6.0"
+        ]
+      },
+      "source_files": "AdNetworkSupport/Millennial/*.{h,m}"
     },
     {
       "name": "TapjoyCustomEvents",
@@ -184,4 +195,3 @@
       "source_files": "AdNetworkSupport/Vungle/*.{h,m}"
     }
   ]
-}
