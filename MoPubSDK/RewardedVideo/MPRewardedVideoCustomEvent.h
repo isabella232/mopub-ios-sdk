@@ -38,7 +38,7 @@
  * This method may be invoked either at rewarded video initialization or on-demand when
  * `requestRewardedVideoWithCustomEventInfo:` is invoked.
  *
- * The default implementation of this method does nothing. Subclasses must override this method and implement
+ * The default implementation of this method does nothing. Subclasses must override this method and implement 
  * code to initialize the underlying SDK here.
  *
  * This method may be called multiple times during the lifetime of the app. As such
@@ -67,8 +67,31 @@
  *
  * @param info A dictionary containing additional custom data associated with a given custom event
  * request. This data is configurable on the MoPub website, and may be used to pass dynamic information, such as publisher IDs.
+ *
+ * @remark THIS API WILL BE DEPRECATED IN THE FUTURE
  */
 - (void)requestRewardedVideoWithCustomEventInfo:(NSDictionary *)info;
+
+/**
+ * Called when the MoPub SDK requires a new rewarded video ad.
+ *
+ * When the MoPub SDK receives a response indicating it should load a custom event, it will send
+ * this message to your custom event class. Your implementation of this method should load an
+ * rewarded video ad from a third-party ad network. It must also notify the
+ * `MPRewardedVideoCustomEventDelegate` of certain lifecycle events.
+ *
+ * The default implementation of this method does nothing. Subclasses must override this method and implement code to load a rewarded video here.
+ *
+ * **Important**: The application may provide a mediation settings object containing properties that you should use to configure how you use
+ * the ad network's APIs. Call `[-mediationSettingsForClass:]([MPRewardedVideoCustomEventDelegate mediationSettingsForClass:])`
+ * specifying a specific class that your custom event uses to retrieve the mediation settings object if it exists. You define
+ * the mediation settings class and the properties it supports for your custom event.
+ *
+ * @param info A dictionary containing additional custom data associated with a given custom event
+ * request. This data is configurable on the MoPub website, and may be used to pass dynamic information, such as publisher IDs.
+ * @param adMarkup An optional ad markup to use.
+ */
+- (void)requestRewardedVideoWithCustomEventInfo:(NSDictionary *)info adMarkup:(NSString *)adMarkup;
 
 /**
  * Called when the MoPubSDK wants to know if an ad is currently available for the ad network.
@@ -116,7 +139,7 @@
  *
  * Due to the way ad mediation works, two ad units may load the same ad network for displaying ads. When one ad unit plays
  * an ad, the other ad unit may need to update its state and notify the application an ad may no longer be available as it
- * may have already played. If an ad becomes unavailable for this custom event, call
+ * may have already played. If an ad becomes unavailable for this custom event, call 
  * `[-rewardedVideoDidExpireForCustomEvent:]([MPRewardedVideoCustomEventDelegate rewardedVideoDidExpireForCustomEvent:])`
  * to notify the application that an ad is no longer available.
  *

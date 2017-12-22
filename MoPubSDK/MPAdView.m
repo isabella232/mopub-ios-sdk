@@ -64,7 +64,7 @@
     [self.adContentView removeFromSuperview];
     _adContentView = view;
     [self addSubview:view];
-
+    
     if (view != nil) {
         self.userInteractionEnabled = YES;
     }
@@ -158,7 +158,7 @@
         // make sure we are not released synchronously as objects owned by us
         // may do additional work after this callback
         [[MPCoreInstanceProvider sharedProvider] keepObjectAliveForCurrentRunLoopIteration:self];
-
+        
         [self.delegate adViewDidFailToLoadAd:self];
     }
 }

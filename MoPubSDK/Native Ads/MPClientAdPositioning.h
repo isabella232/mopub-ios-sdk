@@ -52,7 +52,7 @@
  * Tells the positioning object that ads should be displayed evenly throughout a stream using the
  * specified interval.
  *
- * Repeating ads will only appear within a single section. If the receiver has fixed positions,
+ * Repeating ads will only appear within a single section. If the receiver has fixed positions, 
  * the sequence of repeating ads will start to appear following the last registered fixed position.
  * If the receiver does not have any fixed positions, ads will appear regularly starting at
  * `interval`, within the first section.

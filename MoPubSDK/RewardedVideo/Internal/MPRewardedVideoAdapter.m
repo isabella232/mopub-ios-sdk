@@ -76,7 +76,7 @@ static const NSUInteger kExcessiveCustomDataLength = 8196;
 
     if (self.rewardedVideoCustomEvent) {
         [self startTimeoutTimer];
-        [self.rewardedVideoCustomEvent requestRewardedVideoWithCustomEventInfo:configuration.customEventClassData];
+        [self.rewardedVideoCustomEvent requestRewardedVideoWithCustomEventInfo:configuration.customEventClassData adMarkup:configuration.advancedBidPayload];
     } else {
         NSError *error = [NSError errorWithDomain:MoPubRewardedVideoAdsSDKDomain code:MPRewardedVideoAdErrorInvalidCustomEvent userInfo:nil];
         [self.delegate rewardedVideoDidFailToLoadForAdapter:self error:error];
@@ -98,10 +98,10 @@ static const NSUInteger kExcessiveCustomDataLength = 8196;
         if (customDataLength > kExcessiveCustomDataLength) {
             MPLogWarn(@"Custom data length %ld exceeds the receommended maximum length of %ld characters.", customDataLength, kExcessiveCustomDataLength);
         }
-
+        
         self.urlEncodedCustomData = [customData mp_URLEncodedString];
     }
-
+    
     [self.rewardedVideoCustomEvent presentRewardedVideoFromViewController:viewController];
 }
 
@@ -147,22 +147,22 @@ static const NSUInteger kExcessiveCustomDataLength = 8196;
         finalCompletionUrlString = [NSString stringWithFormat:@"%@&customer_id=%@", finalCompletionUrlString, urlEncodedCustomerId];
     }
     finalCompletionUrlString = [NSString stringWithFormat:@"%@&nv=%@&v=%@", finalCompletionUrlString, [MP_SDK_VERSION mp_URLEncodedString], kRewardedVideoApiVersion];
-
+    
     if (self.configuration.selectedReward && ![self.configuration.selectedReward.currencyType isEqualToString:kMPRewardedVideoRewardCurrencyTypeUnspecified]) {
         finalCompletionUrlString = [NSString stringWithFormat:@"%@&rcn=%@&rca=%i", finalCompletionUrlString, [self.configuration.selectedReward.currencyType mp_URLEncodedString], [self.configuration.selectedReward.amount intValue]];
     }
-
+    
     // Append URL encoded custom event class name
     if (self.rewardedVideoCustomEvent != nil) {
         NSString * networkClassName = [NSStringFromClass([self.rewardedVideoCustomEvent class]) mp_URLEncodedString];
         finalCompletionUrlString = [NSString stringWithFormat:@"%@&cec=%@", finalCompletionUrlString, networkClassName];
     }
-
+    
     // Append URL encoded custom data
     if (self.urlEncodedCustomData != nil) {
         finalCompletionUrlString = [NSString stringWithFormat:@"%@&rcd=%@", finalCompletionUrlString, self.urlEncodedCustomData];
     }
-
+    
     return [NSURL URLWithString:finalCompletionUrlString];
 }
 
@@ -198,7 +198,7 @@ static const NSUInteger kExcessiveCustomDataLength = 8196;
     self.hasSuccessfullyLoaded = YES;
     [self didStopLoading];
     [self.delegate rewardedVideoDidLoadForAdapter:self];
-
+    
     // Check for MoPub-specific custom events before setting the timer
     if ([customEvent isKindOfClass:[MPMoPubRewardedVideoCustomEvent class]]
         || [customEvent isKindOfClass:[MPMoPubRewardedPlayableCustomEvent class]]) {
@@ -222,7 +222,7 @@ static const NSUInteger kExcessiveCustomDataLength = 8196;
     // are reporting a timeout here.
     [self.rewardedVideoCustomEvent handleCustomEventInvalidated];
     self.rewardedVideoCustomEvent = nil;
-
+    
     [self didStopLoading];
     [self.delegate rewardedVideoDidFailToLoadForAdapter:self error:error];
 }
@@ -289,16 +289,16 @@ static const NSUInteger kExcessiveCustomDataLength = 8196;
         if (self.configuration.rewardedVideoCompletionUrl) {
             [[MPRewardedVideo sharedInstance] startRewardedVideoConnectionWithUrl:[self rewardedVideoCompletionUrlByAppendingClientParams]];
         }
-
+        
         MPRewardedVideoReward *mopubConfiguredReward = self.configuration.selectedReward;
-
+        
         // If reward is set in adConfig, use reward that's set in adConfig.
         // Currency type has to be defined in mopubConfiguredReward in order to use mopubConfiguredReward.
         if (mopubConfiguredReward && ![mopubConfiguredReward.currencyType isEqualToString:kMPRewardedVideoRewardCurrencyTypeUnspecified]) {
             reward = mopubConfiguredReward;
         }
     }
-
+    
     // Notify client with the reward if present.
     if (reward) {
         [self.delegate rewardedVideoShouldRewardUserForAdapter:self reward:reward];

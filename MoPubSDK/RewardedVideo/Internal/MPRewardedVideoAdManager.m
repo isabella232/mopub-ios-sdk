@@ -98,14 +98,14 @@
         NSLog(@"Rewarded video ad view is not ready to be shown");
         return;
     }
-
+    
     // If we've already played an ad, don't allow playing of another since we allow one play per load.
     if (self.playedAd) {
         NSError *error = [NSError errorWithDomain:MoPubRewardedVideoAdsSDKDomain code:MPRewardedVideoAdErrorAdAlreadyPlayed userInfo:nil];
         [self.delegate rewardedVideoDidFailToPlayForAdManager:self error:error];
         return;
     }
-
+    
     // No reward is specified
     if (reward == nil) {
         // Only a single currency; It should automatically select the only currency available.
@@ -133,7 +133,7 @@
             self.configuration.selectedReward = reward;
         }
     }
-
+    
     [self.adapter presentRewardedVideoFromViewController:viewController customData:customData];
 }
 
@@ -150,7 +150,7 @@
 - (void)loadAdWithURL:(NSURL *)URL
 {
     self.playedAd = NO;
-
+    
     if (self.loading) {
         MPLogWarn(@"Rewarded video manager is already loading an ad. "
                   @"Wait for previous load to finish.");
@@ -165,9 +165,9 @@
 
 #pragma mark - MPAdServerCommunicatorDelegate
 
-- (void)communicatorDidReceiveAdConfiguration:(MPAdConfiguration *)configuration
+- (void)communicatorDidReceiveAdConfigurations:(NSArray<MPAdConfiguration *> *)configurations
 {
-    self.configuration = configuration;
+    self.configuration = configurations.firstObject;
 
     MPLogInfo(@"Rewarded video ad is fetching ad network type: %@", self.configuration.networkType);
 
@@ -178,7 +178,7 @@
         [self.delegate rewardedVideoDidFailToLoadForAdManager:self error:error];
         return;
     }
-
+    
     if ([self.configuration.networkType isEqualToString:kAdTypeClear]) {
         MPLogInfo(kMPClearErrorLogFormatWithAdUnitID, self.adUnitID);
         self.loading = NO;
@@ -196,7 +196,7 @@
     }
 
     self.adapter = adapter;
-    [self.adapter getAdWithConfiguration:configuration];
+    [self.adapter getAdWithConfiguration:self.configuration];
 }
 
 - (void)communicatorDidFailWithError:(NSError *)error

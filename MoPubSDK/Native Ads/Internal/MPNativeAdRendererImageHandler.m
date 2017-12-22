@@ -86,7 +86,7 @@
             MPLogDebug(@"Cell was recycled. Don't bother setting the image.");
             return;
         }
-
+        
         if (image) {
             imageView.image = image;
         }

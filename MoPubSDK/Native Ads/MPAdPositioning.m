@@ -21,7 +21,7 @@
     if (self) {
         _fixedPositions = [[NSMutableOrderedSet alloc] init];
     }
-
+    
     return self;
 }
 

@@ -33,7 +33,7 @@ const NSTimeInterval kDefaultCountdownTimerIntervalInSeconds = 30;
     if (_interstitial == nil) {
         _interstitial = [[MPMRAIDInterstitialViewController alloc] initWithAdConfiguration:self.delegate.configuration];
     }
-
+    
     return _interstitial;
 }
 
@@ -45,7 +45,7 @@ const NSTimeInterval kDefaultCountdownTimerIntervalInSeconds = 30;
     if (duration <= 0) {
         duration = kDefaultCountdownTimerIntervalInSeconds;
     }
-
+    
     return duration;
 }
 
@@ -62,7 +62,7 @@ const NSTimeInterval kDefaultCountdownTimerIntervalInSeconds = 30;
 - (void)rewardUserWithConfiguration:(MPAdConfiguration *)configuration timerHasElapsed:(BOOL)hasElasped  {
     if (!self.userRewarded && (hasElasped || configuration.rewardedPlayableShouldRewardOnClick)) {
         MPLogInfo(@"MoPub rewarded playable user rewarded.");
-
+        
         [self.delegate rewardedVideoShouldRewardUserForCustomEvent:self reward:configuration.selectedReward];
         self.userRewarded = YES;
     }
@@ -75,7 +75,7 @@ const NSTimeInterval kDefaultCountdownTimerIntervalInSeconds = 30;
 - (void)requestRewardedVideoWithCustomEventInfo:(NSDictionary *)info {
     MPLogInfo(@"Loading MoPub rewarded playable");
     self.interstitial.delegate = self;
-
+    
     [self.interstitial setCloseButtonStyle:MPInterstitialCloseButtonStyleAlwaysHidden];
     [self.interstitial startLoading];
 }
@@ -97,13 +97,13 @@ const NSTimeInterval kDefaultCountdownTimerIntervalInSeconds = 30;
         // Add the countdown timer to the interstitial and start the timer.
         self.timerView = [[MPCountdownTimerView alloc] initWithFrame:viewController.view.bounds duration:self.countdownDuration];
         [self.interstitial.view addSubview:self.timerView];
-
+        
         __weak __typeof__(self) weakSelf = self;
         [self.timerView startWithTimerCompletion:^(BOOL hasElapsed) {
             [weakSelf rewardUserWithConfiguration:self.configuration timerHasElapsed:hasElapsed];
             [weakSelf showCloseButton];
         }];
-
+        
         [self.interstitial presentInterstitialFromViewController:viewController];
     }
     else {
@@ -146,7 +146,7 @@ const NSTimeInterval kDefaultCountdownTimerIntervalInSeconds = 30;
     self.adAvailable = NO;
     [self.timerView stopAndSignalCompletion:NO];
     [self.delegate rewardedVideoDidDisappearForCustomEvent:self];
-
+    
     // Get rid of the interstitial view controller when done with it so we don't hold on longer than needed
     self.interstitial = nil;
 }

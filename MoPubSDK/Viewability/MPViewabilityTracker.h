@@ -10,7 +10,7 @@
 @class MPWebView;
 
 /**
- * Notification that is fired when at least one viewability vendor is disabled.
+ * Notification that is fired when at least one viewability vendor is disabled. 
  */
 extern NSString *const kDisableViewabilityTrackerNotification;
 
@@ -44,7 +44,7 @@ typedef NS_OPTIONS(NSInteger, MPViewabilityOption) {
  */
 + (MPViewabilityOption)enabledViewabilityVendors;
 
-/**
+/** 
  * Disables viewability tracking for the specified vendors for the duration of the session.
  * @remark Viewability cannot be re-enabled for a vendor once it has been disabled.
  * @param vendors Vendors to stop viewability tracking

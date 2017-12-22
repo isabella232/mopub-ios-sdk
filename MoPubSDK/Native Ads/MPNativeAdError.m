@@ -11,7 +11,7 @@ NSError *MPNativeAdNSErrorForInvalidAdServerResponse(NSString *reason) {
     if (reason.length == 0) {
         reason = @"Invalid ad server response";
     }
-
+    
     return [NSError errorWithDomain:MoPubNativeAdsSDKDomain code:MPNativeAdErrorInvalidServerResponse userInfo:@{NSLocalizedDescriptionKey : [reason copy]}];
 }
 

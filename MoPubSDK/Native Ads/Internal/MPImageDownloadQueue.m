@@ -1,6 +1,6 @@
 //
 //  MPImageDownloadQueue.m
-//
+//  
 //  Copyright (c) 2014 MoPub. All rights reserved.
 //
 
@@ -21,12 +21,12 @@
 - (id)init
 {
     self = [super init];
-
+    
     if (self != nil) {
         _imageDownloadQueue = [[NSOperationQueue alloc] init];
         [_imageDownloadQueue setMaxConcurrentOperationCount:1]; // serial queue
     }
-
+    
     return self;
 }
 
@@ -43,19 +43,19 @@
 - (void)addDownloadImageURLs:(NSArray *)imageURLs completionBlock:(MPImageDownloadQueueCompletionBlock)completionBlock useCachedImage:(BOOL)useCachedImage
 {
     __block NSMutableArray *errors = nil;
-
+    
     for (NSURL *imageURL in imageURLs) {
         [self.imageDownloadQueue addOperationWithBlock:^{
             @autoreleasepool {
                 if (![[MPNativeCache sharedCache] cachedDataExistsForKey:imageURL.absoluteString] || !useCachedImage) {
                     MPLogDebug(@"Downloading %@", imageURL);
-
+                    
                     NSURLResponse *response = nil;
                     NSError *error = nil;
                     NSData *data = [NSURLConnection sendSynchronousRequest:[NSURLRequest requestWithURL:imageURL]
                                                          returningResponse:&response
                                                                      error:&error];
-
+                    
                     BOOL validImageDownloaded = data != nil;
                     if (validImageDownloaded) {
                         UIImage *downloadedImage = [UIImage imageWithData:data];
@@ -65,27 +65,27 @@
                             if (downloadedImage == nil) {
                                 MPLogDebug(@"Error: invalid image data downloaded");
                             }
-
+                            
                             validImageDownloaded = NO;
                         }
                     }
-
+                    
                     if (!validImageDownloaded) {
                         if (error == nil) {
                             error = MPNativeAdNSErrorForImageDownloadFailure();
                         }
-
+                        
                         if (errors == nil) {
                             errors = [NSMutableArray array];
                         }
-
+                        
                         [errors addObject:error];
                     }
                 }
             }
         }];
     }
-
+    
     // after all images have been downloaded, invoke callback on main thread
     [self.imageDownloadQueue addOperationWithBlock:^{
         dispatch_async(dispatch_get_main_queue(), ^{

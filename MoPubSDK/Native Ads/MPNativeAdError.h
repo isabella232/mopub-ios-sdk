@@ -7,7 +7,7 @@
 
 typedef enum MPNativeAdErrorCode {
     MPNativeAdErrorUnknown = -1,
-
+    
     MPNativeAdErrorHTTPError = -1000,
     MPNativeAdErrorInvalidServerResponse = -1001,
     MPNativeAdErrorNoInventory = -1002,
@@ -15,7 +15,7 @@ typedef enum MPNativeAdErrorCode {
     MPNativeAdErrorAdUnitWarmingUp = -1004,
     MPNativeAdErrorVASTParsingFailed = -1005,
     MPNativeAdErrorVideoConfigInvalid = -1006,
-
+    
     MPNativeAdErrorContentDisplayError = -1100,
     MPNativeAdErrorRenderError = -1200
 } MPNativeAdErrorCode;

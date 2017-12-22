@@ -24,7 +24,7 @@
  * should first consider whether the `UITableViewAdPlacer` or `UICollectionViewAdPlacer` classes are
  * sufficient for your use case before choosing to use this class.
  *
- * @discussion Your app's first responsibility when creating a stream ad placer is to communicate
+ * @discussion Your app's first responsibility when creating a stream ad placer is to communicate 
  * the state of your stream. Specifically, you must provide it with the count of the
  * original content items in your stream using -setItemCount:forSection:, so that it can determine
  * where and how many ads should appear. Additionally, you must also make sure to notify the ad
@@ -149,7 +149,7 @@
  * If the specified index path does not identify a content item, but rather an ad, this method
  * will return nil.
  *
- * @param indexPath An index path object identifying an item in the stream, after ads have been
+ * @param indexPath An index path object identifying an item in the stream, after ads have been 
  * inserted.
  */
 - (NSIndexPath *)originalIndexPathForAdjustedIndexPath:(NSIndexPath *)indexPath;
@@ -170,7 +170,7 @@
  * If a specified index path does not identify a content item, but rather an ad, it will not be
  * included in the result.
  *
- * @param indexPaths An array of index path objects each identifying an item in the stream, after
+ * @param indexPaths An array of index path objects each identifying an item in the stream, after 
  * ads have been inserted.
  */
 - (NSArray *)originalIndexPathsForAdjustedIndexPaths:(NSArray *)indexPaths;

@@ -16,7 +16,7 @@ NSTimeInterval const kUpdateVisibleCellsInterval = 0.25;
     if (urlString.length == 0) {
         return NO;
     }
-
+    
     NSURL *url = [NSURL URLWithString:urlString];
     if (url) {
         [urlArray addObject:url];

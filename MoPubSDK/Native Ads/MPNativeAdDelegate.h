@@ -14,9 +14,8 @@
 @protocol MPNativeAdDelegate <NSObject>
 
 @optional
-  
-- (void)willTrackImpressionForNativeAd:(MPNativeAd *)nativeAd;
 
+- (void)willTrackImpressionForNativeAd:(MPNativeAd *)nativeAd;
 - (void)willTrackClickForNativeAd:(MPNativeAd *)nativeAd;
 
 /**

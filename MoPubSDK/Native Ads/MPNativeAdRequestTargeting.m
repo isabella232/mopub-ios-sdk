@@ -18,7 +18,7 @@
 - (void)setDesiredAssets:(NSSet *)desiredAssets
 {
     if (_desiredAssets != desiredAssets) {
-
+        
         NSMutableSet *allowedAdAssets = [NSMutableSet setWithObjects:kAdTitleKey,
                                          kAdTextKey,
                                          kAdIconImageKey,

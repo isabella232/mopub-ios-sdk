@@ -17,6 +17,7 @@
 #import "MPInterstitialCustomEventDelegate.h"
 #import "MPLogLevel.h"
 #import "MPMediationSettingsProtocol.h"
+#import "MPMoPubConfiguration.h"
 #import "MPRewardedVideo.h"
 #import "MPRewardedVideoNetwork.h"
 #import "MPRewardedVideoReward.h"
@@ -65,6 +66,8 @@
 
 #define MoPubKit [MoPub sharedInstance]
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface MoPub : NSObject
 
 /**
@@ -72,7 +75,7 @@
  *
  * @return The MoPub singleton object.
  */
-+ (MoPub *)sharedInstance;
++ (MoPub * _Nonnull)sharedInstance;
 
 /**
  * A Boolean value indicating whether the MoPub SDK should use Core Location APIs to automatically
@@ -87,10 +90,9 @@
  */
 @property (nonatomic, assign) BOOL locationUpdatesEnabled;
 
-
 /**
- * A Boolean value indicating whether the MoPub SDK should create a MoPub ID that can be used
- * for frequency capping when Limit ad tracking is on & the IDFA we get is
+ * A Boolean value indicating whether the MoPub SDK should create a MoPub ID that can be used 
+ * for frequency capping when Limit ad tracking is on & the IDFA we get is 
  * 00000000-0000-0000-0000-000000000000.
  *
  * When set to NO, the SDK will not create a MoPub ID in the above case. When set to YES, the
@@ -109,6 +111,12 @@
  */
 @property (nonatomic, assign) MPLogLevel logLevel;
 
+/**
+ * A boolean value indicating whether advanced bidding is enabled. This boolean defaults to `YES`.
+ * To disable advanced bidding, set this value to `NO`.
+ */
+@property (nonatomic, assign) BOOL enableAdvancedBidding;
+
 /** @name Rewarded Video */
 /**
  * Initializes the rewarded video system and preinitializes all cached rewarded video network SDKs.
@@ -119,8 +127,8 @@
  * @param globalMediationSettings Global configurations for all rewarded video ad networks your app supports.
  * @param delegate The delegate that will receive all events related to rewarded video.
  */
-- (void)initializeRewardedVideoWithGlobalMediationSettings:(NSArray *)globalMediationSettings
-                                                  delegate:(id<MPRewardedVideoDelegate>)delegate;
+- (void)initializeRewardedVideoWithGlobalMediationSettings:(NSArray *_Nullable)globalMediationSettings
+                                                  delegate:(id<MPRewardedVideoDelegate> _Nullable)delegate;
 
 /** @name Rewarded Video */
 /**
@@ -134,34 +142,43 @@
  * @param order An array of rewarded video custom event networks to preinitialize. For convenience, use
  * the constants from `MPRewardedVideoNetwork`. If `nil` is passed in, no network SDKs will be preinitialized.
  */
-- (void)initializeRewardedVideoWithGlobalMediationSettings:(NSArray *)globalMediationSettings
-                                                  delegate:(id<MPRewardedVideoDelegate>)delegate
-                                networkInitializationOrder:(NSArray<NSString *> *)order;
+- (void)initializeRewardedVideoWithGlobalMediationSettings:(NSArray *_Nullable)globalMediationSettings
+                                                  delegate:(id<MPRewardedVideoDelegate> _Nullable)delegate
+                                networkInitializationOrder:(NSArray<NSString *> *_Nullable)order;
+
+/**
+ * Initializes the MoPub SDK asynchronously on a background thread.
+ * @remark This should be called from the app's `application:didFinishLaunchingWithOptions:` method.
+ * @param configuration Required SDK configuration options.
+ * @param completionBlock Optional completion block that will be called when initialization has completed.
+ */
+- (void)initializeSdkWithConfiguration:(MPMoPubConfiguration * _Nonnull)configuration
+                            completion:(void(^_Nullable)(void))completionBlock;
 
 /**
  * Retrieves the global mediation settings for a given class type.
  *
  * @param aClass The type of mediation settings object you want to receive from the collection.
  */
-- (id<MPMediationSettingsProtocol>)globalMediationSettingsForClass:(Class)aClass;
+- (id<MPMediationSettingsProtocol> _Nullable)globalMediationSettingsForClass:(Class)aClass;
 
 - (void)start;
-- (NSString *)version;
-- (NSString *)bundleIdentifier;
+- (NSString * _Nonnull)version;
+- (NSString * _Nonnull)bundleIdentifier;
 
 /**
  * Default is MOPUBDisplayAgentTypeInApp = 0.
  *
  * If displayType is set to MOPUBDisplayAgentTypeNativeSafari = 1, http/https clickthrough URLs are opened in native
  * safari browser.
- * If displayType is set to MOPUBDisplayAgentTypeSafariViewController = 2, http/https clickthrough URLs are opened in
+ * If displayType is set to MOPUBDisplayAgentTypeSafariViewController = 2, http/https clickthrough URLs are opened in 
  * SafariViewController.
  *
  */
 - (void)setClickthroughDisplayAgentType:(MOPUBDisplayAgentType)displayAgentType;
 
 /**
- * Disables viewability measurement via the specified vendor(s) for the rest of the app session. A given vendor cannot
+ * Disables viewability measurement via the specified vendor(s) for the rest of the app session. A given vendor cannot 
  * be re-enabled after being disabled.
  *
  * @param vendors The viewability vendor(s) to be disabled. This is a bitmask value; ORing vendors together is okay.
@@ -169,3 +186,5 @@
 - (void)disableViewability:(MPViewabilityOption)vendors;
 
 @end
+
+NS_ASSUME_NONNULL_END

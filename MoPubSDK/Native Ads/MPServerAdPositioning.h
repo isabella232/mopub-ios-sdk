@@ -24,13 +24,13 @@
 
 /**
  * Creates and returns a server positioning object.
- *
+ * 
  * When an ad placer is set to use server positioning, it will ask the MoPub ad server for the
  * positions where ads should be inserted into a given stream. These positioning values are
  * configurable on the MoPub website.
  *
  * @return The newly created positioning object.
- *
+ * 
  * @see MPClientAdPositioning
  */
 + (instancetype)positioning;

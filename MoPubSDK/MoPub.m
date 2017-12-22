@@ -6,6 +6,7 @@
 //
 
 #import "MoPub.h"
+#import "MPAdvancedBiddingManager.h"
 #import "MPConstants.h"
 #import "MPCoreInstanceProvider.h"
 #import "MPGeolocationProvider.h"
@@ -69,6 +70,16 @@
     return MPLogGetLevel();
 }
 
+- (void)setEnableAdvancedBidding:(BOOL)enableAdvancedBidding
+{
+    [MPAdvancedBiddingManager sharedManager].advancedBiddingEnabled = enableAdvancedBidding;
+}
+
+- (BOOL)enableAdvancedBidding
+{
+    return [MPAdvancedBiddingManager sharedManager].advancedBiddingEnabled;
+}
+
 - (void)setClickthroughDisplayAgentType:(MOPUBDisplayAgentType)displayAgentType
 {
     [MOPUBExperimentProvider setDisplayAgentType:displayAgentType];
@@ -111,6 +122,24 @@
 #pragma clang diagnostic pop
     [MPRewardedVideo initializeWithOrder:order];
     self.globalMediationSettings = globalMediationSettings;
+}
+
+- (void)initializeSdkWithConfiguration:(MPMoPubConfiguration *)configuration
+                            completion:(void(^_Nullable)(void))completionBlock
+{
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        dispatch_queue_t queue = dispatch_queue_create("Advanced Bidder Initialization Queue", NULL);
+        dispatch_async(queue, ^{
+            [[MPAdvancedBiddingManager sharedManager] setBidderTokensWithBidders:configuration.advancedBidders];
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if (completionBlock) {
+                    completionBlock();
+                }
+            });
+        });
+    });
 }
 
 - (id<MPMediationSettingsProtocol>)globalMediationSettingsForClass:(Class)aClass

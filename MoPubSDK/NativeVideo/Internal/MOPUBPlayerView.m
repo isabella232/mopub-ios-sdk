@@ -173,7 +173,7 @@ static CGFloat const kGradientViewHeight = 25.0f;
 - (void)layoutSubviews
 {
     [super layoutSubviews];
-
+    
     [self layoutProgressBar];
     [self layoutGradientview];
     [self layoutReplayView];

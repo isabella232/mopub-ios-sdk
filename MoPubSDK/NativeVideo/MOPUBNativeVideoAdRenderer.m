@@ -85,7 +85,7 @@ static const CGFloat kAutoPlayTimerInterval = 0.25f;
         if (error) {
             *error = MPNativeAdNSErrorForRenderValueTypeError();
         }
-
+        
         return nil;
     }
 
@@ -150,7 +150,7 @@ static const CGFloat kAutoPlayTimerInterval = 0.25f;
 
         [mainImageView addSubview:mediaView];
     }
-
+    
     // See if the ad contains a star rating and notify the view if it does.
     if ([self.adView respondsToSelector:@selector(layoutStarRating:)]) {
         NSNumber *starRatingNum = [adapter.properties objectForKey:kAdStarRatingKey];

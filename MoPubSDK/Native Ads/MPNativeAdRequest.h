@@ -19,8 +19,8 @@ typedef void(^MPNativeAdRequestHandler)(MPNativeAdRequest *request,
  * The `MPNativeAdRequest` class is used to manage individual requests to the MoPub ad server for
  * native ads.
  *
- * @warning **Note:** This class is meant for one-off requests for which you intend to manually
- * process the native ad response. If you are using `MPTableViewAdPlacer` or
+ * @warning **Note:** This class is meant for one-off requests for which you intend to manually 
+ * process the native ad response. If you are using `MPTableViewAdPlacer` or 
  * `MPCollectionViewAdPlacer` to display ads, there should be no need for you to use this class.
  */
 

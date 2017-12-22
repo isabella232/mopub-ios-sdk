@@ -12,11 +12,11 @@
  * delegate.
  *
  * `MPNativeCustomEvent` is a base class for custom events that support native ads. By implementing
- * subclasses of `MPNativeCustomEvent` you can enable the MoPub SDK to support a variety of
+ * subclasses of `MPNativeCustomEvent` you can enable the MoPub SDK to support a variety of 
  * third-party ad networks.
  *
  * Your implementation should create an `MPNativeAd` object using an appropriate `MPNativeAdAdapter`
- * for your network. Your custom event should also call the appropriate
+ * for your network. Your custom event should also call the appropriate 
  * `MPNativeCustomEventDelegate` methods.
  *
  * At runtime, the MoPub SDK will find and instantiate an `MPNativeCustomEvent` subclass as needed
@@ -30,20 +30,36 @@
  * Called when the MoPub SDK requires a new native ad.
  *
  * When the MoPub SDK receives a response indicating it should load a custom event, it will send
+ * this message to your custom event class. Your implementation should load a native ad from a 
+ * third-party ad network.
+ *
+ * @param info A dictionary containing additional custom data associated with a given custom event 
+ * request. This data is configurable on the MoPub website, and may be used to pass dynamic
+ * information, such as publisher IDs.
+ *
+ * @remark THIS API WILL BE DEPRECATED IN THE FUTURE
+ */
+- (void)requestAdWithCustomEventInfo:(NSDictionary *)info;
+
+/**
+ * Called when the MoPub SDK requires a new native ad.
+ *
+ * When the MoPub SDK receives a response indicating it should load a custom event, it will send
  * this message to your custom event class. Your implementation should load a native ad from a
  * third-party ad network.
  *
  * @param info A dictionary containing additional custom data associated with a given custom event
  * request. This data is configurable on the MoPub website, and may be used to pass dynamic
  * information, such as publisher IDs.
+ * @param adMarkup An optional ad markup to use.
  */
-- (void)requestAdWithCustomEventInfo:(NSDictionary *)info;
+- (void)requestAdWithCustomEventInfo:(NSDictionary *)info adMarkup:(NSString *)adMarkup;
 
 /** @name Caching Image Resources */
 
 /**
  * Downloads and pre-caches images.
- *
+ * 
  * If your ad network does not provide built-in support for image caching, you may invoke this
  * method in your custom event implementation to pre-cache image assets. If you do call this method,
  * you should wait until the completion block is called before invoking the appropriate

@@ -68,7 +68,7 @@ static const CGFloat kMoPubRequiredViewVisibilityPercentage = 0.5;
         }
 
         _defaultActionURL = [NSURL URLWithString:[properties objectForKey:kDefaultActionURLKey]];
-
+        
         // Grab the config, figure out requiredSecondsForImpression and requiredViewVisibilityPercentage,
         // and set up the timer.
         MPNativeAdConfigValues *config = properties[kNativeAdConfigKey];

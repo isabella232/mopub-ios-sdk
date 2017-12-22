@@ -104,7 +104,7 @@
 }
 
 - (void)trackImpression
-{   
+{
     if (self.hasTrackedImpression) {
         MPLogDebug(@"Impression already tracked.");
         return;
@@ -133,7 +133,6 @@
 
     MPLogDebug(@"Tracking a click for %@.", self.adIdentifier);
     self.hasTrackedClick = YES;
-    
     [self trackMetricsForURLs:self.clickTrackerURLs];
 
     if ([self.adAdapter respondsToSelector:@selector(trackClick)] && ![self isThirdPartyHandlingClicks]) {
@@ -153,7 +152,7 @@
 {
     NSMutableURLRequest *request = [[MPCoreInstanceProvider sharedProvider] buildConfiguredURLRequestWithURL:URL];
     request.cachePolicy = NSURLRequestReloadIgnoringCacheData;
-
+    
     NSURLConnection * connection = [[NSURLConnection alloc] initWithRequest:request delegate:nil startImmediately:NO];
     [connection scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
     [connection start];

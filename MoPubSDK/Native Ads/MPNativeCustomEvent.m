@@ -22,7 +22,7 @@
     if (self) {
         _imageDownloadQueue = [[MPImageDownloadQueue alloc] init];
     }
-
+    
     return self;
 }
 
@@ -44,6 +44,13 @@
 - (void)requestAdWithCustomEventInfo:(NSDictionary *)info
 {
     /*override with custom network behavior*/
+}
+
+- (void)requestAdWithCustomEventInfo:(NSDictionary *)info adMarkup:(NSString *)adMarkup
+{
+    // By default, the original requestAdWithCustomEventInfo: method will be called.
+    // Otherwise subclasses must override this method and implement code to load a banner here.
+    [self requestAdWithCustomEventInfo:info];
 }
 
 @end

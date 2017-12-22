@@ -25,7 +25,7 @@
 /**
  * Initializes the rewarded networks in order.
  *
- * @param rewardedNetworks An ordered array of `MPRewardedVideoNetwork` values. If the parameter is empty or `nil`,
+ * @param rewardedNetworks An ordered array of `MPRewardedVideoNetwork` values. If the parameter is empty or `nil`, 
  * nothing will happen.
  */
 + (void)initializeWithOrder:(NSArray<NSString *> *)rewardedNetworks;
@@ -105,7 +105,7 @@
  * @param reward A reward selected from `availableRewardsForAdUnitID:` to award the user upon successful completion of the ad.
  * This value should not be `nil`.
  *
- * @warning **Important**: You should not attempt to play the rewarded video unless `+hasAdAvailableForAdUnitID:` indicates that an
+ * @warning **Important**: You should not attempt to play the rewarded video unless `+hasAdAvailableForAdUnitID:` indicates that an 
  * ad is available for playing or you have received the `[-rewardedVideoAdDidLoadForAdUnitID:]([MPRewardedVideoDelegate rewardedVideoAdDidLoadForAdUnitID:])`
  * message.
  */

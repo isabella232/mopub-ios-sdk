@@ -80,9 +80,9 @@
                                                  testing:NO
                                            desiredAssets:[self.targeting.desiredAssets allObjects]
                                              viewability:NO];
-
+        
         [self assignCompletionHandler:handler];
-
+        
         [self loadAdWithURL:self.URL];
     } else {
         MPLogWarn(@"Native Ad Request did not start - requires completion handler block.");
@@ -101,9 +101,9 @@
                                            desiredAssets:[self.targeting.desiredAssets allObjects]
                                               adSequence:adSequence
                                              viewability:NO];
-
+        
         [self assignCompletionHandler:handler];
-
+        
         [self loadAdWithURL:self.URL];
     } else {
         MPLogWarn(@"Native Ad Request did not start - requires completion handler block.");
@@ -132,7 +132,7 @@
         MPLogWarn(@"Native ad request is already loading an ad. Wait for previous load to finish.");
         return;
     }
-
+    
     MPLogInfo(@"Starting ad request with URL: %@", self.URL);
 
     self.loading = YES;
@@ -144,7 +144,7 @@
     if (configuration.customEventClass) {
         MPLogInfo(@"Looking for custom event class named %@.", configuration.customEventClass);
     }
-
+    
     // For MoPub native ads, set the classData to be the adResponseData
     if ((configuration.customEventClass == [MPMoPubNativeCustomEvent class]) || (configuration.customEventClass == [MOPUBNativeVideoCustomEvent class])) {
         NSError *error;
@@ -165,7 +165,7 @@
             classData[kNativeAdConfigKey] = [[MPNativeAdConfigValues alloc] initWithImpressionMinVisiblePercent:configuration.nativeImpressionMinVisiblePercent
                                                                                     impressionMinVisibleSeconds:configuration.nativeImpressionMinVisibleTimeInterval];
         }
-
+        
         configuration.customEventClassData = classData;
     }
 
@@ -181,7 +181,7 @@
             break;
         }
     }
-
+    
     if (customEventRendererConfig) {
         // Create a renderer from the config.
         self.customEventRenderer = [[customEventRendererConfig.rendererClass alloc] initWithRendererSettings:customEventRendererConfig.rendererSettings];
@@ -189,9 +189,9 @@
     } else {
         MPLogError(@"Could not find renderer configuration for custom event class: %@", NSStringFromClass(configuration.customEventClass));
     }
-
+    
     if (self.nativeCustomEvent) {
-        [self.nativeCustomEvent requestAdWithCustomEventInfo:configuration.customEventClassData];
+        [self.nativeCustomEvent requestAdWithCustomEventInfo:configuration.customEventClassData adMarkup:configuration.advancedBidPayload];
     } else if ([[self.adConfiguration.failoverURL absoluteString] length]) {
         self.loading = NO;
         [self loadAdWithURL:self.adConfiguration.failoverURL];
@@ -205,7 +205,7 @@
     self.loading = NO;
 
     adObject.renderer = self.customEventRenderer;
-
+    
     if ([(id)adObject.adAdapter respondsToSelector:@selector(setAdConfiguration:)]) {
         [(id)adObject.adAdapter performSelector:@selector(setAdConfiguration:) withObject:self.adConfiguration];
     }
@@ -215,7 +215,7 @@
     } else {
         MPLogError(@"Native ad failed to load with error: %@", error);
     }
-
+    
     if (self.completionHandler) {
         self.completionHandler(self, adObject, error);
         self.completionHandler = nil;
@@ -224,34 +224,34 @@
 
 #pragma mark - <MPAdServerCommunicatorDelegate>
 
-- (void)communicatorDidReceiveAdConfiguration:(MPAdConfiguration *)configuration
+- (void)communicatorDidReceiveAdConfigurations:(NSArray<MPAdConfiguration *> *)configurations
 {
-    self.adConfiguration = configuration;
+    self.adConfiguration = configurations.firstObject;
 
-    if (configuration.adUnitWarmingUp) {
+    if (self.adConfiguration.adUnitWarmingUp) {
         MPLogInfo(kMPWarmingUpErrorLogFormatWithAdUnitID, self.adUnitIdentifier);
         [self completeAdRequestWithAdObject:nil error:MPNativeAdNSErrorForAdUnitWarmingUp()];
         return;
     }
-
-    if ([configuration.networkType isEqualToString:kAdTypeClear]) {
+    
+    if ([self.adConfiguration.networkType isEqualToString:kAdTypeClear]) {
         MPLogInfo(kMPClearErrorLogFormatWithAdUnitID, self.adUnitIdentifier);
         [self completeAdRequestWithAdObject:nil error:MPNativeAdNSErrorForNoInventory()];
         return;
     }
-
+    
     MPLogInfo(@"Received data from MoPub to construct native ad.\n");
-    [self getAdWithConfiguration:configuration];
+    [self getAdWithConfiguration:self.adConfiguration];
 }
 
 - (void)communicatorDidFailWithError:(NSError *)error
 {
     MPLogDebug(@"Error: Couldn't retrieve an ad from MoPub. Message: %@", error);
-
+    
     [self completeAdRequestWithAdObject:nil error:MPNativeAdNSErrorForNetworkConnectionError()];
 }
 
-#pragma mark - <MPNativeCustomEventDelegate>
+#pragma mark - <MPNativeCustomEventDelegate> 
 
 - (void)nativeCustomEvent:(MPNativeCustomEvent *)event didLoadAd:(MPNativeAd *)adObject
 {
@@ -264,7 +264,7 @@
     if (self.adConfiguration.impressionTrackingURL) {
         [adObject.impressionTrackerURLs addObject:self.adConfiguration.impressionTrackingURL];
     }
-
+    
     // Error if we don't have click trackers or impression trackers.
     if (adObject.clickTrackerURLs.count < 1 || adObject.impressionTrackerURLs.count < 1) {
         [self completeAdRequestWithAdObject:nil error:MPNativeAdNSErrorForInvalidAdServerResponse(@"Invalid ad trackers")];

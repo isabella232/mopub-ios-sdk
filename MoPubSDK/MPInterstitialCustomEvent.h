@@ -36,9 +36,26 @@
  *
  * @param info A  dictionary containing additional custom data associated with a given custom event
  * request. This data is configurable on the MoPub website, and may be used to pass dynamic information, such as publisher IDs.
+ *
+ * @remark THIS API WILL BE DEPRECATED IN THE FUTURE
  */
 
 - (void)requestInterstitialWithCustomEventInfo:(NSDictionary *)info;
+
+/**
+ * Called when the MoPub SDK requires a new interstitial ad.
+ *
+ * When the MoPub SDK receives a response indicating it should load a custom event, it will send
+ * this message to your custom event class. Your implementation of this method should load an
+ * interstitial ad from a third-party ad network. It must also notify the
+ * `MPInterstitialCustomEventDelegate` of certain lifecycle events.
+ *
+ * @param info A  dictionary containing additional custom data associated with a given custom event
+ * request. This data is configurable on the MoPub website, and may be used to pass dynamic information, such as publisher IDs.
+ * @param adMarkup An optional ad markup to use.
+ */
+
+- (void)requestInterstitialWithCustomEventInfo:(NSDictionary *)info adMarkup:(NSString *)adMarkup;
 
 /**
  * Called when the interstitial should be displayed.

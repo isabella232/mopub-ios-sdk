@@ -46,7 +46,7 @@ static const CGFloat kRetryIntervalBackoffMultiplier = 2.0;
     NSTimeInterval retryInterval = [self backoffTime:self.retryCount];
 
     self.accumulatedRetryInterval += retryInterval;
-
+    
     if (self.accumulatedRetryInterval < kMaximumRequestRetryInterval) {
         [self performSelector:@selector(sendRewardedVideoCompletionRequest) withObject:nil afterDelay:retryInterval];
     } else {

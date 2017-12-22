@@ -29,7 +29,7 @@
     if (self = [super init]) {
 
         // Let's make sure the data types of all the provided native ad properties are strings before creating the adapter.
-
+        
         NSArray *keysToCheck = @[kAdIconImageKey, kAdMainImageKey, kAdTextKey, kAdTitleKey, kAdCTATextKey, kVASTVideoKey];
 
         for (NSString *key in keysToCheck) {

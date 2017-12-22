@@ -44,15 +44,15 @@ static MPRewardedVideo *gSharedInstance = nil;
     if (rewardedNetworks.count == 0) {
         return;
     }
-
+    
     // Weed out any duplicate networks while preserving initialization order.
     NSOrderedSet * orderedNetworks = [NSOrderedSet orderedSetWithArray:rewardedNetworks];
-
+    
     @synchronized (self) {
         // Grab a reference to the `MPRewardedVideoCustomEvent` class since
         // we will be using it for comparisons.
         Class baseClass = [MPRewardedVideoCustomEvent class];
-
+        
         // Iterates over all of the rewarded networks and attempt to
         // retrieve the rewarded class object if it exists in the
         // runtime.
@@ -61,14 +61,14 @@ static MPRewardedVideo *gSharedInstance = nil;
         // 2. The class is a subclass of `MPRewardedVideoCustomEvent`
         for (NSString * network in orderedNetworks) {
             Class networkClass = NSClassFromString(network);
-
+            
             if (networkClass != Nil && [networkClass isSubclassOfClass:baseClass]) {
                 NSDictionary * parameters = [MPRewardedVideoCustomEvent cachedInitializationParametersForNetwork:network];
-
+                
                 dispatch_async(dispatch_get_main_queue(), ^{
                     MPRewardedVideoCustomEvent * networkCustomEvent = (MPRewardedVideoCustomEvent *)[networkClass new];
                     [networkCustomEvent initializeSdkWithParameters:parameters];
-
+                    
                     MPLogInfo(@"Loaded %@", network);
                 });
             }
@@ -120,7 +120,7 @@ static MPRewardedVideo *gSharedInstance = nil;
 {
     MPRewardedVideo *sharedInstance = [[self class] sharedInstance];
     MPRewardedVideoAdManager *adManager = sharedInstance.rewardedVideoAdManagers[adUnitID];
-
+    
     return adManager.availableRewards;
 }
 
@@ -128,7 +128,7 @@ static MPRewardedVideo *gSharedInstance = nil;
 {
     MPRewardedVideo *sharedInstance = [[self class] sharedInstance];
     MPRewardedVideoAdManager *adManager = sharedInstance.rewardedVideoAdManagers[adUnitID];
-
+    
     return adManager.selectedReward;
 }
 
@@ -255,10 +255,10 @@ static MPRewardedVideo *gSharedInstance = nil;
     // that their ads may not be available anymore since another ad unit might have "played" their ad. We go through and notify all ad managers
     // that are of the type of ad that is playing now.
     Class customEventClass = manager.customEventClass;
-
+    
     for (id key in self.rewardedVideoAdManagers) {
         MPRewardedVideoAdManager *adManager = self.rewardedVideoAdManagers[key];
-
+        
         if (adManager != manager && adManager.customEventClass == customEventClass) {
             [adManager handleAdPlayedForCustomEventNetwork];
         }

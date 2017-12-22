@@ -124,7 +124,7 @@ static const double kVideoFinishedBufferingAllowedError = 0.1;
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-
+    
     if (self.avPlayer) {
         [self.avPlayer removeObserver:self forKeyPath:kStatusKey];
     }
@@ -133,7 +133,7 @@ static const double kVideoFinishedBufferingAllowedError = 0.1;
         [self.playerItem removeObserver:self forKeyPath:kStatusKey];
         [self.playerItem removeObserver:self forKeyPath:kLoadedTimeRangesKey];
     }
-
+    
     MPLogDebug(@"playerViewController dealloc called");
 }
 
@@ -158,18 +158,18 @@ static const double kVideoFinishedBufferingAllowedError = 0.1;
 - (void)loadAndPlayVideo
 {
     self.startedLoading = YES;
-
+    
     AVURLAsset *asset = [[AVURLAsset alloc] initWithURL:self.mediaURL options:nil];
-
+    
     if (asset == nil) {
         MPLogError(@"failed to initialize video asset for URL %@", self.mediaURL);
         [self handleVideoInitError];
-
+        
         return;
     }
-
+    
     MPAddLogEvent([[MPLogEvent alloc ] initWithLogEventProperties:self.logEventProperties nativeVideoEventType:MPNativeVideoEventTypeDownloadStart]);
-
+  
     NSArray *requestedKeys = @[kTracksKey, kPlayableKey];
     [asset loadValuesAsynchronouslyForKeys:requestedKeys completionHandler:^{
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -209,11 +209,11 @@ static const double kVideoFinishedBufferingAllowedError = 0.1;
     if (status == AVKeyValueStatusFailed) {
         MPLogError(@"AVKeyValueStatusFailed");
         [self handleVideoInitError];
-
+        
         return;
     } else if (status == AVKeyValueStatusLoaded) {
         [self setVideoAspectRatioWithAsset:asset];
-
+        
         self.playerItem = [AVPlayerItem playerItemWithAsset:asset];
         self.avPlayer = [[MOPUBAVPlayer alloc] initWithDelegate:self playerItem:self.playerItem];
         self.avPlayer.muted = YES;
