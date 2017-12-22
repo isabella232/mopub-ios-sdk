@@ -105,7 +105,7 @@
         NSLog(@"Interstitial ad view is not ready to be shown");
         return;
     }
-
+    
     [self.adapter showInterstitialFromViewController:controller];
 }
 
@@ -126,9 +126,9 @@
 
 #pragma mark - MPAdServerCommunicatorDelegate
 
-- (void)communicatorDidReceiveAdConfiguration:(MPAdConfiguration *)configuration
+- (void)communicatorDidReceiveAdConfigurations:(NSArray<MPAdConfiguration *> *)configurations
 {
-    self.configuration = configuration;
+    self.configuration = configurations.firstObject;
 
     MPLogInfo(@"Interstitial ad view is fetching ad network type: %@", self.configuration.networkType);
 
@@ -138,7 +138,7 @@
         [self.delegate manager:self didFailToLoadInterstitialWithError:[MOPUBError errorWithCode:MOPUBErrorAdUnitWarmingUp]];
         return;
     }
-
+    
     if ([self.configuration.networkType isEqualToString:kAdTypeClear]) {
         MPLogInfo(kMPClearErrorLogFormatWithAdUnitID, self.delegate.interstitialAdController.adUnitId);
         self.loading = NO;

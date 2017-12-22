@@ -41,7 +41,7 @@
         [self.interstitialCustomEvent performSelector:@selector(invalidate)];
     }
     self.interstitialCustomEvent.delegate = nil;
-
+    
     // make sure the custom event isn't released synchronously as objects owned by the custom event
     // may do additional work after a callback that results in dealloc being called
     [[MPCoreInstanceProvider sharedProvider] keepObjectAliveForCurrentRunLoopIteration:_interstitialCustomEvent];
@@ -55,7 +55,7 @@
     self.interstitialCustomEvent = [[MPInstanceProvider sharedProvider] buildInterstitialCustomEventFromCustomClass:configuration.customEventClass delegate:self];
 
     if (self.interstitialCustomEvent) {
-        [self.interstitialCustomEvent requestInterstitialWithCustomEventInfo:configuration.customEventClassData];
+        [self.interstitialCustomEvent requestInterstitialWithCustomEventInfo:configuration.customEventClassData adMarkup:configuration.advancedBidPayload];
     } else {
         [self.delegate adapter:self didFailToLoadAdWithError:nil];
     }
@@ -88,7 +88,7 @@
 {
     [self didStopLoading];
     [self.delegate adapterDidFinishLoadingAd:self];
-
+    
     // Check for MoPub-specific custom events before setting the timer
     if ([customEvent isKindOfClass:[MPHTMLInterstitialCustomEvent class]]
         || [customEvent isKindOfClass:[MPMRAIDInterstitialCustomEvent class]]) {
@@ -146,7 +146,7 @@
         self.hasTrackedClick = YES;
         [self trackClick];
     }
-
+    
     [self.delegate interstitialDidReceiveTapEventForAdapter:self];
 }
 

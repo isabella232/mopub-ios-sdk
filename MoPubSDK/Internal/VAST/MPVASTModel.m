@@ -137,7 +137,7 @@ id<MPObjectMapper> MPParseClass(Class destinationClass)
         ![self.destinationClass instancesRespondToSelector:@selector(initWithDictionary:)]) {
         return nil;
     }
-
+    
     return [[self.destinationClass alloc] initWithDictionary:object];
 }
 
@@ -176,7 +176,7 @@ id<MPObjectMapper> MPParseClass(Class destinationClass)
 - (id)mappedObjectFromSourceObject:(id)object
 {
     NSMutableArray *result = [NSMutableArray array];
-
+    
     if ([object isKindOfClass:[NSArray class]]) {
         for (id obj in object) {
             id model = [self.mapper mappedObjectFromSourceObject:obj];
@@ -190,7 +190,7 @@ id<MPObjectMapper> MPParseClass(Class destinationClass)
             [result addObject:model];
         }
     }
-
+    
     return result;
 }
 
@@ -212,12 +212,12 @@ id<MPObjectMapper> MPParseClass(Class destinationClass)
         if (!dictionary) {
             return nil;
         }
-
+        
         NSDictionary *modelMap = [[self class] modelMap];
         for (NSString *key in modelMap) {
             if ([self hasPropertyNamed:key]) {
                 id modelMapValue = modelMap[key];
-
+                
                 if ([modelMapValue isKindOfClass:[NSString class]]) {
                     // The simple case: grab the value corresponding to the given key path and
                     // assign it to the property.
@@ -228,7 +228,7 @@ id<MPObjectMapper> MPParseClass(Class destinationClass)
                 } else if ([modelMapValue isKindOfClass:[NSArray class]] && [modelMapValue count] == 2) {
                     NSString *dictionaryKeyPath = modelMapValue[0];
                     id<MPObjectMapper> mapper = modelMapValue[1];
-
+                    
                     if ([mapper conformsToProtocol:@protocol(MPObjectMapper)]) {
                         id sourceObject = [dictionary valueForKeyPath:dictionaryKeyPath];
                         if (sourceObject) {
@@ -266,7 +266,7 @@ id<MPObjectMapper> MPParseClass(Class destinationClass)
 
 - (NSArray *)generateModelsFromDictionaryValue:(id)value modelProvider:(id(^)(id))provider {
     NSMutableArray *models = [NSMutableArray array];
-
+    
     if (value && [value isKindOfClass:[NSArray class]]) {
         for (NSDictionary *dictionary in value) {
             id model = provider(dictionary);
@@ -280,7 +280,7 @@ id<MPObjectMapper> MPParseClass(Class destinationClass)
             [models addObject:model];
         }
     }
-
+    
     return [models copy];
 }
 
@@ -290,16 +290,16 @@ id<MPObjectMapper> MPParseClass(Class destinationClass)
 {
     // This method uses the objc runtime API to check whether the current model class has a given
     // property. After we grab the set of properties for a given class, we cache it for efficiency.
-
+    
     static NSMutableDictionary *propertyNamesForClass;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         propertyNamesForClass = [NSMutableDictionary dictionary];
     });
-
+    
     NSString *className = NSStringFromClass([self class]);
     NSMutableSet *propertyNames = propertyNamesForClass[className];
-
+    
     if (!propertyNames) {
         unsigned int propertyCount;
         objc_property_t *properties = class_copyPropertyList([self class], &propertyCount);
@@ -311,23 +311,23 @@ id<MPObjectMapper> MPParseClass(Class destinationClass)
         propertyNamesForClass[className] = propertyNames;
         free(properties);
     }
-
+    
     return [propertyNames containsObject:name];
 }
 
 - (NSString *)description
 {
     NSMutableString *descriptionString = [NSMutableString stringWithFormat:@"%@:", NSStringFromClass([self class])];
-
+    
     unsigned int propertyCount;
     objc_property_t *properties = class_copyPropertyList([self class], &propertyCount);
-
+    
     for (unsigned int i = 0; i < propertyCount; i++) {
         objc_property_t property = properties[i];
         NSString *propertyName = [[NSString alloc] initWithUTF8String:property_getName(property)];
         [descriptionString appendFormat:@"\n\t%s = %s", propertyName.UTF8String, [[self valueForKey:propertyName] description].UTF8String];
     }
-
+    
     free(properties);
     return descriptionString;
 }

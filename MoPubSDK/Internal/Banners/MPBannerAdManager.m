@@ -57,7 +57,7 @@
                                                  selector:@selector(applicationWillEnterForeground)
                                                      name:UIApplicationWillEnterForegroundNotification
                                                    object:[UIApplication sharedApplication]];
-
+        
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(applicationDidEnterBackground)
                                                      name:UIApplicationDidEnterBackgroundNotification
@@ -94,7 +94,7 @@
     if (!self.hasRequestedAtLeastOneAd) {
         self.hasRequestedAtLeastOneAd = YES;
     }
-
+    
     if (self.loading) {
         MPLogWarn(@"Banner view (%@) is already loading an ad. Wait for previous load to finish.", [self.delegate adUnitId]);
         return;
@@ -199,43 +199,43 @@
 
 #pragma mark - <MPAdServerCommunicatorDelegate>
 
-- (void)communicatorDidReceiveAdConfiguration:(MPAdConfiguration *)configuration
+- (void)communicatorDidReceiveAdConfigurations:(NSArray<MPAdConfiguration *> *)configurations
 {
-    self.requestingConfiguration = configuration;
+    self.requestingConfiguration = configurations.firstObject;
 
     MPLogInfo(@"Banner ad view is fetching ad network type: %@", self.requestingConfiguration.networkType);
-
-    if (configuration.adType == MPAdTypeUnknown) {
+    
+    if (self.requestingConfiguration.adType == MPAdTypeUnknown) {
         [self didFailToLoadAdapterWithError:[MOPUBError errorWithCode:MOPUBErrorServerError]];
         return;
     }
 
-    if (configuration.adType == MPAdTypeInterstitial) {
+    if (self.requestingConfiguration.adType == MPAdTypeInterstitial) {
         MPLogWarn(@"Could not load ad: banner object received an interstitial ad unit ID.");
         [self didFailToLoadAdapterWithError:[MOPUBError errorWithCode:MOPUBErrorAdapterInvalid]];
         return;
     }
 
-    if (configuration.adUnitWarmingUp) {
+    if (self.requestingConfiguration.adUnitWarmingUp) {
         MPLogInfo(kMPWarmingUpErrorLogFormatWithAdUnitID, self.delegate.adUnitId);
         [self didFailToLoadAdapterWithError:[MOPUBError errorWithCode:MOPUBErrorAdUnitWarmingUp]];
         return;
     }
-
-    if ([configuration.networkType isEqualToString:kAdTypeClear]) {
+    
+    if ([self.requestingConfiguration.networkType isEqualToString:kAdTypeClear]) {
         MPLogInfo(kMPClearErrorLogFormatWithAdUnitID, self.delegate.adUnitId);
         [self didFailToLoadAdapterWithError:[MOPUBError errorWithCode:MOPUBErrorNoInventory]];
         return;
     }
 
-    self.requestingAdapter = [[MPInstanceProvider sharedProvider] buildBannerAdapterForConfiguration:configuration
+    self.requestingAdapter = [[MPInstanceProvider sharedProvider] buildBannerAdapterForConfiguration:self.requestingConfiguration
                                                                                             delegate:self];
     if (!self.requestingAdapter) {
         [self loadAdWithURL:self.requestingConfiguration.failoverURL];
         return;
     }
 
-    [self.requestingAdapter _getAdWithConfiguration:configuration containerSize:self.delegate.containerSize];
+    [self.requestingAdapter _getAdWithConfiguration:self.requestingConfiguration containerSize:self.delegate.containerSize];
 }
 
 - (void)communicatorDidFailWithError:(NSError *)error

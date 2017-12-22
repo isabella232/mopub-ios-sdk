@@ -10,10 +10,21 @@
 #import "MPAdConfiguration.h"
 #import "MPLogging.h"
 #import "MPCoreInstanceProvider.h"
+#import "MPError.h"
 #import "MPLogEvent.h"
 #import "MPLogEventRecorder.h"
 
 const NSTimeInterval kRequestTimeoutInterval = 10.0;
+
+// Ad response header
+static NSString * const kAdResponseTypeHeaderKey = @"X-Ad-Response-Type";
+static NSString * const kAdResponseTypeMultipleResponse = @"multi";
+
+// Multiple response JSON fields
+static NSString * const kMultiAdResponsesKey = @"ad-responses";
+static NSString * const kMultiAdResponsesHeadersKey = @"headers";
+static NSString * const kMultiAdResponsesBodyKey = @"body";
+static NSString * const kMultiAdResponsesAdMarkupKey = @"adm";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -122,23 +133,75 @@ const NSTimeInterval kRequestTimeoutInterval = 10.0;
 {
     [self.adRequestLatencyEvent recordEndTime];
     self.adRequestLatencyEvent.requestStatusCode = 200;
-
-    MPAdConfiguration *configuration = [[MPAdConfiguration alloc]
-                                         initWithHeaders:self.responseHeaders
-                                         data:self.responseData];
+    
+    NSArray <MPAdConfiguration *> *configurations;
+    // Single ad response
+    if (![self.responseHeaders[kAdResponseTypeHeaderKey] isEqualToString:kAdResponseTypeMultipleResponse]) {
+        MPAdConfiguration *configuration = [[MPAdConfiguration alloc] initWithHeaders:self.responseHeaders
+                                                                                 data:self.responseData];
+        configurations = @[configuration];
+    }
+    // Multiple ad responses
+    else {
+        // The response data is a JSON payload conforming to the structure:
+        // ad-responses: [
+        //   {
+        //     headers: { x-adtype: html, ... },
+        //     body: "<!DOCTYPE html> <html> <head> ... </html>",
+        //     adm: "some ad markup"
+        //   },
+        //   ...
+        // ]
+        NSError * error = nil;
+        NSDictionary * json = [NSJSONSerialization JSONObjectWithData:self.responseData options:kNilOptions error:&error];
+        if (error) {
+            MPLogError(@"Failed to parse multiple ad response JSON: %@", error.localizedDescription);
+            self.loading = NO;
+            [self.delegate communicatorDidFailWithError:error];
+            return;
+        }
+        
+        NSArray * responses = json[kMultiAdResponsesKey];
+        if (responses == nil) {
+            MPLogError(@"No ad responses");
+            self.loading = NO;
+            [self.delegate communicatorDidFailWithError:[MOPUBError errorWithCode:MOPUBErrorUnableToParseJSONAdResponse]];
+            return;
+        }
+        
+        MPLogInfo(@"There are %ld ad responses", responses.count);
+        
+        NSMutableArray<MPAdConfiguration *> * responseConfigurations = [NSMutableArray arrayWithCapacity:responses.count];
+        for (NSDictionary * responseJson in responses) {
+            NSDictionary * headers = responseJson[kMultiAdResponsesHeadersKey];
+            NSData * body = [responseJson[kMultiAdResponsesBodyKey] dataUsingEncoding:NSUTF8StringEncoding];
+            
+            MPAdConfiguration * configuration = [[MPAdConfiguration alloc] initWithHeaders:headers data:body];
+            if (configuration) {
+                configuration.advancedBidPayload = responseJson[kMultiAdResponsesAdMarkupKey];
+                [responseConfigurations addObject:configuration];
+            }
+            else {
+                MPLogInfo(@"Failed to generate configuration from\nheaders:\n%@\nbody:\n%@", headers, responseJson[kMultiAdResponsesBodyKey]);
+            }
+        }
+        
+        configurations = [NSArray arrayWithArray:responseConfigurations];
+    }
+    
     MPAdConfigurationLogEventProperties *logEventProperties =
-        [[MPAdConfigurationLogEventProperties alloc] initWithConfiguration:configuration];
-
+    [[MPAdConfigurationLogEventProperties alloc] initWithConfiguration:configurations.firstObject];
+    
     // Do not record ads that are warming up.
-    if (configuration.adUnitWarmingUp) {
+    if (configurations.firstObject.adUnitWarmingUp) {
         self.adRequestLatencyEvent = nil;
     } else {
         [self.adRequestLatencyEvent setLogEventProperties:logEventProperties];
         MPAddLogEvent(self.adRequestLatencyEvent);
     }
-
+    
     self.loading = NO;
-    [self.delegate communicatorDidReceiveAdConfiguration:configuration];
+    [self.delegate communicatorDidReceiveAdConfigurations:configurations];
 }
 
 #pragma mark - Internal

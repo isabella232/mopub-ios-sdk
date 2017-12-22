@@ -35,7 +35,7 @@
 
 /**
  * The `MRControllerDelegate` will relay specific events such as ad loading to
- * the object that implements the delegate. It also requires information
+ * the object that implements the delegate. It also requires information 
  * such as adUnitId, adConfiguation, and location in order to use its
  * ad alert manager.
  **/

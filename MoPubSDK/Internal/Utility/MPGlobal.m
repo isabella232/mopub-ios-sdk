@@ -59,7 +59,7 @@ CGRect MPScreenBounds()
     if ([[UIScreen mainScreen] respondsToSelector:@selector(fixedCoordinateSpace)]) {
         bounds = [UIScreen mainScreen].fixedCoordinateSpace.bounds;
     }
-
+    
     // Rotate the portrait-up bounds if the orientation of the device is in landscape.
     if (UIInterfaceOrientationIsLandscape(MPInterfaceOrientation())) {
         CGFloat width = bounds.size.width;
@@ -158,7 +158,7 @@ BOOL MPViewIntersectsParentWindow(UIView *view)
     if (parentWindow == nil) {
         return NO;
     }
-
+    
     // We need to call convertRect:toView: on this view's superview rather than on this view itself.
     CGRect viewFrameInWindowCoordinates = [view.superview convertRect:view.frame toView:parentWindow];
 
@@ -168,18 +168,18 @@ BOOL MPViewIntersectsParentWindow(UIView *view)
 BOOL MPViewIntersectsParentWindowWithPercent(UIView *view, CGFloat percentVisible)
 {
     UIWindow *parentWindow = MPViewGetParentWindow(view);
-
+    
     if (parentWindow == nil) {
         return NO;
     }
-
+    
     // We need to call convertRect:toView: on this view's superview rather than on this view itself.
     CGRect viewFrameInWindowCoordinates = [view.superview convertRect:view.frame toView:parentWindow];
     CGRect intersection = CGRectIntersection(viewFrameInWindowCoordinates, parentWindow.frame);
-
+    
     CGFloat intersectionArea = CGRectGetWidth(intersection) * CGRectGetHeight(intersection);
     CGFloat originalArea = CGRectGetWidth(view.bounds) * CGRectGetHeight(view.bounds);
-
+    
     return intersectionArea >= (originalArea * percentVisible);
 }
 
@@ -303,7 +303,7 @@ NSArray *MPConvertStringArrayToURLArray(NSArray *strArray)
     if (supportsPortraitUpsideDown && orientation == UIInterfaceOrientationPortraitUpsideDown) {
         return YES;
     }
-
+    
     return NO;
 }
 

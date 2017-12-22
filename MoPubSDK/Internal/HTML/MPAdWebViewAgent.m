@@ -63,12 +63,12 @@
     self = [super init];
     if (self) {
         _frame = frame;
-
+        
         self.destinationDisplayAgent = [[MPCoreInstanceProvider sharedProvider] buildMPAdDestinationDisplayAgentWithDelegate:self];
         self.delegate = delegate;
         self.shouldHandleRequests = YES;
         self.adAlertManager = [[MPCoreInstanceProvider sharedProvider] buildMPAdAlertManagerWithDelegate:self];
-
+        
         self.userInteractionRecognizer = [[MPUserInteractionGestureRecognizer alloc] initWithTarget:self action:@selector(handleInteraction:)];
         self.userInteractionRecognizer.cancelsTouchesInView = NO;
         self.userInteractionRecognizer.delegate = self;
@@ -117,7 +117,7 @@
 - (void)loadConfiguration:(MPAdConfiguration *)configuration
 {
     self.configuration = configuration;
-
+    
     // Initialize web view
     if (self.view != nil) {
         self.view.delegate = nil;
@@ -146,7 +146,7 @@
     [self.view loadHTMLString:[configuration adResponseHTMLString]
                       baseURL:[NSURL URLWithString:[MPAPIEndpoints baseURL]]
      ];
-
+    
     [self init3rdPartyViewabilityTrackers];
 
     [self initAdAlertManager];
@@ -160,7 +160,7 @@
             if ([self shouldDeferViewability]) {
                 [self.viewabilityTracker startTracking];
             }
-
+            
             [self.view stringByEvaluatingJavaScriptFromString:@"webviewDidAppear();"];
             break;
         case MPAdWebViewEventAdDidDisappear:
@@ -223,13 +223,13 @@
         [self performActionForMoPubSpecificURL:URL];
         return NO;
     } else if ([self shouldIntercept:URL navigationType:navigationType]) {
-
+        
         // Disable intercept without user interaction
         if (!self.userInteractedWithWebView) {
             MPLogInfo(@"Redirect without user interaction detected");
             return NO;
         }
-
+        
         [self interceptURL:URL];
         return NO;
     } else {

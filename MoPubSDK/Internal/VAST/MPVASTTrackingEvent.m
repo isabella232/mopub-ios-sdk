@@ -35,7 +35,7 @@ NSString * const MPVASTTrackingEventTypeProgress = @"progress";
     self = [super initWithDictionary:dictionary];
     if (self) {
         _eventType = dictionary[@"event"];
-
+        
         _URL = [self generateModelFromDictionaryValue:dictionary
                                         modelProvider:^id(NSDictionary *dictionary) {
                                             return [NSURL URLWithString:[dictionary[@"text"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]];
@@ -44,7 +44,7 @@ NSString * const MPVASTTrackingEventTypeProgress = @"progress";
         if (_URL == nil) {
             return nil;
         }
-
+        
         _progressOffset = [self generateModelFromDictionaryValue:dictionary
                                                    modelProvider:^id(NSDictionary *dictionary) {
                                                        return [[MPVASTDurationOffset alloc] initWithDictionary:dictionary];

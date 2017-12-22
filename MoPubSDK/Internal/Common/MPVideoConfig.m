@@ -83,11 +83,11 @@
 - (void)commonInit:(MPVASTResponse *)response additionalTrackers:(NSDictionary *)additionalTrackers
 {
     NSArray *candidates = [self playbackCandidatesFromVASTResponse:response];
-
+    
     if (candidates.count == 0) {
         return;
     }
-
+    
     MPVideoPlaybackCandidate *candidate = candidates[0];
     MPVASTMediaFile *mediaFile = candidate.linearAd.highestBitrateMediaFile;
 

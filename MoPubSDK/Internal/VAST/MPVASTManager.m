@@ -53,7 +53,7 @@ static NSString * const kMPVASTManagerErrorDomain = @"com.mopub.MPVASTManager";
         completion(nil, [NSError errorWithDomain:kMPVASTManagerErrorDomain code:MPVASTErrorExceededMaximumWrapperDepth userInfo:nil]);
         return;
     }
-
+    
     NSError *XMLParserError = nil;
     MPXMLParser *parser = [[MPXMLParser alloc] init];
     NSDictionary *dictionary = [parser dictionaryWithData:data error:&XMLParserError];
@@ -61,7 +61,7 @@ static NSString * const kMPVASTManagerErrorDomain = @"com.mopub.MPVASTManager";
         completion(nil, [NSError errorWithDomain:kMPVASTManagerErrorDomain code:MPVASTErrorXMLParseFailure userInfo:nil]);
         return;
     }
-
+    
     MPVASTResponse *VASTResponse = [[MPVASTResponse alloc] initWithDictionary:dictionary];
     NSArray *wrappers = [self wrappersForVASTResponse:VASTResponse];
     if ([wrappers count] == 0) {
@@ -73,7 +73,7 @@ static NSString * const kMPVASTManagerErrorDomain = @"com.mopub.MPVASTManager";
             return;
         }
     }
-
+    
     __block NSInteger wrappersFetched = 0;
     for (MPVASTWrapper *wrapper in wrappers) {
         [NSURLConnection sendAsynchronousRequest:[NSURLRequest requestWithURL:wrapper.VASTAdTagURI]
@@ -88,10 +88,10 @@ static NSString * const kMPVASTManagerErrorDomain = @"com.mopub.MPVASTManager";
                                                    completion(nil, error);
                                                    return;
                                                }
-
+                                               
                                                wrapper.wrappedVASTResponse = response;
                                                wrappersFetched++;
-
+                                               
                                                // Once we've fetched all wrappers within the VAST
                                                // response, we can call the top-level completion
                                                // handler.

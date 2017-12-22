@@ -73,7 +73,7 @@
 - (void)setSupportedOrientationMask:(UIInterfaceOrientationMask)supportedOrientationMask
 {
     _supportedOrientationMask = supportedOrientationMask;
-
+    
     [UIViewController attemptRotationToDeviceOrientation];
 }
 

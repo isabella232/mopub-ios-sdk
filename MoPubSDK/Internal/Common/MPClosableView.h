@@ -33,7 +33,7 @@ CGRect MPClosableViewCustomCloseButtonFrame(CGSize size, MPClosableViewCloseButt
  * `MPClosableView` is composed of a content view and a close button. The close button can
  * be positioned at any corner, the center of top and bottom edges, and the center of the view.
  * The close button can either be a button that is tappable with image, tappable without an image,
- * and completely disabled altogether. Finally, `MPClosableView` keeps track as to whether or not
+ * and completely disabled altogether. Finally, `MPClosableView` keeps track as to whether or not 
  * it has been tapped.
  */
 @interface MPClosableView : UIView

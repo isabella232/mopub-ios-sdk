@@ -63,7 +63,7 @@ static MPCoreInstanceProvider *sharedProvider = nil;
     dispatch_once(&once, ^{
         sharedProvider = [[self alloc] init];
     });
-
+    
     return sharedProvider;
 }
 
@@ -72,7 +72,7 @@ static MPCoreInstanceProvider *sharedProvider = nil;
     self = [super init];
     if (self) {
         self.singletons = [NSMutableDictionary dictionary];
-
+        
         [self initializeCarrierInfo];
     }
     return self;
@@ -110,13 +110,13 @@ static MPCoreInstanceProvider *sharedProvider = nil;
 - (void)initializeCarrierInfo
 {
     self.carrierInfo = [NSMutableDictionary dictionary];
-
+    
     // check if we have a saved copy
     NSDictionary *saved = [[NSUserDefaults standardUserDefaults] dictionaryForKey:MOPUB_CARRIER_INFO_DEFAULTS_KEY];
     if (saved != nil) {
         [self.carrierInfo addEntriesFromDictionary:saved];
     }
-
+    
     // now asynchronously load a fresh copy
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         CTTelephonyNetworkInfo *networkInfo = [[CTTelephonyNetworkInfo alloc] init];
@@ -131,7 +131,7 @@ static MPCoreInstanceProvider *sharedProvider = nil;
     [self.carrierInfo setValue:ctCarrier.isoCountryCode forKey:@"isoCountryCode"];
     [self.carrierInfo setValue:ctCarrier.mobileCountryCode forKey:@"mobileCountryCode"];
     [self.carrierInfo setValue:ctCarrier.mobileNetworkCode forKey:@"mobileNetworkCode"];
-
+    
     [[NSUserDefaults standardUserDefaults] setObject:self.carrierInfo forKey:MOPUB_CARRIER_INFO_DEFAULTS_KEY];
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
@@ -150,7 +150,7 @@ static MPCoreInstanceProvider *sharedProvider = nil;
     if (!_userAgent) {
         self.userAgent = [[[UIWebView alloc] init] stringByEvaluatingJavaScriptFromString:@"navigator.userAgent"];
     }
-
+    
     return _userAgent;
 }
 
@@ -194,25 +194,25 @@ static MPCoreInstanceProvider *sharedProvider = nil;
 - (id<MPAdAlertManagerProtocol>)buildMPAdAlertManagerWithDelegate:(id)delegate
 {
     id<MPAdAlertManagerProtocol> adAlertManager = nil;
-
+    
     Class adAlertManagerClass = NSClassFromString(@"MPAdAlertManager");
     if (adAlertManagerClass != nil) {
         adAlertManager = [[adAlertManagerClass alloc] init];
         [adAlertManager performSelector:@selector(setDelegate:) withObject:delegate];
     }
-
+    
     return adAlertManager;
 }
 
 - (MPAdAlertGestureRecognizer *)buildMPAdAlertGestureRecognizerWithTarget:(id)target action:(SEL)action
 {
     MPAdAlertGestureRecognizer *gestureRecognizer = nil;
-
+    
     Class gestureRecognizerClass = NSClassFromString(@"MPAdAlertGestureRecognizer");
     if (gestureRecognizerClass != nil) {
         gestureRecognizer = [[gestureRecognizerClass alloc] initWithTarget:target action:action];
     }
-
+    
     return gestureRecognizer;
 }
 
@@ -220,11 +220,11 @@ static MPCoreInstanceProvider *sharedProvider = nil;
 {
     static NSOperationQueue *sharedOperationQueue = nil;
     static dispatch_once_t pred;
-
+    
     dispatch_once(&pred, ^{
         sharedOperationQueue = [[NSOperationQueue alloc] init];
     });
-
+    
     return sharedOperationQueue;
 }
 
@@ -263,32 +263,32 @@ static MPCoreInstanceProvider *sharedProvider = nil;
     // This way, the setting value only gets assembled once.
     static BOOL gCheckedAppTransportSettings = NO;
     static MPATSSetting gSetting = MPATSSettingEnabled;
-
+    
     // If we've already checked ATS settings, just use what we have
     if (gCheckedAppTransportSettings) {
         return gSetting;
     }
-
+    
     // Otherwise, figure out ATS settings
-
+    
     // App Transport Security was introduced in iOS 9; if the system version is less than 9, then arbirtrary loads are fine.
     if (SYSTEM_VERSION_LESS_THAN(@"9.0")) {
         gSetting = MPATSSettingAllowsArbitraryLoads;
         gCheckedAppTransportSettings = YES;
         return gSetting;
     }
-
+    
     // Start with the assumption that ATS is enabled
     gSetting = MPATSSettingEnabled;
-
+    
     // Grab the ATS dictionary from the Info.plist
     NSDictionary *atsSettingsDictionary = [NSBundle mainBundle].infoDictionary[kMoPubAppTransportSecurityDictionaryKey];
-
+    
     // Check if ATS is entirely disabled, and if so, add that to the setting value
     if ([atsSettingsDictionary[kMoPubAppTransportSecurityAllowsArbitraryLoadsKey] boolValue]) {
         gSetting |= MPATSSettingAllowsArbitraryLoads;
     }
-
+    
     // New App Transport Security keys were introduced in iOS 10. Only send settings for these keys if we're running iOS 10 or greater.
     // They may exist in the dictionary if we're running iOS 9, but they won't do anything, so the server shouldn't know about them.
     if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"10.0")) {
@@ -301,7 +301,7 @@ static MPCoreInstanceProvider *sharedProvider = nil;
             || atsSettingsDictionary[kMoPubAppTransportSecurityAllowsLocalNetworkingKey] != nil) {
             gSetting &= (~MPATSSettingAllowsArbitraryLoads);
         }
-
+        
         if ([atsSettingsDictionary[kMoPubAppTransportSecurityAllowsArbitraryLoadsForMediaKey] boolValue]) {
             gSetting |= MPATSSettingAllowsArbitraryLoadsForMedia;
         }
@@ -315,7 +315,7 @@ static MPCoreInstanceProvider *sharedProvider = nil;
             gSetting |= MPATSSettingAllowsLocalNetworking;
         }
     }
-
+    
     gCheckedAppTransportSettings = YES;
     return gSetting;
 }

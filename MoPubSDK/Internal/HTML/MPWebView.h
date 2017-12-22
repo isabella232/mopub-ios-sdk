@@ -7,16 +7,16 @@
 
 /***
  * MPWebView
- * This class is a wrapper class for WKWebView and UIWebView. Internally, it utilizes WKWebView when possible, and
+ * This class is a wrapper class for WKWebView and UIWebView. Internally, it utilizes WKWebView when possible, and 
  * falls back on UIWebView only when WKWebView isn't available (i.e., in iOS 7). MPWebView's interface is meant to
  * imitate UIWebView, and, in many cases, MPWebView can act as a drop-in replacement for UIWebView. MPWebView also
  * blocks all JavaScript text boxes from appearing.
  *
- * While `stringByEvaluatingJavaScriptFromString:` does exist for UIWebView compatibility reasons, it's highly
+ * While `stringByEvaluatingJavaScriptFromString:` does exist for UIWebView compatibility reasons, it's highly 
  * recommended that the caller uses `evaluateJavaScript:completionHandler:` whenever code can be reworked
  * to make use of completion blocks to keep the advantages of asynchronicity. It solely fires off the javascript
  * execution within WKWebView and does not wait or return.
- *
+ * 
  * MPWebView currently does not support a few other features of UIWebView -- such as pagination -- as WKWebView also
  * does not contain support.
  ***/

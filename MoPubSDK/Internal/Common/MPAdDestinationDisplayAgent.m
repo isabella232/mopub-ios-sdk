@@ -230,9 +230,9 @@ static NSString * const kDisplayAgentErrorDomain = @"com.mopub.displayagent";
 
 - (void)showAdBrowserController {
     [self hideOverlay];
-
+    
     UIViewController *browserViewController = self.safariController ? self.safariController : self.browserController;
-
+    
     browserViewController.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
     [[self.delegate viewControllerForPresentingModalView] presentViewController:browserViewController
                                                                        animated:MP_ANIMATED

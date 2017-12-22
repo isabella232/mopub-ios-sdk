@@ -31,7 +31,7 @@
 @protocol MPAdServerCommunicatorDelegate <NSObject>
 
 @required
-- (void)communicatorDidReceiveAdConfiguration:(MPAdConfiguration *)configuration;
+- (void)communicatorDidReceiveAdConfigurations:(NSArray<MPAdConfiguration *> *)configurations;
 - (void)communicatorDidFailWithError:(NSError *)error;
 
 @end

@@ -104,13 +104,13 @@ extern NSString *const MPLogEventCategoryAdInteractions;
 @property (nonatomic, copy) NSString *dspCreativeId;
 
 /**
- * Identifier for a class of ad. Examples include "html", "mraid", "interstitial", "json",
+ * Identifier for a class of ad. Examples include "html", "mraid", "interstitial", "json", 
  * "custom", "clear".
  */
 @property (nonatomic, copy) NSString *adType;
 
 /**
- * Identifier for an ad network type. Examples include "admob", "custom", "custom_native", "mojiva",
+ * Identifier for an ad network type. Examples include "admob", "custom", "custom_native", "mojiva", 
  * "huntmads", "millennial".
  */
 @property (nonatomic, copy) NSString *adNetworkType;

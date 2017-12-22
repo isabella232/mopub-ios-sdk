@@ -54,9 +54,9 @@ static BOOL gFrequencyCappingIdUsageEnabled = YES;
     if (obfuscate) {
         return @"ifa:XXXX";
     }
-
+    
     NSString *identifier = [[ASIdentifierManager sharedManager].advertisingIdentifier UUIDString];
-
+    
     return [NSString stringWithFormat:@"ifa:%@", [identifier uppercaseString]];
 }
 

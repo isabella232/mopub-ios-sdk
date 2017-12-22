@@ -40,7 +40,7 @@
 - (void)startWithTimerCompletion:(void(^)(BOOL hasElapsed))completion;
 
 /**
- * Stops the timer and optionally invokes the completion block from `startWithTimerCompletion:`.
+ * Stops the timer and optionally invokes the completion block from `startWithTimerCompletion:`. 
  * If the timer hasn't started, calling this method will do nothing.
  */
 - (void)stopAndSignalCompletion:(BOOL)shouldSignalCompletion;

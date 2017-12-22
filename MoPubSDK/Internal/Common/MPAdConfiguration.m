@@ -112,7 +112,7 @@ NSString * const kViewabilityDisableHeaderKey = @"X-Disable-Viewability";
         self.adType = [self adTypeFromHeaders:headers];
 
         self.adUnitWarmingUp = [[headers objectForKey:kAdUnitWarmingUpHeaderKey] boolValue];
-
+        
         self.networkType = [self networkTypeFromHeaders:headers];
         self.networkType = self.networkType ? self.networkType : @"";
 
@@ -144,9 +144,9 @@ NSString * const kViewabilityDisableHeaderKey = @"X-Disable-Viewability";
         self.customEventClass = [self setUpCustomEventClassFromHeaders:headers];
 
         self.customEventClassData = [self customEventClassDataFromHeaders:headers];
-
+        
         self.dspCreativeId = [headers objectForKey:kDspCreativeIdKey];
-
+        
         self.precacheRequired = [[headers objectForKey:kPrecacheRequiredKey] boolValue];
 
         self.isVastVideoPlayer = [[headers objectForKey:kIsVastVideoPlayerKey] boolValue];
@@ -169,10 +169,10 @@ NSString * const kViewabilityDisableHeaderKey = @"X-Disable-Viewability";
 #if MP_HAS_NATIVE_PACKAGE
         self.nativeVideoTrackers = [self nativeVideoTrackersFromHeaders:headers key:kNativeVideoTrackersHeaderKey];
 #endif
-
+        
 
         // rewarded video
-
+        
         // Attempt to parse the multiple currency header first since this will take
         // precedence over the older single currency approach.
         self.availableRewards = [self parseAvailableRewardsFromHeaders:headers];
@@ -194,19 +194,19 @@ NSString * const kViewabilityDisableHeaderKey = @"X-Disable-Viewability";
         // headers.
         else {
             NSString *currencyName = [headers objectForKey:kRewardedVideoCurrencyNameHeaderKey] ?: kMPRewardedVideoRewardCurrencyTypeUnspecified;
-
+            
             NSNumber *currencyAmount = [self adAmountFromHeaders:headers key:kRewardedVideoCurrencyAmountHeaderKey];
             if (currencyAmount.integerValue <= 0) {
                 currencyAmount = @(kMPRewardedVideoRewardCurrencyAmountUnspecified);
             }
-
+            
             MPRewardedVideoReward * reward = [[MPRewardedVideoReward alloc] initWithCurrencyType:currencyName amount:currencyAmount];
             self.availableRewards = [NSArray arrayWithObject:reward];
             self.selectedReward = reward;
         }
 
         self.rewardedVideoCompletionUrl = [headers objectForKey:kRewardedVideoCompletionUrlHeaderKey];
-
+        
         // rewarded playables
         self.rewardedPlayableDuration = [self timeIntervalFromHeaders:headers forKey:kRewardedPlayableDurationHeaderKey];
         self.rewardedPlayableShouldRewardOnClick = [[headers objectForKey:kRewardedPlayableRewardOnClickHeaderKey] boolValue];
@@ -214,7 +214,7 @@ NSString * const kViewabilityDisableHeaderKey = @"X-Disable-Viewability";
         // clickthrough experiment
         self.clickthroughExperimentBrowserAgent = [self clickthroughExperimentVariantFromHeaders:headers forKey:kClickthroughExperimentBrowserAgent];
         [MOPUBExperimentProvider setDisplayAgentFromAdServer:self.clickthroughExperimentBrowserAgent];
-
+        
         // viewability
         NSString * disabledViewabilityValue = [headers objectForKey:kViewabilityDisableHeaderKey];
         NSNumber * disabledViewabilityVendors = disabledViewabilityValue != nil ? [disabledViewabilityValue safeIntegerValue] : nil;
@@ -361,7 +361,7 @@ NSString * const kViewabilityDisableHeaderKey = @"X-Disable-Viewability";
             interval = parsedInt;
         }
     }
-
+    
     return interval;
 }
 
@@ -469,7 +469,7 @@ NSString * const kViewabilityDisableHeaderKey = @"X-Disable-Viewability";
     if (currencies == nil) {
         return nil;
     }
-
+    
     // Either the list of available rewards doesn't exist or is empty.
     // This is an error.
     NSArray * rewards = [currencies objectForKey:@"rewards"];
@@ -477,7 +477,7 @@ NSString * const kViewabilityDisableHeaderKey = @"X-Disable-Viewability";
         MPLogError(@"No available rewards found.");
         return nil;
     }
-
+    
     // Parse the list of JSON rewards into objects.
     NSMutableArray * availableRewards = [NSMutableArray arrayWithCapacity:rewards.count];
     [rewards enumerateObjectsUsingBlock:^(NSDictionary * rewardDict, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -487,7 +487,7 @@ NSString * const kViewabilityDisableHeaderKey = @"X-Disable-Viewability";
         MPRewardedVideoReward * reward = [[MPRewardedVideoReward alloc] initWithCurrencyType:name amount:amount];
         [availableRewards addObject:reward];
     }];
-
+    
     return availableRewards;
 }
 

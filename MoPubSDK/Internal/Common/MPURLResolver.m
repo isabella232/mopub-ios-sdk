@@ -67,7 +67,7 @@ static NSString * const kRedirectURLQueryStringKey = @"r";
 {
     [self.connection cancel];
     self.currentURL = self.originalURL;
-
+    
     NSError *error = nil;
     MPURLActionInfo *info = [self actionInfoFromURL:self.originalURL error:&error];
 
@@ -118,7 +118,7 @@ static NSString * const kRedirectURLQueryStringKey = @"r";
         }
         return nil;
     }
-
+    
     if ([self storeItemIdentifierForURL:URL]) {
         actionInfo = [MPURLActionInfo infoWithURL:self.originalURL iTunesItemIdentifier:[self storeItemIdentifierForURL:URL] iTunesStoreFallbackURL:URL];
     } else if ([self URLHasDeeplinkPlusScheme:URL]) {
@@ -151,7 +151,7 @@ static NSString * const kRedirectURLQueryStringKey = @"r";
                                  safariDestinationURL:self.currentURL];
         }
     }
-
+    
     return actionInfo;
 }
 
@@ -220,23 +220,23 @@ static NSString * const kRedirectURLQueryStringKey = @"r";
 - (NSStringEncoding)stringEncodingFromContentType:(NSString *)contentType
 {
     NSStringEncoding encoding = NSUTF8StringEncoding;
-
+    
     if (![contentType length]) {
         MPLogWarn(@"Attempting to set string encoding from nil %@", kMoPubHTTPHeaderContentType);
         return encoding;
     }
-
+    
     NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"(?<=charset=)[^;]*" options:kNilOptions error:nil];
-
+    
     NSTextCheckingResult *charsetResult = [regex firstMatchInString:contentType options:kNilOptions range:NSMakeRange(0, [contentType length])];
     if (charsetResult && charsetResult.range.location != NSNotFound) {
         NSString *charset = [contentType substringWithRange:[charsetResult range]];
-
+        
         // ensure that charset is not deallocated early
         CFStringRef cfCharset = (CFStringRef)CFBridgingRetain(charset);
         CFStringEncoding cfEncoding = CFStringConvertIANACharSetNameToEncoding(cfCharset);
         CFBridgingRelease(cfCharset);
-
+        
         if (cfEncoding == kCFStringEncodingInvalidId) {
             return encoding;
         }
@@ -258,7 +258,7 @@ static NSString * const kRedirectURLQueryStringKey = @"r";
     // First, check to see if the redirect URL matches any of our suggested actions.
     NSError *error = nil;
     MPURLActionInfo *info = [self actionInfoFromURL:request.URL error:&error];
-
+    
     if (info) {
         [connection cancel];
         [self safeInvokeAndNilCompletionBlock:info error:nil];

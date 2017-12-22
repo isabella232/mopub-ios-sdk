@@ -66,7 +66,7 @@ static MPInstanceProvider *sharedAdProvider = nil;
     dispatch_once(&once, ^{
         sharedAdProvider = [[self alloc] init];
     });
-
+    
     return sharedAdProvider;
 }
 
@@ -113,7 +113,7 @@ static MPInstanceProvider *sharedAdProvider = nil;
     if (configuration.customEventClass) {
         return [(MPBannerCustomEventAdapter *)[MPBannerCustomEventAdapter alloc] initWithDelegate:delegate];
     }
-
+    
     return nil;
 }
 
@@ -155,7 +155,7 @@ static MPInstanceProvider *sharedAdProvider = nil;
         MPLogError(@"**** Custom Event Class: %@ does not extend MPInterstitialCustomEvent ****", NSStringFromClass(customClass));
         return nil;
     }
-
+    
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wundeclared-selector"
     if ([customEvent respondsToSelector:@selector(customEventDidUnload)]) {

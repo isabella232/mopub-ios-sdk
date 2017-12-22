@@ -23,7 +23,7 @@ static BOOL sUsesHTTPS = YES;
     if ([[MPCoreInstanceProvider sharedProvider] appTransportSecuritySettings] == MPATSSettingEnabled) {
         return [@"https://" stringByAppendingString:MOPUB_BASE_HOSTNAME];
     }
-
+    
     return [@"http://" stringByAppendingString:MOPUB_BASE_HOSTNAME];
 }
 

@@ -96,6 +96,7 @@ extern NSString * const kViewabilityDisableHeaderKey;
 @property (nonatomic, copy) NSString *rewardedVideoCompletionUrl;
 @property (nonatomic, assign) NSTimeInterval rewardedPlayableDuration;
 @property (nonatomic, assign) BOOL rewardedPlayableShouldRewardOnClick;
+@property (nonatomic, copy) NSString *advancedBidPayload;
 
 - (id)initWithHeaders:(NSDictionary *)headers data:(NSData *)data;
 

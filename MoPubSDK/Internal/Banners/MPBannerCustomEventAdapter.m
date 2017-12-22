@@ -34,7 +34,7 @@
         [self.bannerCustomEvent performSelector:@selector(invalidate)];
     }
     self.bannerCustomEvent.delegate = nil;
-
+    
     // make sure the custom event isn't released synchronously as objects owned by the custom event
     // may do additional work after a callback that results in unregisterDelegate being called
     [[MPCoreInstanceProvider sharedProvider] keepObjectAliveForCurrentRunLoopIteration:_bannerCustomEvent];
@@ -52,7 +52,7 @@
     self.bannerCustomEvent = [[MPInstanceProvider sharedProvider] buildBannerCustomEventFromCustomClass:configuration.customEventClass
                                                                                                delegate:self];
     if (self.bannerCustomEvent) {
-        [self.bannerCustomEvent requestAdWithSize:size customEventInfo:configuration.customEventClassData];
+        [self.bannerCustomEvent requestAdWithSize:size customEventInfo:configuration.customEventClassData adMarkup:configuration.advancedBidPayload];
     } else {
         [self.delegate adapter:self didFailToLoadAdWithError:nil];
     }

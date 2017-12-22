@@ -47,7 +47,7 @@
 {
     [self view];
     [self.backingViewAgent loadConfiguration:configuration];
-
+    
     self.backingView = self.backingViewAgent.view;
     [self.view addSubview:self.backingView];
     self.backingView.frame = self.view.bounds;
@@ -62,7 +62,7 @@
                                                   [self.backingView.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor],
                                                   ]];
     }
-
+    
     [self.backingViewAgent.viewabilityTracker registerFriendlyObstructionView:self.closeButton];
 }
 

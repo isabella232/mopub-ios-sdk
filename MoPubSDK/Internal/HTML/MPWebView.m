@@ -36,7 +36,7 @@ static BOOL gForceWKWebView = NO;
     if (self = [super init]) {
         [self setUpStepsForceUIWebView:NO];
     }
-
+    
     return self;
 }
 
@@ -44,7 +44,7 @@ static BOOL gForceWKWebView = NO;
     if (self = [super initWithCoder:aDecoder]) {
         [self setUpStepsForceUIWebView:NO];
     }
-
+    
     return self;
 }
 
@@ -52,7 +52,7 @@ static BOOL gForceWKWebView = NO;
     if (self = [super initWithFrame:frame]) {
         [self setUpStepsForceUIWebView:NO];
     }
-
+    
     return self;
 }
 
@@ -60,14 +60,14 @@ static BOOL gForceWKWebView = NO;
     if (self = [super initWithFrame:frame]) {
         [self setUpStepsForceUIWebView:forceUIWebView];
     }
-
+    
     return self;
 }
 
 - (void)setUpStepsForceUIWebView:(BOOL)forceUIWebView {
     // set up web view
     UIView *webView;
-
+    
     if ((gForceWKWebView || !forceUIWebView) && [WKWebView class]) {
         WKUserContentController *contentController = [[WKUserContentController alloc] init];
         WKWebViewConfiguration *config = [[WKWebViewConfiguration alloc] init];
@@ -78,49 +78,49 @@ static BOOL gForceWKWebView = NO;
             config.mediaPlaybackRequiresUserAction = kMoPubRequiresUserActionForMediaPlaybackDefault;
         }
         config.userContentController = contentController;
-
+        
         WKWebView *wkWebView = [[WKWebView alloc] initWithFrame:self.bounds configuration:config];
-
+        
         wkWebView.UIDelegate = self;
         wkWebView.navigationDelegate = self;
-
+        
         webView = wkWebView;
-
+        
         self.wkWebView = wkWebView;
-
+        
         // Put WKWebView onto the offscreen view so any loading will complete correctly; see comment below.
         [self retainWKWebViewOffscreen:wkWebView];
     } else {
         UIWebView *uiWebView = [[UIWebView alloc] initWithFrame:self.bounds];
-
+        
         uiWebView.allowsInlineMediaPlayback = kMoPubAllowsInlineMediaPlaybackDefault;
         uiWebView.mediaPlaybackRequiresUserAction = kMoPubRequiresUserActionForMediaPlaybackDefault;
-
+        
         uiWebView.delegate = self;
-
+        
         webView = uiWebView;
-
+        
         self.uiWebView = uiWebView;
-
+        
         [self addSubview:webView];
         [self setAutolayoutConstraintsForWebView:webView];
     }
-
+    
     webView.backgroundColor = [UIColor clearColor];
     webView.opaque = NO;
-
+    
     webView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-
+    
     // set default scalesPageToFit
     self.scalesPageToFit = NO;
-
+    
     // configure like the old MPAdWebView
     self.backgroundColor = [UIColor clearColor];
     self.opaque = NO;
-
+    
     // set default for allowsLinkPreview as they're different between WKWebView and UIWebView
     self.allowsLinkPreview = kMoPubAllowsLinkPreviewDefault;
-
+    
     // set up KVO to adjust the frame of the WKWebView to avoid white screens
     if (self.wkWebView) {
         [self addObserver:self
@@ -148,17 +148,17 @@ static UIView *gOffscreenView = nil;
         gOffscreenView = nil;
     }
 }
-
+    
 - (UIView *)constructOffscreenView {
     UIView *view = [[UIView alloc] initWithFrame:CGRectZero];
     view.clipsToBounds = YES;
-
+    
     UIWindow *appWindow = [[UIApplication sharedApplication] keyWindow];
     [appWindow addSubview:view];
-
+    
     return view;
 }
-
+    
 - (void)didMoveToWindow {
     // If using WKWebView, and if MPWebView is in the view hierarchy, and if the WKWebView is in the offscreen view currently,
     // move our WKWebView to self and deallocate OffscreenView if no other MPWebView is using it.
@@ -170,7 +170,7 @@ static UIView *gOffscreenView = nil;
         [self addSubview:self.wkWebView];
         [self setAutolayoutConstraintsForWebView:self.wkWebView];
         self.hasMovedToWindow = YES;
-
+        
         // Don't keep OffscreenView if we don't need it; it can always be re-allocated again later
         [self cleanUpOffscreenView];
     }
@@ -208,10 +208,10 @@ static UIView *gOffscreenView = nil;
     if (self.wkWebView) {
         [self removeObserver:self forKeyPath:kMoPubFrameKeyPathString];
     }
-
+    
     // Avoids EXC_BAD_INSTRUCTION crash
     self.wkWebView.scrollView.delegate = nil;
-
+    
     // Be sure our WKWebView doesn't stay stuck to the static OffscreenView
     [self.wkWebView removeFromSuperview];
     // Deallocate OffscreenView if needed
@@ -326,7 +326,7 @@ textEncodingName:(NSString *)encodingName
             return self.wkWebView.allowsLinkPreview;
         }
     }
-
+    
     return NO;
 }
 
@@ -336,7 +336,7 @@ textEncodingName:(NSString *)encodingName
     } else {
         if (scalesPageToFit) {
             self.wkWebView.scrollView.delegate = nil;
-
+            
             [self.wkWebView.configuration.userContentController removeAllUserScripts];
         } else {
             // Make sure the scroll view can't scroll (prevent double tap to zoom)
@@ -357,7 +357,7 @@ textEncodingName:(NSString *)encodingName
          completionHandler:(MPWebViewJavascriptEvaluationCompletionHandler)completionHandler {
     if (self.uiWebView) {
         NSString *resultString = [self.uiWebView stringByEvaluatingJavaScriptFromString:javaScriptString];
-
+        
         if (completionHandler) {
             completionHandler(resultString, nil);
         }
@@ -375,11 +375,11 @@ textEncodingName:(NSString *)encodingName
         // deadlocking the main thread. This method is called on the main thread and the completion block is also
         // called on the main thread.
         // Instead of waiting, just fire and return an empty string.
-
+        
         // Methods attempted:
         // libdispatch dispatch groups
         // http://stackoverflow.com/questions/17920169/how-to-wait-for-method-that-has-completion-block-all-on-main-thread
-
+        
         [self.wkWebView evaluateJavaScript:javaScriptString completionHandler:nil];
         return @"";
     }
@@ -425,7 +425,7 @@ textEncodingName:(NSString *)encodingName
             return self.wkWebView.configuration.allowsPictureInPictureMediaPlayback;
         }
     }
-
+    
     return NO;
 }
 
@@ -439,7 +439,7 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
            shouldStartLoadWithRequest:request
                        navigationType:navigationType];
     }
-
+    
     return YES;
 }
 
@@ -512,7 +512,7 @@ didFailProvisionalNavigation:(WKNavigation *)navigation
 decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction
 decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
     WKNavigationActionPolicy policy = WKNavigationActionPolicyAllow;
-
+    
     if ([self.delegate respondsToSelector:@selector(webView:shouldStartLoadWithRequest:navigationType:)]) {
         NSURLRequest *request = navigationAction.request;
         UIWebViewNavigationType navType;
@@ -536,12 +536,12 @@ decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
                 navType = UIWebViewNavigationTypeOther;
                 break;
         }
-
+        
         policy = [self.delegate webView:self
              shouldStartLoadWithRequest:request
                          navigationType:navType] ? WKNavigationActionPolicyAllow : WKNavigationActionPolicyCancel;
     }
-
+    
     decisionHandler(policy);
 }
 
@@ -553,7 +553,7 @@ windowFeatures:(WKWindowFeatures *)windowFeatures {
     if (!navigationAction.targetFrame.isMainFrame) {
         [webView loadRequest:navigationAction.request];
     }
-
+    
     return nil;
 }
 

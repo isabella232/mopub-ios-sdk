@@ -122,10 +122,6 @@
 
 - (void)trackClick
 {
-    if ([self.delegate respondsToSelector:@selector(willTrackClickForNativeAd:)]) {
-        [self.delegate willTrackClickForNativeAd:self];
-    }
-    
     if (self.hasTrackedClick) {
         MPLogDebug(@"Click already tracked.");
         return;

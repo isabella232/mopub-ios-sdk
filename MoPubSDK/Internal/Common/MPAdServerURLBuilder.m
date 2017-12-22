@@ -7,6 +7,7 @@
 
 #import "MPAdServerURLBuilder.h"
 
+#import "MPAdvancedBiddingManager.h"
 #import "MPConstants.h"
 #import "MPGeolocationProvider.h"
 #import "MPGlobal.h"
@@ -77,7 +78,7 @@ static NSInteger const kAdSequenceNone = -1;
              desiredAssets:(NSArray *)assets
                viewability:(BOOL)viewability
 {
-
+    
 
     return [self URLWithAdUnitID:adUnitID
                         keywords:keywords
@@ -106,7 +107,7 @@ static NSInteger const kAdSequenceNone = -1;
                            [MPIdentityProvider identifier],
                            [adUnitID stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding],
                            versionParameterName, version];
-
+    
     URLString = [URLString stringByAppendingString:[self queryParameterForKeywords:keywords]];
     URLString = [URLString stringByAppendingString:[self queryParameterForOrientation]];
     URLString = [URLString stringByAppendingString:[self queryParameterForScaleFactor]];
@@ -126,9 +127,14 @@ static NSInteger const kAdSequenceNone = -1;
     URLString = [URLString stringByAppendingString:[self queryParameterForPhysicalScreenSize]];
     URLString = [URLString stringByAppendingString:[self queryParameterForBundleIdentifier]];
     URLString = [URLString stringByAppendingString:[self queryParameterForAppTransportSecurity]];
-
+    
     if (viewability) {
         URLString = [URLString stringByAppendingString:[self queryParameterForViewability]];
+    }
+    
+    NSString * advancedBiddingQueryParameter = [self queryParameterForAdvancedBidding];
+    if (advancedBiddingQueryParameter) {
+        URLString = [URLString stringByAppendingString:advancedBiddingQueryParameter];
     }
 
     return [NSURL URLWithString:URLString];
@@ -194,27 +200,27 @@ static NSInteger const kAdSequenceNone = -1;
 
     CLLocation *bestLocation = location;
     CLLocation *locationFromProvider = [[[MPCoreInstanceProvider sharedProvider] sharedMPGeolocationProvider] lastKnownLocation];
-
+    
     if (locationFromProvider) {
         bestLocation = locationFromProvider;
     }
-
+    
     if (bestLocation && bestLocation.horizontalAccuracy >= 0) {
         result = [NSString stringWithFormat:@"&ll=%@,%@",
                   [NSNumber numberWithDouble:bestLocation.coordinate.latitude],
                   [NSNumber numberWithDouble:bestLocation.coordinate.longitude]];
-
+        
         if (bestLocation.horizontalAccuracy) {
             result = [result stringByAppendingFormat:@"&lla=%@",
                       [NSNumber numberWithDouble:bestLocation.horizontalAccuracy]];
         }
-
+        
         if (bestLocation == locationFromProvider) {
             result = [result stringByAppendingString:@"&llsdk=1"];
         }
 
         NSTimeInterval locationLastUpdatedMillis = [[NSDate date] timeIntervalSinceDate:bestLocation.timestamp] * 1000.0;
-
+        
         result = [result stringByAppendingFormat:@"&llf=%.0f", locationLastUpdatedMillis];
     }
 
@@ -310,6 +316,20 @@ static NSInteger const kAdSequenceNone = -1;
 
 + (NSString *)queryParameterForViewability {
     return [NSString stringWithFormat:@"&vv=%d", (int)[MPViewabilityTracker enabledViewabilityVendors]];
+}
+
++ (NSString *)queryParameterForAdvancedBidding {
+    // Opted out of advanced bidding, no query parameter should be sent.
+    if (![MPAdvancedBiddingManager sharedManager].advancedBiddingEnabled) {
+        return nil;
+    }
+    
+    NSString * urlEncodedTokens = [[[MPAdvancedBiddingManager sharedManager] bidderTokensJson] mp_URLEncodedString];
+    if (urlEncodedTokens == nil) {
+        return nil;
+    }
+    
+    return [NSString stringWithFormat:@"&abt=%@", urlEncodedTokens];
 }
 
 + (BOOL)advertisingTrackingEnabled

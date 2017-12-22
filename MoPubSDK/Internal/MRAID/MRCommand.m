@@ -181,7 +181,7 @@
 - (BOOL)executeWithParams:(NSDictionary *)params
 {
     [self.delegate mrCommand:self resizeWithParams:params];
-
+    
     return YES;
 }
 
@@ -292,7 +292,7 @@
 
     return YES;
 }
-/*
+/* 
  * We allow setOrientationProperties to run while we're blocking requests because this command can occur during the presentation
  * animation of an interstitial, and has a strong effect on how an ad is presented so we want to make sure it's executed.
  *

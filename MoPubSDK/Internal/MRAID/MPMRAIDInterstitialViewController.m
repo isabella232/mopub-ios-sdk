@@ -110,7 +110,7 @@
 - (void)adDidLoad:(UIView *)adView
 {
     [self.interstitialView removeFromSuperview];
-
+    
     self.interstitialView = adView;
     self.interstitialView.frame = self.view.bounds;
     self.interstitialView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
@@ -160,7 +160,7 @@
 - (void)setSupportedOrientationMask:(UIInterfaceOrientationMask)supportedOrientationMask
 {
     _supportedOrientationMask = supportedOrientationMask;
-
+    
     // This should be called whenever the return value of -shouldAutorotateToInterfaceOrientation changes. Since the return
     // value is based on _supportedOrientationMask, we do that here. Prevents possible rotation bugs.
     [UIViewController attemptRotationToDeviceOrientation];
