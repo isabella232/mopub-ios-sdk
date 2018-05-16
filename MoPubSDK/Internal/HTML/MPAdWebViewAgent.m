@@ -63,12 +63,12 @@
     self = [super init];
     if (self) {
         _frame = frame;
-        
-        self.destinationDisplayAgent = [[MPCoreInstanceProvider sharedProvider] buildMPAdDestinationDisplayAgentWithDelegate:self];
+
+        self.destinationDisplayAgent = [MPAdDestinationDisplayAgent agentWithDelegate:self];
         self.delegate = delegate;
         self.shouldHandleRequests = YES;
         self.adAlertManager = [[MPCoreInstanceProvider sharedProvider] buildMPAdAlertManagerWithDelegate:self];
-        
+
         self.userInteractionRecognizer = [[MPUserInteractionGestureRecognizer alloc] initWithTarget:self action:@selector(handleInteraction:)];
         self.userInteractionRecognizer.cancelsTouchesInView = NO;
         self.userInteractionRecognizer.delegate = self;
@@ -117,7 +117,7 @@
 - (void)loadConfiguration:(MPAdConfiguration *)configuration
 {
     self.configuration = configuration;
-    
+
     // Initialize web view
     if (self.view != nil) {
         self.view.delegate = nil;
@@ -125,6 +125,7 @@
         self.view = nil;
     }
     self.view = [[MPWebView alloc] initWithFrame:self.frame];
+    self.view.shouldConformToSafeArea = [self isInterstitialAd];
     self.view.delegate = self;
     [self.view addGestureRecognizer:self.userInteractionRecognizer];
 
@@ -143,11 +144,12 @@
     [self.view mp_setScrollable:configuration.scrollable];
     [self.view disableJavaScriptDialogs];
 
+    // Initialize viewability trackers before loading self.view
+    [self init3rdPartyViewabilityTrackers];
+
     [self.view loadHTMLString:[configuration adResponseHTMLString]
                       baseURL:[NSURL URLWithString:[MPAPIEndpoints baseURL]]
      ];
-    
-    [self init3rdPartyViewabilityTrackers];
 
     [self initAdAlertManager];
 }
@@ -156,11 +158,12 @@
 {
     switch (event) {
         case MPAdWebViewEventAdDidAppear:
-            // interstitial has been presented, start viewability trackers
-            if ([self shouldDeferViewability]) {
-                [self.viewabilityTracker startTracking];
+            // For banner, viewability tracker is handled right after adView is initialized (not here).
+            // For interstitial (handled here), we start tracking viewability if it's not started during adView initialization.
+            if (![self shouldStartViewabilityDuringInitialization]) {
+                [self startViewabilityTracker];
             }
-            
+
             [self.view stringByEvaluatingJavaScriptFromString:@"webviewDidAppear();"];
             break;
         case MPAdWebViewEventAdDidDisappear:
@@ -169,6 +172,11 @@
         default:
             break;
     }
+}
+
+- (void)startViewabilityTracker
+{
+    [self.viewabilityTracker startTracking];
 }
 
 - (void)disableRequestHandling
@@ -223,13 +231,13 @@
         [self performActionForMoPubSpecificURL:URL];
         return NO;
     } else if ([self shouldIntercept:URL navigationType:navigationType]) {
-        
+
         // Disable intercept without user interaction
         if (!self.userInteractedWithWebView) {
             MPLogInfo(@"Redirect without user interaction detected");
             return NO;
         }
-        
+
         [self interceptURL:URL];
         return NO;
     } else {
@@ -269,8 +277,6 @@
 {
     if ([URL mp_hasTelephoneScheme] || [URL mp_hasTelephonePromptScheme]) {
         return YES;
-    } else if (!(self.configuration.shouldInterceptLinks)) {
-        return NO;
     } else if (navigationType == UIWebViewNavigationTypeLinkClicked) {
         return YES;
     } else if (navigationType == UIWebViewNavigationTypeOther && self.userInteractedWithWebView) {
@@ -297,10 +303,21 @@
 
 - (void)init3rdPartyViewabilityTrackers
 {
-    self.viewabilityTracker = [[MPViewabilityTracker alloc] initWithAdView:self.view isVideo:self.configuration.isVastVideoPlayer startTrackingImmediately:![self shouldDeferViewability]];
+    self.viewabilityTracker = [[MPViewabilityTracker alloc] initWithAdView:self.view isVideo:self.configuration.isVastVideoPlayer startTrackingImmediately:[self shouldStartViewabilityDuringInitialization]];
 }
 
-- (BOOL)shouldDeferViewability
+- (BOOL)shouldStartViewabilityDuringInitialization
+{
+    // If viewabile impression tracking experiment is enabled, we defer viewability trackers until
+    // ad view is at least x pixels on screen for y seconds, where x and y are configurable values defined in server.
+    if (self.adConfiguration.visibleImpressionTrackingEnabled) {
+        return NO;
+    }
+
+    return ![self isInterstitialAd];
+}
+
+- (BOOL)isInterstitialAd
 {
     return (self.configuration.adType == MPAdTypeInterstitial);
 }

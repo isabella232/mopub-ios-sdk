@@ -78,7 +78,7 @@ static NSString * const kMraidURLScheme = @"mraid";
 - (void)fireChangeEventForProperty:(MRProperty *)property
 {
     NSString *JSON = [NSString stringWithFormat:@"{%@}", property];
-    
+
     MPLogDebug(@"mraidbridge.fireChangeEvent(%@)", JSON);
     [self executeJavascript:@"window.mraidbridge.fireChangeEvent(%@);", JSON];
 }
@@ -86,7 +86,7 @@ static NSString * const kMraidURLScheme = @"mraid";
 - (void)fireChangeEventsForProperties:(NSArray *)properties
 {
     NSString *JSON = [NSString stringWithFormat:@"{%@}", [properties componentsJoinedByString:@", "]];
-    
+
     MPLogDebug(@"mraidbridge.fireChangeEvent(%@)", JSON);
     [self executeJavascript:@"window.mraidbridge.fireChangeEvent(%@);", JSON];
 }
@@ -186,7 +186,7 @@ static NSString * const kMraidURLScheme = @"mraid";
         if (iframe && !((navigationType == UIWebViewNavigationTypeLinkClicked) && ([scheme isEqualToString:@"https"] || [scheme isEqualToString:@"http"]))) {
             return safeToAutoloadLink;
         }
-        
+
         // Otherwise, open the URL in a new web view.
         [self.delegate bridge:self handleDisplayForDestinationURL:url];
         return NO;

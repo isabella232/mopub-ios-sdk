@@ -73,7 +73,7 @@
 - (void)setSupportedOrientationMask:(UIInterfaceOrientationMask)supportedOrientationMask
 {
     _supportedOrientationMask = supportedOrientationMask;
-    
+
     [UIViewController attemptRotationToDeviceOrientation];
 }
 
@@ -90,12 +90,6 @@
 - (BOOL)shouldAutorotate
 {
     return YES;
-}
-
-// shouldAutorotateToInterfaceOrientation is for ios 5.
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
-{
-    return [[UIApplication sharedApplication] mp_doesOrientation:interfaceOrientation matchOrientationMask:self.supportedOrientationMask];
 }
 
 #pragma mark - <MPClosableViewDelegate>

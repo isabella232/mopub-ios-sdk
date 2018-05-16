@@ -23,10 +23,10 @@
 {
     if (self = [super init]) {
         _elementStack = [NSMutableArray array];
-        
+
         // Create a "root" dictionary.
         [_elementStack addObject:[NSMutableDictionary dictionary]];
-        
+
         _currentTextContent = [NSMutableString string];
     }
     return self;
@@ -47,7 +47,7 @@
     NSMutableDictionary *parentElement = [self.elementStack lastObject];
     NSMutableDictionary *currentElement = [NSMutableDictionary dictionary];
     [currentElement addEntriesFromDictionary:attributeDict];
-    
+
     if (parentElement[elementName] && [parentElement[elementName] isKindOfClass:[NSArray class]]) {
         [parentElement[elementName] addObject:currentElement];
     } else if (parentElement[elementName]) {
@@ -59,7 +59,7 @@
     } else {
         parentElement[elementName] = currentElement;
     }
-    
+
     [self.elementStack addObject:currentElement];
 }
 
@@ -70,7 +70,7 @@
     if ([trimmedContent length]) {
         currentElement[@"text"] = trimmedContent;
     }
-    
+
     self.currentTextContent = [NSMutableString string];
     [self.elementStack removeLastObject];
 }

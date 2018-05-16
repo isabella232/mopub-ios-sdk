@@ -19,13 +19,8 @@
 @property (nonatomic, assign) BOOL advancedBiddingEnabled;
 
 /**
- * A JSON-serializable dictionary of bidder tokens to be sent on every ad request when
- * `advancedBiddingEnabled` is set to `YES`.
- */
-@property (nonatomic, strong, readonly) NSDictionary * _Nullable bidderTokens;
-
-/**
- * A JSON string representation of `bidderTokens`.
+ * A UTF-8 JSON string representation of the Advanced Bidding tokens.
+ * @remark If `advancedBiddingEnabled` is set to `NO`, this will always return `nil`.
  */
 @property (nonatomic, copy, readonly) NSString * _Nullable bidderTokensJson;
 
@@ -35,9 +30,11 @@
 + (MPAdvancedBiddingManager * _Nonnull)sharedManager;
 
 /**
- * Generates the bidder tokens from a given set of bidders.
- * @param bidders Array of bidders
+ Initializes each Advanced Bidder and retains a reference. If an Advanced Bidder is
+ already initialized, nothing will be done.
+ @param bidders Array of bidders
+ @param complete Completion block
  */
-- (void)setBidderTokensWithBidders:(NSArray<Class<MPAdvancedBidder>> * _Nonnull)bidders;
+- (void)initializeBidders:(NSArray<Class<MPAdvancedBidder>> * _Nonnull)bidders complete:(void(^_Nullable)(void))complete;
 
 @end

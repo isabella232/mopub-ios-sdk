@@ -38,8 +38,6 @@
  *
  * @param info A dictionary containing additional custom data associated with a given custom event
  * request. This data is configurable on the MoPub website, and may be used to pass dynamic information, such as publisher IDs.
- *
- * @remark THIS API WILL BE DEPRECATED IN THE FUTURE
  */
 - (void)requestAdWithSize:(CGSize)size customEventInfo:(NSDictionary *)info;
 

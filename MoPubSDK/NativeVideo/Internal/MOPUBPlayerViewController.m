@@ -12,8 +12,6 @@
 #import "MPCoreInstanceProvider.h"
 #import "MPGlobal.h"
 #import "MPLogging.h"
-#import "MPLogEvent+NativeVideo.h"
-#import "MPLogEventRecorder.h"
 #import "MOPUBNativeVideoAdConfigValues.h"
 #import "MPVastTracking.h"
 #import "MPVideoConfig.h"
@@ -60,7 +58,6 @@ static const double kVideoFinishedBufferingAllowedError = 0.1;
 
 // KVO might be triggerd multipe times. This property is used to make sure the view will only be created once.
 @property (nonatomic) BOOL alreadyInitialized;
-@property (nonatomic) MPAdConfigurationLogEventProperties *logEventProperties;
 @property (nonatomic) BOOL downloadFinishedEventFired;
 @property (nonatomic) BOOL alreadyCreatedPlayerView;
 @property (nonatomic) BOOL finishedPlaying;
@@ -69,7 +66,7 @@ static const double kVideoFinishedBufferingAllowedError = 0.1;
 
 @implementation MOPUBPlayerViewController
 
-- (instancetype)initWithVideoConfig:(MPVideoConfig *)videoConfig nativeVideoAdConfig:(MOPUBNativeVideoAdConfigValues *)nativeVideoAdConfig logEventProperties:(MPAdConfigurationLogEventProperties *)logEventProperties
+- (instancetype)initWithVideoConfig:(MPVideoConfig *)videoConfig nativeVideoAdConfig:(MOPUBNativeVideoAdConfigValues *)nativeVideoAdConfig
 {
     if (self = [super init]) {
         _mediaURL = videoConfig.mediaURL;
@@ -80,7 +77,6 @@ static const double kVideoFinishedBufferingAllowedError = 0.1;
         [notificationCenter addObserver:self selector:@selector(applicationDidEnterBackground:) name:UIApplicationDidEnterBackgroundNotification object:nil];
         [notificationCenter addObserver:self selector:@selector(applicationDidEnterForeground:) name:UIApplicationWillEnterForegroundNotification object:nil];
         _nativeVideoAdConfig = nativeVideoAdConfig;
-        _logEventProperties = logEventProperties;
 
         // default aspect ratio is 16:9
         _videoAspectRatio = kDefaultVideoAspectRatio;
@@ -124,7 +120,7 @@ static const double kVideoFinishedBufferingAllowedError = 0.1;
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    
+
     if (self.avPlayer) {
         [self.avPlayer removeObserver:self forKeyPath:kStatusKey];
     }
@@ -133,7 +129,7 @@ static const double kVideoFinishedBufferingAllowedError = 0.1;
         [self.playerItem removeObserver:self forKeyPath:kStatusKey];
         [self.playerItem removeObserver:self forKeyPath:kLoadedTimeRangesKey];
     }
-    
+
     MPLogDebug(@"playerViewController dealloc called");
 }
 
@@ -149,7 +145,6 @@ static const double kVideoFinishedBufferingAllowedError = 0.1;
 
 - (void)handleVideoInitError
 {
-    MPAddLogEvent([[MPLogEvent alloc] initWithLogEventProperties:self.logEventProperties nativeVideoEventType:MPNativeVideoEventTypeErrorFailedToPlay]);
     [self.vastTracking handleVideoEvent:MPVideoEventTypeError videoTimeOffset:self.avPlayer.currentPlaybackTime];
     [self stopLoadingIndicator];
     [self.playerView handleVideoInitFailure];
@@ -158,18 +153,16 @@ static const double kVideoFinishedBufferingAllowedError = 0.1;
 - (void)loadAndPlayVideo
 {
     self.startedLoading = YES;
-    
+
     AVURLAsset *asset = [[AVURLAsset alloc] initWithURL:self.mediaURL options:nil];
-    
+
     if (asset == nil) {
         MPLogError(@"failed to initialize video asset for URL %@", self.mediaURL);
         [self handleVideoInitError];
-        
+
         return;
     }
-    
-    MPAddLogEvent([[MPLogEvent alloc ] initWithLogEventProperties:self.logEventProperties nativeVideoEventType:MPNativeVideoEventTypeDownloadStart]);
-  
+
     NSArray *requestedKeys = @[kTracksKey, kPlayableKey];
     [asset loadValuesAsynchronouslyForKeys:requestedKeys completionHandler:^{
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -209,11 +202,11 @@ static const double kVideoFinishedBufferingAllowedError = 0.1;
     if (status == AVKeyValueStatusFailed) {
         MPLogError(@"AVKeyValueStatusFailed");
         [self handleVideoInitError];
-        
+
         return;
     } else if (status == AVKeyValueStatusLoaded) {
         [self setVideoAspectRatioWithAsset:asset];
-        
+
         self.playerItem = [AVPlayerItem playerItemWithAsset:asset];
         self.avPlayer = [[MOPUBAVPlayer alloc] initWithDelegate:self playerItem:self.playerItem];
         self.avPlayer.muted = YES;
@@ -226,7 +219,6 @@ static const double kVideoFinishedBufferingAllowedError = 0.1;
 - (void)initOnVideoReady
 {
     [self startPlayer];
-    MPAddLogEvent([[MPLogEvent alloc] initWithLogEventProperties:self.logEventProperties nativeVideoEventType:MPNativeVideoEventTypeVideoReady]);
 }
 
 - (void)createView
@@ -264,7 +256,7 @@ static const double kVideoFinishedBufferingAllowedError = 0.1;
 - (MPAdDestinationDisplayAgent *)displayAgent
 {
     if (!_displayAgent) {
-        _displayAgent = [[MPCoreInstanceProvider sharedProvider] buildMPAdDestinationDisplayAgentWithDelegate:self];
+        _displayAgent = [MPAdDestinationDisplayAgent agentWithDelegate:self];
     }
     return _displayAgent;
 }
@@ -378,11 +370,6 @@ static const double kVideoFinishedBufferingAllowedError = 0.1;
 {
     if (object == self.avPlayer) {
         if (self.avPlayer.status == AVPlayerItemStatusFailed) {
-            if (self.isReadyToPlay) {
-                MPAddLogEvent([[MPLogEvent alloc] initWithLogEventProperties:self.logEventProperties nativeVideoEventType:MPNativeVideoEventTypeErrorDuringPlayback]);
-            } else {
-                MPAddLogEvent([[MPLogEvent alloc] initWithLogEventProperties:self.logEventProperties nativeVideoEventType:MPNativeVideoEventTypeErrorFailedToPlay]);
-            }
             MPLogError(@"avPlayer status failed");
             [self.vastTracking handleVideoEvent:MPVideoEventTypeError videoTimeOffset:self.avPlayer.currentPlaybackTime];
         }
@@ -396,7 +383,6 @@ static const double kVideoFinishedBufferingAllowedError = 0.1;
                 double videoDuration = CMTimeGetSeconds(self.playerItem.duration);
                 if ((startTime + loadedDuration + kVideoFinishedBufferingAllowedError) >= videoDuration && !self.downloadFinishedEventFired) {
                     self.downloadFinishedEventFired = YES;
-                    MPAddLogEvent([[MPLogEvent alloc ] initWithLogEventProperties:self.logEventProperties nativeVideoEventType:MPNativeVideoEventTypeDownloadFinished]);
                 }
             }
         }
@@ -518,7 +504,6 @@ static const double kVideoFinishedBufferingAllowedError = 0.1;
 - (void)avPlayer:(MOPUBAVPlayer *)player didError:(NSError *)error withMessage:(NSString *)message
 {
     [self.avPlayer pause];
-    MPAddLogEvent([[MPLogEvent alloc] initWithLogEventProperties:self.logEventProperties nativeVideoEventType:MPNativeVideoEventTypeErrorDuringPlayback]);
     [self.vastTracking handleVideoEvent:MPVideoEventTypeError videoTimeOffset:self.avPlayer.currentPlaybackTime];
 }
 
@@ -547,7 +532,6 @@ static const double kVideoFinishedBufferingAllowedError = 0.1;
 
 - (void)avPlayerDidStall:(MOPUBAVPlayer *)player
 {
-    MPAddLogEvent([[MPLogEvent alloc] initWithLogEventProperties:self.logEventProperties nativeVideoEventType:MPNativeVideoEventTypeBuffering]);
     if (self.displayMode == MOPUBPlayerDisplayModeInline) {
         [self startLoadingIndicator];
     } else {

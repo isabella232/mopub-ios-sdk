@@ -66,7 +66,7 @@ static MPInstanceProvider *sharedAdProvider = nil;
     dispatch_once(&once, ^{
         sharedAdProvider = [[self alloc] init];
     });
-    
+
     return sharedAdProvider;
 }
 
@@ -100,35 +100,6 @@ static MPInstanceProvider *sharedAdProvider = nil;
     return singleton;
 }
 
-#pragma mark - Banners
-
-- (MPBannerAdManager *)buildMPBannerAdManagerWithDelegate:(id<MPBannerAdManagerDelegate>)delegate
-{
-    return [(MPBannerAdManager *)[MPBannerAdManager alloc] initWithDelegate:delegate];
-}
-
-- (MPBaseBannerAdapter *)buildBannerAdapterForConfiguration:(MPAdConfiguration *)configuration
-                                                   delegate:(id<MPBannerAdapterDelegate>)delegate
-{
-    if (configuration.customEventClass) {
-        return [(MPBannerCustomEventAdapter *)[MPBannerCustomEventAdapter alloc] initWithDelegate:delegate];
-    }
-    
-    return nil;
-}
-
-- (MPBannerCustomEvent *)buildBannerCustomEventFromCustomClass:(Class)customClass
-                                                      delegate:(id<MPBannerCustomEventDelegate>)delegate
-{
-    MPBannerCustomEvent *customEvent = [[customClass alloc] init];
-    if (![customEvent isKindOfClass:[MPBannerCustomEvent class]]) {
-        MPLogError(@"**** Custom Event Class: %@ does not extend MPBannerCustomEvent ****", NSStringFromClass(customClass));
-        return nil;
-    }
-    customEvent.delegate = delegate;
-    return customEvent;
-}
-
 #pragma mark - Interstitials
 
 - (MPInterstitialAdManager *)buildMPInterstitialAdManagerWithDelegate:(id<MPInterstitialAdManagerDelegate>)delegate
@@ -155,7 +126,7 @@ static MPInstanceProvider *sharedAdProvider = nil;
         MPLogError(@"**** Custom Event Class: %@ does not extend MPInterstitialCustomEvent ****", NSStringFromClass(customClass));
         return nil;
     }
-    
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wundeclared-selector"
     if ([customEvent respondsToSelector:@selector(customEventDidUnload)]) {

@@ -18,7 +18,7 @@ CGRect MPClosableViewCustomCloseButtonFrame(CGSize size, MPClosableViewCloseButt
     CGFloat width = size.width;
     CGFloat height = size.height;
     CGRect closeButtonFrame = CGRectMake(0.0f, 0.0f, kCloseRegionWidth, kCloseRegionHeight);
-    
+
     switch (closeButtonLocation) {
         case MPClosableViewCloseButtonLocationTopRight:
             closeButtonFrame.origin = CGPointMake(width-kCloseRegionWidth, 0.0f);
@@ -45,7 +45,7 @@ CGRect MPClosableViewCustomCloseButtonFrame(CGSize size, MPClosableViewCloseButt
             closeButtonFrame.origin = CGPointMake(width-kCloseRegionWidth, 0.0f);
             break;
     }
-    
+
     return closeButtonFrame;
 }
 
@@ -101,12 +101,12 @@ CGRect MPClosableViewCustomCloseButtonFrame(CGSize size, MPClosableViewCloseButt
 {
     if (@available(iOS 11, *)) {
         self.closeButton.translatesAutoresizingMaskIntoConstraints = NO;
-        
+
         NSMutableArray <NSLayoutConstraint *> *constraints = [NSMutableArray arrayWithObjects:
                                                               [self.closeButton.widthAnchor constraintEqualToConstant:kCloseRegionWidth],
                                                               [self.closeButton.heightAnchor constraintEqualToConstant:kCloseRegionHeight],
                                                               nil];
-        
+
         switch (self.closeButtonLocation) {
             case MPClosableViewCloseButtonLocationTopRight:
                 [constraints addObject:[self.closeButton.trailingAnchor constraintEqualToAnchor:self.safeAreaLayoutGuide.trailingAnchor]];
@@ -142,12 +142,12 @@ CGRect MPClosableViewCustomCloseButtonFrame(CGSize size, MPClosableViewCloseButt
                 [constraints addObject:[self.closeButton.topAnchor constraintEqualToAnchor:self.safeAreaLayoutGuide.topAnchor]];
                 break;
         }
-        
+
         [NSLayoutConstraint activateConstraints:constraints];
     } else {
         self.closeButton.frame = MPClosableViewCustomCloseButtonFrame(self.bounds.size, self.closeButtonLocation);
     }
-    
+
     [self bringSubviewToFront:self.closeButton];
 }
 

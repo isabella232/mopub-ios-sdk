@@ -7,13 +7,14 @@
 
 #import "MPAdConfiguration.h"
 
+#import "MOPUBExperimentProvider.h"
+#import "MPConsentAdServerKeys.h"
+#import "MPConsentManager.h"
 #import "MPConstants.h"
 #import "MPLogging.h"
-#import "math.h"
-#import "NSJSONSerialization+MPAdditions.h"
 #import "MPRewardedVideoReward.h"
-#import "MOPUBExperimentProvider.h"
 #import "MPViewabilityTracker.h"
+#import "NSJSONSerialization+MPAdditions.h"
 #import "NSString+MPAdditions.h"
 
 #if MP_HAS_NATIVE_PACKAGE
@@ -30,7 +31,6 @@ NSString * const kCustomEventClassDataHeaderKey = @"X-Custom-Event-Class-Data";
 NSString * const kFailUrlHeaderKey = @"X-Failurl";
 NSString * const kHeightHeaderKey = @"X-Height";
 NSString * const kImpressionTrackerHeaderKey = @"X-Imptracker";
-NSString * const kInterceptLinksHeaderKey = @"X-Interceptlinks";
 NSString * const kLaunchpageHeaderKey = @"X-Launchpage";
 NSString * const kNativeSDKParametersHeaderKey = @"X-Nativeparams";
 NSString * const kNetworkTypeHeaderKey = @"X-Networktype";
@@ -45,12 +45,16 @@ NSString * const kIsVastVideoPlayerKey = @"X-VastVideoPlayer";
 NSString * const kInterstitialAdTypeHeaderKey = @"X-Fulladtype";
 NSString * const kOrientationTypeHeaderKey = @"X-Orientation";
 
+NSString * const kNativeImpressionMinVisiblePixelsHeaderKey = @"X-Native-Impression-Min-Px"; // The pixels header takes priority over percentage, but percentage is left for backwards compatibility
 NSString * const kNativeImpressionMinVisiblePercentHeaderKey = @"X-Impression-Min-Visible-Percent";
 NSString * const kNativeImpressionVisibleMsHeaderKey = @"X-Impression-Visible-Ms";
 NSString * const kNativeVideoPlayVisiblePercentHeaderKey = @"X-Play-Visible-Percent";
 NSString * const kNativeVideoPauseVisiblePercentHeaderKey = @"X-Pause-Visible-Percent";
 NSString * const kNativeVideoMaxBufferingTimeMsHeaderKey = @"X-Max-Buffer-Ms";
 NSString * const kNativeVideoTrackersHeaderKey = @"X-Video-Trackers";
+
+NSString * const kBannerImpressionVisableMsHeaderKey = @"X-Banner-Impression-Min-Ms";
+NSString * const kBannerImpressionMinPixelHeaderKey = @"X-Banner-Impression-Min-Pixels";
 
 NSString * const kAdTypeHtml = @"html";
 NSString * const kAdTypeInterstitial = @"interstitial";
@@ -112,7 +116,7 @@ NSString * const kViewabilityDisableHeaderKey = @"X-Disable-Viewability";
         self.adType = [self adTypeFromHeaders:headers];
 
         self.adUnitWarmingUp = [[headers objectForKey:kAdUnitWarmingUpHeaderKey] boolValue];
-        
+
         self.networkType = [self networkTypeFromHeaders:headers];
         self.networkType = self.networkType ? self.networkType : @"";
 
@@ -128,8 +132,6 @@ NSString * const kViewabilityDisableHeaderKey = @"X-Disable-Viewability";
         self.interceptURLPrefix = [self URLFromHeaders:headers
                                                 forKey:kLaunchpageHeaderKey];
 
-        NSNumber *shouldInterceptLinks = [headers objectForKey:kInterceptLinksHeaderKey];
-        self.shouldInterceptLinks = shouldInterceptLinks ? [shouldInterceptLinks boolValue] : YES;
         self.scrollable = [[headers objectForKey:kScrollableHeaderKey] boolValue];
         self.refreshInterval = [self refreshIntervalFromHeaders:headers];
         self.adTimeoutInterval = [self timeIntervalFromHeaders:headers forKey:kAdTimeoutHeaderKey];
@@ -144,9 +146,9 @@ NSString * const kViewabilityDisableHeaderKey = @"X-Disable-Viewability";
         self.customEventClass = [self setUpCustomEventClassFromHeaders:headers];
 
         self.customEventClassData = [self customEventClassDataFromHeaders:headers];
-        
+
         self.dspCreativeId = [headers objectForKey:kDspCreativeIdKey];
-        
+
         self.precacheRequired = [[headers objectForKey:kPrecacheRequiredKey] boolValue];
 
         self.isVastVideoPlayer = [[headers objectForKey:kIsVastVideoPlayerKey] boolValue];
@@ -161,6 +163,8 @@ NSString * const kViewabilityDisableHeaderKey = @"X-Disable-Viewability";
 
         self.nativeVideoPauseVisiblePercent = [self percentFromHeaders:headers forKey:kNativeVideoPauseVisiblePercentHeaderKey];
 
+        self.nativeImpressionMinVisiblePixels = [[self adAmountFromHeaders:headers key:kNativeImpressionMinVisiblePixelsHeaderKey] floatValue];
+
         self.nativeImpressionMinVisiblePercent = [self percentFromHeaders:headers forKey:kNativeImpressionMinVisiblePercentHeaderKey];
 
         self.nativeImpressionMinVisibleTimeInterval = [self timeIntervalFromMsHeaders:headers forKey:kNativeImpressionVisibleMsHeaderKey];
@@ -169,10 +173,12 @@ NSString * const kViewabilityDisableHeaderKey = @"X-Disable-Viewability";
 #if MP_HAS_NATIVE_PACKAGE
         self.nativeVideoTrackers = [self nativeVideoTrackersFromHeaders:headers key:kNativeVideoTrackersHeaderKey];
 #endif
-        
+
+        self.impressionMinVisibleTimeInSec = [self timeIntervalFromMsHeaders:headers forKey:kBannerImpressionVisableMsHeaderKey];
+        self.impressionMinVisiblePixels = [[self adAmountFromHeaders:headers key:kBannerImpressionMinPixelHeaderKey] floatValue];
 
         // rewarded video
-        
+
         // Attempt to parse the multiple currency header first since this will take
         // precedence over the older single currency approach.
         self.availableRewards = [self parseAvailableRewardsFromHeaders:headers];
@@ -194,19 +200,19 @@ NSString * const kViewabilityDisableHeaderKey = @"X-Disable-Viewability";
         // headers.
         else {
             NSString *currencyName = [headers objectForKey:kRewardedVideoCurrencyNameHeaderKey] ?: kMPRewardedVideoRewardCurrencyTypeUnspecified;
-            
+
             NSNumber *currencyAmount = [self adAmountFromHeaders:headers key:kRewardedVideoCurrencyAmountHeaderKey];
             if (currencyAmount.integerValue <= 0) {
                 currencyAmount = @(kMPRewardedVideoRewardCurrencyAmountUnspecified);
             }
-            
+
             MPRewardedVideoReward * reward = [[MPRewardedVideoReward alloc] initWithCurrencyType:currencyName amount:currencyAmount];
             self.availableRewards = [NSArray arrayWithObject:reward];
             self.selectedReward = reward;
         }
 
         self.rewardedVideoCompletionUrl = [headers objectForKey:kRewardedVideoCompletionUrlHeaderKey];
-        
+
         // rewarded playables
         self.rewardedPlayableDuration = [self timeIntervalFromHeaders:headers forKey:kRewardedPlayableDurationHeaderKey];
         self.rewardedPlayableShouldRewardOnClick = [[headers objectForKey:kRewardedPlayableRewardOnClickHeaderKey] boolValue];
@@ -214,7 +220,7 @@ NSString * const kViewabilityDisableHeaderKey = @"X-Disable-Viewability";
         // clickthrough experiment
         self.clickthroughExperimentBrowserAgent = [self clickthroughExperimentVariantFromHeaders:headers forKey:kClickthroughExperimentBrowserAgent];
         [MOPUBExperimentProvider setDisplayAgentFromAdServer:self.clickthroughExperimentBrowserAgent];
-        
+
         // viewability
         NSString * disabledViewabilityValue = [headers objectForKey:kViewabilityDisableHeaderKey];
         NSNumber * disabledViewabilityVendors = disabledViewabilityValue != nil ? [disabledViewabilityValue safeIntegerValue] : nil;
@@ -224,6 +230,13 @@ NSString * const kViewabilityDisableHeaderKey = @"X-Disable-Viewability";
             MPViewabilityOption vendorsToDisable = (MPViewabilityOption)([disabledViewabilityVendors integerValue]);
             [MPViewabilityTracker disableViewability:vendorsToDisable];
         }
+
+        // consent
+        [[MPConsentManager sharedManager] forceStatusShouldForceExplicitNo:[headers[kForceExplicitNoKey] boolValue]
+                                                   shouldInvalidateConsent:[headers[kInvalidateConsentKey] boolValue]
+                                                    shouldReacquireConsent:[headers[kReacquireConsentKey] boolValue]
+                                                       consentChangeReason:headers[kConsentChangedReasonKey]
+                                                   shouldBroadcast:YES];
     }
     return self;
 }
@@ -361,7 +374,7 @@ NSString * const kViewabilityDisableHeaderKey = @"X-Disable-Viewability";
             interval = parsedInt;
         }
     }
-    
+
     return interval;
 }
 
@@ -469,7 +482,7 @@ NSString * const kViewabilityDisableHeaderKey = @"X-Disable-Viewability";
     if (currencies == nil) {
         return nil;
     }
-    
+
     // Either the list of available rewards doesn't exist or is empty.
     // This is an error.
     NSArray * rewards = [currencies objectForKey:@"rewards"];
@@ -477,7 +490,7 @@ NSString * const kViewabilityDisableHeaderKey = @"X-Disable-Viewability";
         MPLogError(@"No available rewards found.");
         return nil;
     }
-    
+
     // Parse the list of JSON rewards into objects.
     NSMutableArray * availableRewards = [NSMutableArray arrayWithCapacity:rewards.count];
     [rewards enumerateObjectsUsingBlock:^(NSDictionary * rewardDict, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -487,7 +500,7 @@ NSString * const kViewabilityDisableHeaderKey = @"X-Disable-Viewability";
         MPRewardedVideoReward * reward = [[MPRewardedVideoReward alloc] initWithCurrencyType:name amount:amount];
         [availableRewards addObject:reward];
     }];
-    
+
     return availableRewards;
 }
 
@@ -504,6 +517,14 @@ NSString * const kViewabilityDisableHeaderKey = @"X-Disable-Viewability";
     }
 
     return variant;
+}
+
+- (BOOL)visibleImpressionTrackingEnabled
+{
+    if (self.impressionMinVisibleTimeInSec < 0 || self.impressionMinVisiblePixels <= 0) {
+        return NO;
+    }
+    return YES;
 }
 
 @end

@@ -16,12 +16,12 @@ NSString *const kJavaScriptDisableDialogSnippet = @"window.alert = function() { 
  * Find all subviews that are UIScrollViews or subclasses and set their scrolling and bounce.
  */
 - (void)mp_setScrollable:(BOOL)scrollable {
-    if ([self respondsToSelector:@selector(scrollView)]) 
+    if ([self respondsToSelector:@selector(scrollView)])
     {
         UIScrollView *scrollView = self.scrollView;
         scrollView.scrollEnabled = scrollable;
         scrollView.bounces = scrollable;
-    } 
+    }
     else
     {
         UIScrollView *scrollView = nil;

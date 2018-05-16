@@ -29,20 +29,20 @@ void _MPLog(MPLogLevel level, NSString *format, va_list args)
 {
     static NSString *sIdentifier;
     static NSString *sObfuscatedIdentifier;
-    
+
     if (!sIdentifier) {
         sIdentifier = [[MPIdentityProvider identifier] copy];
     }
-    
+
     if (!sObfuscatedIdentifier) {
         sObfuscatedIdentifier = [[MPIdentityProvider obfuscatedIdentifier] copy];
     }
-    
+
     NSString *logString = [[NSString alloc] initWithFormat:format arguments:args];
-    
+
     // Replace identifier with a obfuscated version when logging.
     logString = [logString stringByReplacingOccurrencesOfString:sIdentifier withString:sObfuscatedIdentifier];
-    
+
     [[MPLogProvider sharedLogProvider] logMessage:logString atLogLevel:level];
 }
 

@@ -80,7 +80,7 @@
 {
     MPLogInfo(@"MoPub HTML interstitial did appear");
     [self.delegate interstitialCustomEventDidAppear:self];
-    
+
     if (!self.trackedImpression) {
         self.trackedImpression = YES;
         [self.delegate trackImpression];

@@ -27,7 +27,7 @@
     dispatch_once(&once, ^{
         sharedLogProvider = [[self alloc] init];
     });
-    
+
     return sharedLogProvider;
 }
 

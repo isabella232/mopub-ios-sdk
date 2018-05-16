@@ -156,7 +156,7 @@ static NSString * const MPAVPlayerItemLoadErrorTemplate = @"Loading player item 
                 }
             }
         }
-        
+
     }
 }
 
@@ -223,7 +223,7 @@ static NSString * const MPAVPlayerItemLoadErrorTemplate = @"Loading player item 
 - (void)dispose
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    
+
     [self stopTimeObserver];
     [self.reachability stopNotifier];
     if (_playbackTimer) {

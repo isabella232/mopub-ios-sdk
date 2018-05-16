@@ -25,7 +25,7 @@
         formatter = [[NSNumberFormatter alloc] init];
         formatter.numberStyle = NSNumberFormatterNoStyle;
     }
-    
+
     return [formatter numberFromString:self];
 }
 

@@ -85,7 +85,7 @@ static const CGFloat kAutoPlayTimerInterval = 0.25f;
         if (error) {
             *error = MPNativeAdNSErrorForRenderValueTypeError();
         }
-        
+
         return nil;
     }
 
@@ -150,7 +150,7 @@ static const CGFloat kAutoPlayTimerInterval = 0.25f;
 
         [mainImageView addSubview:mediaView];
     }
-    
+
     // See if the ad contains a star rating and notify the view if it does.
     if ([self.adView respondsToSelector:@selector(layoutStarRating:)]) {
         NSNumber *starRatingNum = [adapter.properties objectForKey:kAdStarRatingKey];
@@ -323,8 +323,7 @@ static const CGFloat kAutoPlayTimerInterval = 0.25f;
         if (!self.videoController || self.videoController.disposed) {
             createdNewVideoController = YES;
             self.videoController = [[MOPUBPlayerManager sharedInstance] playerViewControllerWithVideoConfig:self.videoConfig
-                                                                                        nativeVideoAdConfig:self.nativeVideoAdConfig
-                                                                                         logEventProperties:[self.adapter.properties valueForKey:kLogEventRequestPropertiesKey]];
+                                                                                        nativeVideoAdConfig:self.nativeVideoAdConfig];
             self.videoController.defaultActionURL = self.adapter.defaultActionURL;
             self.videoController.displayMode = MOPUBPlayerDisplayModeInline;
             self.videoController.delegate = self;
