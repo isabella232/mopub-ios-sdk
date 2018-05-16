@@ -26,17 +26,17 @@
     self = [super init];
     if (self) {
         _delegate = delegate;
-        
+
         _videoPlayerManager = [[MPInstanceProvider sharedProvider] buildMRVideoPlayerManagerWithDelegate:self];
     }
-    
+
     return self;
 }
 
 - (void)handleNativeCommand:(NSString *)command withProperties:(NSDictionary *)properties
 {
     BOOL success = YES;
-    
+
     MRCommand *cmd = [MRCommand commandForString:command];
     if (cmd == nil) {
         success = NO;
@@ -44,9 +44,9 @@
         cmd.delegate = self;
         success = [cmd executeWithParams:properties];
     }
-    
+
     [self.delegate nativeCommandCompleted:command];
-    
+
     if (!success) {
         MPLogDebug(@"Unknown command: %@", command);
         [self.delegate nativeCommandFailed:command withMessage:@"Specified command is not implemented."];
@@ -59,7 +59,7 @@
     if (![self.delegate handlingWebviewRequests] && ![cmd executableWhileBlockingRequests]) {
         return NO;
     }
-    
+
     // some MRAID commands may not require user interaction
     return ![cmd requiresUserInteractionForPlacementType:[self.delegate adViewPlacementType]] || [self.delegate userInteractedWithWebView];
 }

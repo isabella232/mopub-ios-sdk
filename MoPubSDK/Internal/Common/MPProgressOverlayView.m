@@ -157,7 +157,7 @@ static void exponentialDecayInterpolation(void *info, const CGFloat *input, CGFl
 
     self.closeButton.hidden = YES;
     self.closeButton.alpha = 0.0f;
-    
+
     if (MP_ANIMATED) {
         [UIView animateWithDuration:0.2 animations:^{
             self.alpha = 0.0;

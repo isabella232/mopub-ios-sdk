@@ -69,7 +69,7 @@
     dispatch_once(&onceToken, ^{
         validVideoMimeTypes = [NSSet setWithObjects:@"video/quicktime", @"video/mp4", @"video/3gpp", @"video/3gpp2", @"video/x-m4v", nil];
     });
-    
+
     return validVideoMimeTypes;
 }
 
@@ -80,7 +80,7 @@
     NSArray * sortedMediaFiles = [filteredMediaFiles sortedArrayUsingComparator:^NSComparisonResult(MPVASTMediaFile * a, MPVASTMediaFile * b) {
         return a.bitrate < b.bitrate;
     }];
-    
+
     return (sortedMediaFiles.count > 0 ? sortedMediaFiles[0] : nil);
 }
 

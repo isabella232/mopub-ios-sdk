@@ -23,15 +23,6 @@
 @end
 
 @implementation MPAdView
-@synthesize location = _location;
-@synthesize adManager = _adManager;
-@synthesize adUnitId = _adUnitId;
-@synthesize keywords = _keywords;
-@synthesize delegate = _delegate;
-@synthesize originalSize = _originalSize;
-@synthesize testing = _testing;
-@synthesize adContentView = _adContentView;
-@synthesize allowedNativeAdOrientation = _allowedNativeAdOrientation;
 
 #pragma mark -
 #pragma mark Lifecycle
@@ -46,7 +37,7 @@
         self.originalSize = size;
         self.allowedNativeAdOrientation = MPNativeAdOrientationAny;
         self.adUnitId = (adUnitId) ? adUnitId : DEFAULT_PUB_ID;
-        self.adManager = [[MPInstanceProvider sharedProvider] buildMPBannerAdManagerWithDelegate:self];
+        self.adManager = [[MPBannerAdManager alloc] initWithDelegate:self];
         self.userInteractionEnabled = NO;
     }
     return self;
@@ -64,7 +55,7 @@
     [self.adContentView removeFromSuperview];
     _adContentView = view;
     [self addSubview:view];
-    
+
     if (view != nil) {
         self.userInteractionEnabled = YES;
     }
@@ -158,7 +149,7 @@
         // make sure we are not released synchronously as objects owned by us
         // may do additional work after this callback
         [[MPCoreInstanceProvider sharedProvider] keepObjectAliveForCurrentRunLoopIteration:self];
-        
+
         [self.delegate adViewDidFailToLoadAd:self];
     }
 }

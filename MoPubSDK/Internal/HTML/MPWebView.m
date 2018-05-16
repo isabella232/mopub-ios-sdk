@@ -26,6 +26,8 @@ static BOOL gForceWKWebView = NO;
 @property (weak, nonatomic) WKWebView *wkWebView;
 @property (weak, nonatomic) UIWebView *uiWebView;
 
+@property (strong, nonatomic) NSArray<NSLayoutConstraint *> *wkWebViewLayoutConstraints;
+
 @property (nonatomic, assign) BOOL hasMovedToWindow;
 
 @end
@@ -36,7 +38,7 @@ static BOOL gForceWKWebView = NO;
     if (self = [super init]) {
         [self setUpStepsForceUIWebView:NO];
     }
-    
+
     return self;
 }
 
@@ -44,7 +46,7 @@ static BOOL gForceWKWebView = NO;
     if (self = [super initWithCoder:aDecoder]) {
         [self setUpStepsForceUIWebView:NO];
     }
-    
+
     return self;
 }
 
@@ -52,7 +54,7 @@ static BOOL gForceWKWebView = NO;
     if (self = [super initWithFrame:frame]) {
         [self setUpStepsForceUIWebView:NO];
     }
-    
+
     return self;
 }
 
@@ -60,14 +62,14 @@ static BOOL gForceWKWebView = NO;
     if (self = [super initWithFrame:frame]) {
         [self setUpStepsForceUIWebView:forceUIWebView];
     }
-    
+
     return self;
 }
 
 - (void)setUpStepsForceUIWebView:(BOOL)forceUIWebView {
     // set up web view
     UIView *webView;
-    
+
     if ((gForceWKWebView || !forceUIWebView) && [WKWebView class]) {
         WKUserContentController *contentController = [[WKUserContentController alloc] init];
         WKWebViewConfiguration *config = [[WKWebViewConfiguration alloc] init];
@@ -78,49 +80,51 @@ static BOOL gForceWKWebView = NO;
             config.mediaPlaybackRequiresUserAction = kMoPubRequiresUserActionForMediaPlaybackDefault;
         }
         config.userContentController = contentController;
-        
+
         WKWebView *wkWebView = [[WKWebView alloc] initWithFrame:self.bounds configuration:config];
-        
+
         wkWebView.UIDelegate = self;
         wkWebView.navigationDelegate = self;
-        
+
         webView = wkWebView;
-        
+
         self.wkWebView = wkWebView;
-        
+
         // Put WKWebView onto the offscreen view so any loading will complete correctly; see comment below.
         [self retainWKWebViewOffscreen:wkWebView];
     } else {
         UIWebView *uiWebView = [[UIWebView alloc] initWithFrame:self.bounds];
-        
+
         uiWebView.allowsInlineMediaPlayback = kMoPubAllowsInlineMediaPlaybackDefault;
         uiWebView.mediaPlaybackRequiresUserAction = kMoPubRequiresUserActionForMediaPlaybackDefault;
-        
+
         uiWebView.delegate = self;
-        
+
         webView = uiWebView;
-        
+
         self.uiWebView = uiWebView;
-        
+
         [self addSubview:webView];
-        [self setAutolayoutConstraintsForWebView:webView];
     }
-    
+
     webView.backgroundColor = [UIColor clearColor];
     webView.opaque = NO;
-    
+
     webView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    
+
     // set default scalesPageToFit
     self.scalesPageToFit = NO;
-    
+
+    // set default `shouldConformToSafeArea`
+    self.shouldConformToSafeArea = NO;
+
     // configure like the old MPAdWebView
     self.backgroundColor = [UIColor clearColor];
     self.opaque = NO;
-    
+
     // set default for allowsLinkPreview as they're different between WKWebView and UIWebView
     self.allowsLinkPreview = kMoPubAllowsLinkPreviewDefault;
-    
+
     // set up KVO to adjust the frame of the WKWebView to avoid white screens
     if (self.wkWebView) {
         [self addObserver:self
@@ -148,17 +152,17 @@ static UIView *gOffscreenView = nil;
         gOffscreenView = nil;
     }
 }
-    
+
 - (UIView *)constructOffscreenView {
     UIView *view = [[UIView alloc] initWithFrame:CGRectZero];
     view.clipsToBounds = YES;
-    
+
     UIWindow *appWindow = [[UIApplication sharedApplication] keyWindow];
     [appWindow addSubview:view];
-    
+
     return view;
 }
-    
+
 - (void)didMoveToWindow {
     // If using WKWebView, and if MPWebView is in the view hierarchy, and if the WKWebView is in the offscreen view currently,
     // move our WKWebView to self and deallocate OffscreenView if no other MPWebView is using it.
@@ -168,9 +172,9 @@ static UIView *gOffscreenView = nil;
         && [self.wkWebView.superview isEqual:gOffscreenView]) {
         self.wkWebView.frame = self.bounds;
         [self addSubview:self.wkWebView];
-        [self setAutolayoutConstraintsForWebView:self.wkWebView];
+        [self constrainWebViewShouldUseSafeArea:self.shouldConformToSafeArea];
         self.hasMovedToWindow = YES;
-        
+
         // Don't keep OffscreenView if we don't need it; it can always be re-allocated again later
         [self cleanUpOffscreenView];
     }
@@ -187,19 +191,21 @@ static UIView *gOffscreenView = nil;
     // If it's attached to self, the autoresizing mask should come into play & this is just extra work.
     if ([keyPath isEqualToString:kMoPubFrameKeyPathString]
         && [self.wkWebView.superview isEqual:gOffscreenView]) {
-        self.wkWebView.frame = self.bounds;
-    }
-}
-
-- (void)setAutolayoutConstraintsForWebView:(UIView *)webView {
-    if (@available(iOS 9.0, *)) {
-        webView.translatesAutoresizingMaskIntoConstraints = NO;
-        [NSLayoutConstraint activateConstraints:@[
-                                                  [webView.topAnchor constraintEqualToAnchor:self.topAnchor],
-                                                  [webView.leadingAnchor constraintEqualToAnchor:self.leadingAnchor],
-                                                  [webView.trailingAnchor constraintEqualToAnchor:self.trailingAnchor],
-                                                  [webView.bottomAnchor constraintEqualToAnchor:self.bottomAnchor],
-                                                  ]];
+        if (@available(iOS 11.0, *)) {
+            // In iOS 11, WKWebView loads web view contents into the safe area only unless `viewport-fit=cover` is
+            // included in the page's viewport tag. Also, as of iOS 11, it appears WKWebView does not redraw page
+            // contents to match the safe area of a new position after being moved. As a result, making `wkWebView`'s
+            // X/Y coordinates (0,0) can introduce an issue on iPhone X where banners do not load inside of
+            // `wkWebView`'s bounds, even if the banner is moved into the safe area after loading.
+            //
+            // To skirt around these problems, always put `wkWebView` into the safe area when using iOS 11 or later.
+            self.wkWebView.frame = CGRectMake(gOffscreenView.safeAreaInsets.left,
+                                              gOffscreenView.safeAreaInsets.top,
+                                              CGRectGetWidth(self.bounds),
+                                              CGRectGetHeight(self.bounds));
+        } else {
+            self.wkWebView.frame = self.bounds;
+        }
     }
 }
 
@@ -208,14 +214,50 @@ static UIView *gOffscreenView = nil;
     if (self.wkWebView) {
         [self removeObserver:self forKeyPath:kMoPubFrameKeyPathString];
     }
-    
+
     // Avoids EXC_BAD_INSTRUCTION crash
     self.wkWebView.scrollView.delegate = nil;
-    
+
     // Be sure our WKWebView doesn't stay stuck to the static OffscreenView
     [self.wkWebView removeFromSuperview];
     // Deallocate OffscreenView if needed
     [self cleanUpOffscreenView];
+}
+
+- (void)setShouldConformToSafeArea:(BOOL)shouldConformToSafeArea {
+    _shouldConformToSafeArea = shouldConformToSafeArea;
+
+    if (self.hasMovedToWindow) {
+        [self constrainWebViewShouldUseSafeArea:shouldConformToSafeArea];
+    }
+}
+
+- (void)constrainWebViewShouldUseSafeArea:(BOOL)shouldUseSafeArea {
+    if (@available(iOS 11.0, *)) {
+        self.wkWebView.translatesAutoresizingMaskIntoConstraints = NO;
+
+        if (self.wkWebViewLayoutConstraints) {
+            [NSLayoutConstraint deactivateConstraints:self.wkWebViewLayoutConstraints];
+        }
+
+        if (shouldUseSafeArea) {
+            self.wkWebViewLayoutConstraints = @[
+                                                [self.wkWebView.topAnchor constraintEqualToAnchor:self.safeAreaLayoutGuide.topAnchor],
+                                                [self.wkWebView.leadingAnchor constraintEqualToAnchor:self.safeAreaLayoutGuide.leadingAnchor],
+                                                [self.wkWebView.trailingAnchor constraintEqualToAnchor:self.safeAreaLayoutGuide.trailingAnchor],
+                                                [self.wkWebView.bottomAnchor constraintEqualToAnchor:self.safeAreaLayoutGuide.bottomAnchor],
+                                                ];
+        } else {
+            self.wkWebViewLayoutConstraints = @[
+                                                [self.wkWebView.topAnchor constraintEqualToAnchor:self.topAnchor],
+                                                [self.wkWebView.leadingAnchor constraintEqualToAnchor:self.leadingAnchor],
+                                                [self.wkWebView.trailingAnchor constraintEqualToAnchor:self.trailingAnchor],
+                                                [self.wkWebView.bottomAnchor constraintEqualToAnchor:self.bottomAnchor],
+                                                ];
+        }
+
+        [NSLayoutConstraint activateConstraints:self.wkWebViewLayoutConstraints];
+    }
 }
 
 - (BOOL)isLoading {
@@ -326,7 +368,7 @@ textEncodingName:(NSString *)encodingName
             return self.wkWebView.allowsLinkPreview;
         }
     }
-    
+
     return NO;
 }
 
@@ -336,7 +378,7 @@ textEncodingName:(NSString *)encodingName
     } else {
         if (scalesPageToFit) {
             self.wkWebView.scrollView.delegate = nil;
-            
+
             [self.wkWebView.configuration.userContentController removeAllUserScripts];
         } else {
             // Make sure the scroll view can't scroll (prevent double tap to zoom)
@@ -357,7 +399,7 @@ textEncodingName:(NSString *)encodingName
          completionHandler:(MPWebViewJavascriptEvaluationCompletionHandler)completionHandler {
     if (self.uiWebView) {
         NSString *resultString = [self.uiWebView stringByEvaluatingJavaScriptFromString:javaScriptString];
-        
+
         if (completionHandler) {
             completionHandler(resultString, nil);
         }
@@ -375,11 +417,11 @@ textEncodingName:(NSString *)encodingName
         // deadlocking the main thread. This method is called on the main thread and the completion block is also
         // called on the main thread.
         // Instead of waiting, just fire and return an empty string.
-        
+
         // Methods attempted:
         // libdispatch dispatch groups
         // http://stackoverflow.com/questions/17920169/how-to-wait-for-method-that-has-completion-block-all-on-main-thread
-        
+
         [self.wkWebView evaluateJavaScript:javaScriptString completionHandler:nil];
         return @"";
     }
@@ -425,7 +467,7 @@ textEncodingName:(NSString *)encodingName
             return self.wkWebView.configuration.allowsPictureInPictureMediaPlayback;
         }
     }
-    
+
     return NO;
 }
 
@@ -439,7 +481,7 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
            shouldStartLoadWithRequest:request
                        navigationType:navigationType];
     }
-    
+
     return YES;
 }
 
@@ -512,7 +554,7 @@ didFailProvisionalNavigation:(WKNavigation *)navigation
 decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction
 decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
     WKNavigationActionPolicy policy = WKNavigationActionPolicyAllow;
-    
+
     if ([self.delegate respondsToSelector:@selector(webView:shouldStartLoadWithRequest:navigationType:)]) {
         NSURLRequest *request = navigationAction.request;
         UIWebViewNavigationType navType;
@@ -536,12 +578,12 @@ decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
                 navType = UIWebViewNavigationTypeOther;
                 break;
         }
-        
+
         policy = [self.delegate webView:self
              shouldStartLoadWithRequest:request
                          navigationType:navType] ? WKNavigationActionPolicyAllow : WKNavigationActionPolicyCancel;
     }
-    
+
     decisionHandler(policy);
 }
 
@@ -553,7 +595,7 @@ windowFeatures:(WKWindowFeatures *)windowFeatures {
     if (!navigationAction.targetFrame.isMainFrame) {
         [webView loadRequest:navigationAction.request];
     }
-    
+
     return nil;
 }
 

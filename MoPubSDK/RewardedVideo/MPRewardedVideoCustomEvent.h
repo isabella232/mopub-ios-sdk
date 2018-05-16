@@ -7,6 +7,7 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
+#import "MPMediationSdkInitializable.h"
 
 @protocol MPRewardedVideoCustomEventDelegate;
 @protocol MPMediationSettingsProtocol;
@@ -26,7 +27,7 @@
  * invoke its `-requestRewardedVideoWithCustomEventInfo:` method and `+initializeSdkWithParameters:` method.
  */
 
-@interface MPRewardedVideoCustomEvent : NSObject
+@interface MPRewardedVideoCustomEvent : NSObject <MPMediationSdkInitializable>
 
 @property (nonatomic, weak) id<MPRewardedVideoCustomEventDelegate> delegate;
 
@@ -35,10 +36,10 @@
 /**
  * Called when the MoPub SDK requires the underlying network SDK to be initialized.
  *
- * This method may be invoked either at rewarded video initialization or on-demand when
+ * This method may be invoked either at SDK initialization time or on-demand when
  * `requestRewardedVideoWithCustomEventInfo:` is invoked.
  *
- * The default implementation of this method does nothing. Subclasses must override this method and implement 
+ * The default implementation of this method does nothing. Subclasses must override this method and implement
  * code to initialize the underlying SDK here.
  *
  * This method may be called multiple times during the lifetime of the app. As such
@@ -67,8 +68,6 @@
  *
  * @param info A dictionary containing additional custom data associated with a given custom event
  * request. This data is configurable on the MoPub website, and may be used to pass dynamic information, such as publisher IDs.
- *
- * @remark THIS API WILL BE DEPRECATED IN THE FUTURE
  */
 - (void)requestRewardedVideoWithCustomEventInfo:(NSDictionary *)info;
 
@@ -139,7 +138,7 @@
  *
  * Due to the way ad mediation works, two ad units may load the same ad network for displaying ads. When one ad unit plays
  * an ad, the other ad unit may need to update its state and notify the application an ad may no longer be available as it
- * may have already played. If an ad becomes unavailable for this custom event, call 
+ * may have already played. If an ad becomes unavailable for this custom event, call
  * `[-rewardedVideoDidExpireForCustomEvent:]([MPRewardedVideoCustomEventDelegate rewardedVideoDidExpireForCustomEvent:])`
  * to notify the application that an ad is no longer available.
  *

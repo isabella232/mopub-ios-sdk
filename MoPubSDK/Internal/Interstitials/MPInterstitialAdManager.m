@@ -45,7 +45,7 @@
 {
     self = [super init];
     if (self) {
-        self.communicator = [[MPCoreInstanceProvider sharedProvider] buildMPAdServerCommunicatorWithDelegate:self];
+        self.communicator = [[MPAdServerCommunicator alloc] initWithDelegate:self];
         self.delegate = delegate;
     }
     return self;
@@ -84,15 +84,15 @@
 }
 
 
-- (void)loadInterstitialWithAdUnitID:(NSString *)ID keywords:(NSString *)keywords location:(CLLocation *)location testing:(BOOL)testing
+- (void)loadInterstitialWithAdUnitID:(NSString *)ID keywords:(NSString *)keywords userDataKeywords:(NSString *)userDataKeywords location:(CLLocation *)location
 {
     if (self.ready) {
         [self.delegate managerDidLoadInterstitial:self];
     } else {
         [self loadAdWithURL:[MPAdServerURLBuilder URLWithAdUnitID:ID
                                                          keywords:keywords
-                                                         location:location
-                                                          testing:testing]];
+                                                 userDataKeywords:userDataKeywords
+                                                         location:location]];
     }
 }
 
@@ -105,7 +105,7 @@
         NSLog(@"Interstitial ad view is not ready to be shown");
         return;
     }
-    
+
     [self.adapter showInterstitialFromViewController:controller];
 }
 
@@ -138,7 +138,7 @@
         [self.delegate manager:self didFailToLoadInterstitialWithError:[MOPUBError errorWithCode:MOPUBErrorAdUnitWarmingUp]];
         return;
     }
-    
+
     if ([self.configuration.networkType isEqualToString:kAdTypeClear]) {
         MPLogInfo(kMPClearErrorLogFormatWithAdUnitID, self.delegate.interstitialAdController.adUnitId);
         self.loading = NO;

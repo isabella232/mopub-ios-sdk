@@ -28,7 +28,7 @@
         _interval = interval;
         _block = block;
     }
-    
+
     return self;
 }
 
@@ -44,7 +44,7 @@
 - (void)invalidate {
     [self.timer invalidate];
     self.timer = nil;
-    
+
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     self.isScheduled = NO;
     self.fireDate = nil;
@@ -87,7 +87,7 @@
         [self fire];
         return;
     }
-    
+
     // update time interval and schedule a new timer if it's not yet time to fire
     self.currentTimeInterval = [self.fireDate timeIntervalSinceNow];
     [self setTimerWithCurrentTimeInterval];

@@ -99,7 +99,7 @@
 {
     self.adAvailable = NO;
     [self.delegate rewardedVideoDidDisappearForCustomEvent:self];
-    
+
     // Get rid of the interstitial view controller when done with it so we don't hold on longer than needed
     self.interstitial = nil;
 }

@@ -14,6 +14,7 @@
 #import "MPTimer.h"
 #import "MPConstants.h"
 #import "MPLogging.h"
+#import "MPBannerCustomEventAdapter.h"
 
 @interface MPBannerAdManager ()
 
@@ -51,13 +52,13 @@
     if (self) {
         self.delegate = delegate;
 
-        self.communicator = [[MPCoreInstanceProvider sharedProvider] buildMPAdServerCommunicatorWithDelegate:self];
+        self.communicator = [[MPAdServerCommunicator alloc] initWithDelegate:self];
 
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(applicationWillEnterForeground)
                                                      name:UIApplicationWillEnterForegroundNotification
                                                    object:[UIApplication sharedApplication]];
-        
+
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(applicationDidEnterBackground)
                                                      name:UIApplicationDidEnterBackgroundNotification
@@ -94,7 +95,7 @@
     if (!self.hasRequestedAtLeastOneAd) {
         self.hasRequestedAtLeastOneAd = YES;
     }
-    
+
     if (self.loading) {
         MPLogWarn(@"Banner view (%@) is already loading an ad. Wait for previous load to finish.", [self.delegate adUnitId]);
         return;
@@ -158,8 +159,8 @@
 
     URL = (URL) ? URL : [MPAdServerURLBuilder URLWithAdUnitID:[self.delegate adUnitId]
                                                      keywords:[self.delegate keywords]
-                                                     location:[self.delegate location]
-                                                      testing:[self.delegate isTesting]];
+                                             userDataKeywords:[self.delegate userDataKeywords]
+                                                     location:[self.delegate location]];
 
     MPLogInfo(@"Banner view (%@) loading ad with MoPub server URL: %@", [self.delegate adUnitId], URL);
 
@@ -204,7 +205,7 @@
     self.requestingConfiguration = configurations.firstObject;
 
     MPLogInfo(@"Banner ad view is fetching ad network type: %@", self.requestingConfiguration.networkType);
-    
+
     if (self.requestingConfiguration.adType == MPAdTypeUnknown) {
         [self didFailToLoadAdapterWithError:[MOPUBError errorWithCode:MOPUBErrorServerError]];
         return;
@@ -221,15 +222,15 @@
         [self didFailToLoadAdapterWithError:[MOPUBError errorWithCode:MOPUBErrorAdUnitWarmingUp]];
         return;
     }
-    
+
     if ([self.requestingConfiguration.networkType isEqualToString:kAdTypeClear]) {
         MPLogInfo(kMPClearErrorLogFormatWithAdUnitID, self.delegate.adUnitId);
         [self didFailToLoadAdapterWithError:[MOPUBError errorWithCode:MOPUBErrorNoInventory]];
         return;
     }
 
-    self.requestingAdapter = [[MPInstanceProvider sharedProvider] buildBannerAdapterForConfiguration:self.requestingConfiguration
-                                                                                            delegate:self];
+    self.requestingAdapter = [[MPBannerCustomEventAdapter alloc] initWithConfiguration:self.requestingConfiguration
+                                                                              delegate:self];
     if (!self.requestingAdapter) {
         [self loadAdWithURL:self.requestingConfiguration.failoverURL];
         return;

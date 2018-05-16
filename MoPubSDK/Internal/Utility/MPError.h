@@ -19,6 +19,8 @@ typedef enum {
     MOPUBErrorAdapterInvalid = 17,
     MOPUBErrorAdapterHasNoInventory = 18,
     MOPUBErrorUnableToParseJSONAdResponse,
+    MOPUBErrorUnexpectedNetworkResponse,
+    MOPUBErrorNoNetworkData,
 } MOPUBErrorCode;
 
 @interface MOPUBError : NSError

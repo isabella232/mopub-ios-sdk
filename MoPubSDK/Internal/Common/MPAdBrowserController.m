@@ -8,11 +8,10 @@
 
 #import "MPAdBrowserController.h"
 #import "MPLogging.h"
-#import "MPLogEvent.h"
-#import "MPLogEventRecorder.h"
 #import "MPAdConfiguration.h"
 #import "MPAPIEndpoints.h"
 #import "NSBundle+MPAdditions.h"
+#import "MPURLRequest.h"
 
 static NSString * const kAdBrowserControllerNibName = @"MPAdBrowserController";
 
@@ -31,8 +30,6 @@ static NSString * const kAdBrowserControllerNibName = @"MPAdBrowserController";
 @property (nonatomic, strong) UIActionSheet *actionSheet;
 @property (nonatomic, strong) NSString *HTMLString;
 @property (nonatomic, assign) int webViewLoadCount;
-@property (nonatomic) MPLogEvent *dwellEvent;
-@property (nonatomic) BOOL hasAppeared;
 
 - (void)dismissActionSheet;
 
@@ -58,8 +55,6 @@ static NSString * const kAdBrowserControllerNibName = @"MPAdBrowserController";
         self.spinner.hidesWhenStopped = YES;
 
         self.webViewLoadCount = 0;
-
-        _hasAppeared = NO;
     }
     return self;
 }
@@ -78,7 +73,7 @@ static NSString * const kAdBrowserControllerNibName = @"MPAdBrowserController";
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
+
     // Set web view delegate
     self.webView.delegate = self;
     self.webView.scalesPageToFit = YES;
@@ -90,7 +85,7 @@ static NSString * const kAdBrowserControllerNibName = @"MPAdBrowserController";
     self.forwardButton.title = nil;
     self.spinnerItem.customView = self.spinner;
     self.spinnerItem.title = nil;
-    
+
     // If iOS 11, set up autolayout constraints so that the toolbar and web view stay within the safe area
     // Note: The web view has to be constrained to the safe area on top for the notch in Portait and leading/trailing
     // for the notch in Landscape. Only the bottom of the toolbar needs to be constrained because Apple will move
@@ -103,14 +98,14 @@ static NSString * const kAdBrowserControllerNibName = @"MPAdBrowserController";
         self.webViewTopConstraint.active = NO;
         self.webViewLeadingConstraint.active = NO;
         self.webViewTrailingConstraint.active = NO;
-        
+
         // Set new constraints based on the safe area layout guide
         self.navigationBarYConstraint = [self.navigationBar.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor]; // put nav bar just above safe area
         self.browserControlToolbarBottomConstraint = [self.browserControlToolbar.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor];
         self.webViewTopConstraint = [self.webView.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor];
         self.webViewLeadingConstraint = [self.webView.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor];
         self.webViewTrailingConstraint = [self.webView.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor];
-        
+
         // Enable the new constraints
         [NSLayoutConstraint activateConstraints:@[
                                                   self.navigationBarYConstraint,
@@ -120,7 +115,7 @@ static NSString * const kAdBrowserControllerNibName = @"MPAdBrowserController";
                                                   self.webViewTrailingConstraint,
                                                   ]];
     }
-    
+
     // Set web view background color to white so scrolling at extremes won't have a gray background
     self.webView.backgroundColor = [UIColor whiteColor];
 }
@@ -140,20 +135,12 @@ static NSString * const kAdBrowserControllerNibName = @"MPAdBrowserController";
 {
     [super viewDidAppear:animated];
 
-    // Track when this view first appears so we can log the time the user stays in the view controller. Creating the event will mark the start of the dwell time.
-    // Make sure we don't create the event twice.
-    if (!self.hasAppeared) {
-        self.dwellEvent = [[MPLogEvent alloc] initWithEventCategory:MPLogEventCategoryAdInteractions eventName:MPLogEventNameClickthroughDwellTime];
-    }
-
-    self.hasAppeared = YES;
-
     NSURL *baseURL = (self.URL != nil) ? self.URL : [NSURL URLWithString:[MPAPIEndpoints baseURL]];
-    
+
     if (self.HTMLString) {
         [self.webView loadHTMLString:self.HTMLString baseURL:baseURL];
     } else {
-        [self.webView loadRequest:[NSURLRequest requestWithURL:self.URL]];
+        [self.webView loadRequest:[MPURLRequest requestWithURL:self.URL]];
     }
 }
 
@@ -186,18 +173,6 @@ static NSString * const kAdBrowserControllerNibName = @"MPAdBrowserController";
         [self.delegate dismissBrowserController:self animated:MP_ANIMATED];
     } else {
         [self dismissViewControllerAnimated:MP_ANIMATED completion:nil];
-    }
-
-    if ([self.delegate respondsToSelector:@selector(adConfiguration)]) {
-        MPAdConfiguration *configuration = [self.delegate adConfiguration];
-        
-        if (configuration) {
-            MPAdConfigurationLogEventProperties *logProperties = [[MPAdConfigurationLogEventProperties alloc] initWithConfiguration:configuration];
-            [self.dwellEvent setLogEventProperties:logProperties];
-            [self.dwellEvent recordEndTime];
-
-            MPAddLogEvent(self.dwellEvent);
-        }
     }
 }
 
@@ -263,13 +238,13 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
 {
     MPLogDebug(@"Ad browser (%p) starting to load URL: %@", self, request.URL);
     self.URL = request.URL;
-    
+
     BOOL appShouldOpenURL = ![self.URL.scheme isEqualToString:@"http"] && ![self.URL.scheme isEqualToString:@"https"];
-    
+
     if (appShouldOpenURL) {
         [[UIApplication sharedApplication] openURL:self.URL];
     }
-    
+
     return !appShouldOpenURL;
 }
 
@@ -365,13 +340,6 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
     UIImage *image = [[UIImage alloc] initWithCGImage:imageRef];
     CGImageRelease(imageRef);
     return image;
-}
-
-#pragma mark -
-
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
-{
-    return YES;
 }
 
 @end
