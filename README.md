@@ -97,15 +97,17 @@ In case they were removed automatically after the update, please add the followi
 in method
     `- (void)trackClick` 
 add the following lines of code
-    `if ([self.delegate respondsToSelector:@selector(willTrackClickForNativeAd:)]) {
-        [self.delegate willTrackClickForNativeAd:self];
+    `SEL selector = @selector(willTrackClickForNativeAd:);
+        if ([self.delegate respondsToSelector:selector]) {
+        [self.delegate performSelector:selector withObject:self];
     }`
 
 in  method
     `- (void)trackImpression`
 add the following lines of code
-    `if ([self.delegate respondsToSelector:@selector(willTrackImpressionForNativeAd:)]) {
-    [self.delegate willTrackImpressionForNativeAd:self];
+    `SEL selector = @selector(willTrackImpressionForNativeAd:);
+        if ([self.delegate respondsToSelector:selector]) {
+        [self.delegate performSelector:selector withObject:self];
     }`
 
 These are custom implemetations to track click and impresson of Native ads.
