@@ -100,9 +100,7 @@ static const CGFloat kRetryIntervalBackoffMultiplier = 2.0;
         [strongSelf parsePositioningData:data];
     } errorHandler:^(NSError * _Nonnull error) {
         __typeof__(self) strongSelf = weakSelf;
-        if (!strongSelf) {
-            return;
-        }
+
         if (strongSelf.retryInterval >= strongSelf.maximumRetryInterval) {
             strongSelf.completionHandler(nil, error);
             strongSelf.completionHandler = nil;

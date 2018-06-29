@@ -33,7 +33,7 @@ The MoPub SDK is distributed as source code that you can include in your applica
 
   Includes everything you need to serve HTML and MRAID advertisements.  Third party ad networks and Native MoPub advertisements are not included.
 
-The current version of the SDK is 5.0.0
+The current version of the SDK is 5.1.0
 
 ## Integrate
 
@@ -46,14 +46,10 @@ More detailed class documentation is available in the repo under the `ClassDocum
 Please view the [changelog](https://github.com/mopub/mopub-ios-sdk/blob/master/CHANGELOG.md) for details.
 
 - **Features**
-	- General Data Protection Regulation (GDPR) update to support a way for publishers to determine GDPR applicability and to obtain and manage consent from users in European Economic Area, the United Kingdom, or Switzerland to serve personalize ads.
-	- New SDK initialization method to initialize consent management and rewarded video ad networks. Required for receiving personalized ads. In future versions of the SDK, initialization will be required to receive ads.
-	- Updated the networking stack to use `NSURLSession` in place of the deprecated `NSURLConnection`.
-	- Updated ad requests to use POST instead of GET.
-
-- **Bug Fixes**
-	- Renamed the `/MoPubSDK/Native Ads/` folder to `/MoPubSDK/NativeAds/`.
-	- Removed the usage of deprecated `shouldAutorotateToInterfaceOrientation`.
+	- Updated `MPReachability` to be IPv6 compliant.
+	- Allow publishers to determine which users should be treated as GDPR compliant users through the new API `forceGDPRApplicable`.
+	- Alert a publisher (through logs) when they are trying to use the new GDPR consent flow without being whitelisted.
+	- Banner refresh will only occur after an impression.
 
 See the [Getting Started Guide](https://github.com/mopub/mopub-ios-sdk/wiki/Getting-Started#app-transport-security-settings) for instructions on setting up ATS in your app.
 
@@ -75,7 +71,7 @@ Including `pod 'mopub-ios-sdk'` in your Podfile will include both IAS and Moat S
 
 Make sure to run `pod update` once your Podfile is set up to your preferences.
 ##### Software Disable
-If you would like to opt out of viewability measurement but do not want to modify the MoPub SDK, a function is provided for your convenience. As soon as possible after calling `[[MoPub sharedInstance] start]`, call `[[MoPub sharedInstance] disableViewability:(vendors)]`. In place of “(vendors)”, `MPViewabilityOptionIAS` will disable IAS but leave Moat enabled, `MPViewabilityOptionMoat` will disable Moat but leave IAS enabled, and `MPViewabilityOptionAll` will disable all viewability measurement.
+If you would like to opt out of viewability measurement but do not want to modify the MoPub SDK, a function is provided for your convenience. As soon as possible after calling `- (void)initializeSdkWithConfiguration:completion:`, call `[[MoPub sharedInstance] disableViewability:(vendors)]`. In place of “(vendors)”, `MPViewabilityOptionIAS` will disable IAS but leave Moat enabled, `MPViewabilityOptionMoat` will disable Moat but leave IAS enabled, and `MPViewabilityOptionAll` will disable all viewability measurement.
 
 ## Requirements
 
@@ -85,30 +81,3 @@ If you would like to opt out of viewability measurement but do not want to modif
 ## License
 
 We have launched a new license as of version 3.2.0. To view the full license, visit [http://www.mopub.com/legal/sdk-license-agreement/](http://www.mopub.com/legal/sdk-license-agreement/)
-
-## Important Note
-
-After each update make sure you did not remove(automatically) these method calls from MPNativeAd.m file.
-`willTrackClickForNativeAd`
-`willTrackImpressionForNativeAd`
-
-In case they were removed automatically after the update, please add the following code in MPNativeAd.m file's:
-
-in method
-    `- (void)trackClick` 
-add the following lines of code
-    `SEL selector = @selector(willTrackClickForNativeAd:);
-        if ([self.delegate respondsToSelector:selector]) {
-        [self.delegate performSelector:selector withObject:self];
-    }`
-
-in  method
-    `- (void)trackImpression`
-add the following lines of code
-    `SEL selector = @selector(willTrackImpressionForNativeAd:);
-        if ([self.delegate respondsToSelector:selector]) {
-        [self.delegate performSelector:selector withObject:self];
-    }`
-
-These are custom implemetations to track click and impresson of Native ads.
-In case you missed these lines of code, impression and click tracking weill be imposible.
