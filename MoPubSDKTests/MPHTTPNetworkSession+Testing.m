@@ -1,15 +1,16 @@
 //
-//  MPURLRequest+Testing.m
+//  MPHTTPNetworkSession+Testing.m
 //  MoPubSDKTests
 //
 //  Copyright © 2018 MoPub. All rights reserved.
 //
 
-#import "MPURLRequest+Testing.h"
+#import "MPHTTPNetworkSession+Testing.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
-@implementation MPURLRequest (Testing)
+@implementation MPHTTPNetworkSession (Testing)
+@dynamic sharedSession;
 
 @end
 #pragma clang diagnostic pop

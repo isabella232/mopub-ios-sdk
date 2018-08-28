@@ -17,7 +17,7 @@ To file an issue with our team, email [support@mopub.com](mailto:support@mopub.c
 Thank you for submitting pull requests to the MoPub iOS GitHub repository. Our team regularly monitors and investigates all submissions for inclusion in our official SDK releases. Please note that MoPub does not directly merge these pull requests at this time. Please reach out to your account team or [support@mopub.com](mailto:support@mopub.com) if you have further questions.
 
 ## Disclosure
-MoPub SDK 4.16 and above integrates technology from our partners Integral Ad Science, Inc. (“IAS”) and Moat, Inc. (“Moat”) in order to support viewability measurement and other proprietary reporting that [IAS](https://integralads.com/capabilities/viewability/) and [Moat](https://moat.com/analytics) provide to their advertiser and publisher clients. You have the option to remove or disable this technology by following the opt-out instructions [below](#disableViewability).  
+MoPub SDK 4.16 and above integrates technology from our partners Integral Ad Science, Inc. (“IAS”) and Moat, Inc. (“Moat”) in order to support viewability measurement and other proprietary reporting that [IAS](https://integralads.com/capabilities/viewability/) and [Moat](https://moat.com/analytics) provide to their advertiser and publisher clients. You have the option to remove or disable this technology by following the opt-out instructions [below](#disableViewability).
 
 If you do not remove or disable IAS's and/or Moat’s technology in accordance with these instructions, you agree that IAS's [privacy policy](https://integralads.com/privacy-policy/) and [license](https://integralads.com/sdk-license-agreement) and Moat’s [privacy policy](https://moat.com/privacy),  [terms](https://moat.com/terms), and [license](https://moat.com/sdklicense.txt), respectively, apply to your integration of these partners' technologies into your application.
 
@@ -27,29 +27,24 @@ The MoPub SDK is distributed as source code that you can include in your applica
 
 - **[MoPub Base SDK.zip](http://bit.ly/2bH8ObO)**
 
-  Includes everything you need to serve HTML, MRAID, and Native MoPub advertisements.  Third party ad networks are not included.
+Includes everything you need to serve HTML, MRAID, and Native MoPub advertisements.  Third party ad networks are not included.
 
 - **[MoPub Base SDK Excluding Native.zip](http://bit.ly/2bCCgRw)**
 
-  Includes everything you need to serve HTML and MRAID advertisements.  Third party ad networks and Native MoPub advertisements are not included.
+Includes everything you need to serve HTML and MRAID advertisements.  Third party ad networks and Native MoPub advertisements are not included.
 
-The current version of the SDK is 5.1.0
+The current version of the SDK is 5.3.0
 
 ## Integrate
 
 Integration instructions are available on the [wiki](https://github.com/mopub/mopub-ios-sdk/wiki/Getting-Started).
-
-More detailed class documentation is available in the repo under the `ClassDocumentation` folder.  This can be viewed [online too](http://htmlpreview.github.com/?https://github.com/mopub/mopub-ios-sdk/blob/master/ClassDocumentation/index.html).
 
 ## New in this Version
 
 Please view the [changelog](https://github.com/mopub/mopub-ios-sdk/blob/master/CHANGELOG.md) for details.
 
 - **Features**
-	- Updated `MPReachability` to be IPv6 compliant.
-	- Allow publishers to determine which users should be treated as GDPR compliant users through the new API `forceGDPRApplicable`.
-	- Alert a publisher (through logs) when they are trying to use the new GDPR consent flow without being whitelisted.
-	- Banner refresh will only occur after an impression.
+- Laying the foundation for platform optimization work that enables the SDK to receive multiple ad responses per ad request, reducing the number of round trips between the server and the client required to fill the requests.
 
 See the [Getting Started Guide](https://github.com/mopub/mopub-ios-sdk/wiki/Getting-Started#app-transport-security-settings) for instructions on setting up ATS in your app.
 
@@ -81,3 +76,17 @@ If you would like to opt out of viewability measurement but do not want to modif
 ## License
 
 We have launched a new license as of version 3.2.0. To view the full license, visit [http://www.mopub.com/legal/sdk-license-agreement/](http://www.mopub.com/legal/sdk-license-agreement/)
+
+
+## Important Note
+After each update make sure you did not remove(automatically) these method calls from MPNativeAd.m file. willTrackClickForNativeAd willTrackImpressionForNativeAd
+
+In case they were removed automatically after the update, please add the following code in MPNativeAd.m file's:
+
+in method - (void)trackClick add the following lines of code SEL selector = @selector(willTrackClickForNativeAd:); if ([self.delegate respondsToSelector:selector]) { [self.delegate performSelector:selector withObject:self]; }
+
+in method - (void)trackImpression add the following lines of code SEL selector = @selector(willTrackImpressionForNativeAd:); if ([self.delegate respondsToSelector:selector]) { [self.delegate performSelector:selector withObject:self]; }
+
+These are custom implemetations to track click and impresson of Native ads. In case you missed these lines of code, impression and click tracking weill be imposible.
+
+Also make sure not to lose this note from this file.

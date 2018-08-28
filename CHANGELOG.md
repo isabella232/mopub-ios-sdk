@@ -1,3 +1,16 @@
+## Version 5.3.0 (August 15, 2018)
+- **Features**
+  - Laying the foundation for platform optimization work that enables the SDK to receive multiple ad responses per ad request, reducing the number of round trips between the server and the client required to fill the requests.
+
+## Version 5.2.0 (July 9, 2018)
+- **Features**
+  - SDK initialization is required for ads to load.
+  - Added callback to the consent dialog when it is dismissed.
+
+- **Bug Fixes**
+  - Synchronized access to shared `NSMutableDictionary` in `MPHTTPNetworkSession`.
+  - Video ads using Device orientation now appear aligned correctly on iPhone X.
+
 ## Version 5.1.0 (June 5, 2018)
 - **Features**
   - Updated `MPReachability` to be IPv6 compliant.
