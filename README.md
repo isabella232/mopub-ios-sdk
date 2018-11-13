@@ -124,3 +124,18 @@ If you would like to opt out of viewability measurement but do not want to modif
 ## License
 
 We have launched a new license as of version 3.2.0. To view the full license, visit [http://www.mopub.com/legal/sdk-license-agreement/](http://www.mopub.com/legal/sdk-license-agreement/)
+
+
+## Important Note
+
+After each update make sure you did not remove(automatically) these method calls from MPNativeAd.m file. willTrackClickForNativeAd willTrackImpressionForNativeAd
+
+In case they were removed automatically after the update, please add the following code in MPNativeAd.m file's:
+
+in method - (void)trackClick add the following lines of code SEL selector = @selector(willTrackClickForNativeAd:); if ([self.delegate respondsToSelector:selector]) { [self.delegate performSelector:selector withObject:self]; }
+
+in method - (void)trackImpression add the following lines of code SEL selector = @selector(willTrackImpressionForNativeAd:); if ([self.delegate respondsToSelector:selector]) { [self.delegate performSelector:selector withObject:self]; }
+
+These are custom implemetations to track click and impresson of Native ads. In case you missed these lines of code, impression and click tracking weill be imposible.
+
+Also make sure not to lose this note from this file.

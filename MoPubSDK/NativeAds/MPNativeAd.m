@@ -124,11 +124,37 @@
 
     MPLogDebug(@"Tracking an impression for %@.", self.adIdentifier);
     self.hasTrackedImpression = YES;
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wundeclared-selector"
+    SEL selector = @selector(willTrackImpressionForNativeAd:);
+#pragma clang diagnostic pop
+    
+    if ([self.delegate respondsToSelector:selector]) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+        [self.delegate performSelector:selector withObject:self];
+#pragma clang diagnostic pop
+        
+    }
+    
     [self trackMetricsForURLs:self.impressionTrackerURLs];
 }
 
 - (void)trackClick
 {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wundeclared-selector"
+    SEL selector = @selector(willTrackClickForNativeAd:);
+#pragma clang diagnostic pop
+    
+    if ([self.delegate respondsToSelector:selector]) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+        [self.delegate performSelector:selector withObject:self];
+#pragma clang diagnostic pop
+        
+    }
     if (self.hasTrackedClick) {
         MPLogDebug(@"Click already tracked.");
         return;
