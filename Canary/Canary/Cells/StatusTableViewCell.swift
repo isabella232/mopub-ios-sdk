@@ -1,7 +1,7 @@
 //
 //  StatusTableViewCell.swift
 //
-//  Copyright 2018 Twitter, Inc.
+//  Copyright 2018-2019 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
@@ -30,7 +30,8 @@ class StatusTableViewCell: UITableViewCell {
         
         // Update text highlighted state
         nameLabel.textColor = isHighlighted ? .black : .lightGray
-        
+        accessoryType = isHighlighted ? .checkmark : .none
+
         // Update the visible state of the message label
         messageLabel.isHidden = (error == nil)
         

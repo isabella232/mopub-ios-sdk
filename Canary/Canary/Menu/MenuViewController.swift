@@ -1,7 +1,7 @@
 //
 //  MenuViewController.swift
 //
-//  Copyright 2018 Twitter, Inc.
+//  Copyright 2018-2019 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
@@ -86,7 +86,7 @@ extension MenuViewController: UITableViewDelegate {
         if let container = (UIApplication.shared.delegate as? AppDelegate)?.containerViewController,
             let presentingController = container.mainTabBarController,
             dataSource.didSelect(itemAtIndexPath: indexPath, inTableView: tableView, presentingFrom: presentingController) {
-            container.closeMenu(animated: true)
+            container.closeMenu()
         }
     }
 }

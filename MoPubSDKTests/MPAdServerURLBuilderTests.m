@@ -1,29 +1,27 @@
 //
 //  MPAdServerURLBuilderTests.m
 //
-//  Copyright 2018 Twitter, Inc.
+//  Copyright 2018-2019 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
 
 #import <XCTest/XCTest.h>
+#import "MPAdServerKeys.h"
 #import "MPAdServerURLBuilder+Testing.h"
-#import "MPAdvancedBiddingManager+Testing.h"
 #import "MPAPIEndpoints.h"
 #import "MPConsentManager.h"
+#import "MPIdentityProvider.h"
+#import "MPMediationManager.h"
+#import "MPMediationManager+Testing.h"
+#import "MPURL.h"
 #import "MPViewabilityTracker.h"
-#import "NSURLComponents+Testing.h"
-#import "MPStubAdvancedBidder.h"
 #import "NSString+MPConsentStatus.h"
 #import "NSString+MPAdditions.h"
-#import "MPAdServerKeys.h"
-#import "MPStubAdvancedBidder.h"
-#import "MPIdentityProvider.h"
-#import "MPURL.h"
+#import "NSURLComponents+Testing.h"
 
-static NSString *const kTestAdUnitId = @"";
-static NSString *const kTestKeywords = @"";
-static NSTimeInterval const kTestTimeout = 4;
+static NSString * const kTestAdUnitId = @"";
+static NSString * const kTestKeywords = @"";
 static NSString * const kGDPRAppliesStorageKey                   = @"com.mopub.mopub-ios-sdk.gdpr.applies";
 static NSString * const kConsentedIabVendorListStorageKey        = @"com.mopub.mopub-ios-sdk.consented.iab.vendor.list";
 static NSString * const kConsentedPrivacyPolicyVersionStorageKey = @"com.mopub.mopub-ios-sdk.consented.privacy.policy.version";
@@ -74,29 +72,12 @@ static NSString * const kLastChangedMsStorageKey                 = @"com.mopub.m
 #pragma mark - Advanced Bidding
 
 - (void)testAdvancedBiddingNotInitialized {
-    MPAdvancedBiddingManager.sharedManager.bidders = [NSMutableDictionary dictionary];
-    MPAdvancedBiddingManager.sharedManager.advancedBiddingEnabled = YES;
-    NSString * queryParam = [MPAdServerURLBuilder advancedBiddingValue];
-
+    MPMediationManager.sharedManager.adapters = [NSMutableDictionary dictionary];
+    NSDictionary * queryParam = [MPAdServerURLBuilder adapterInformation];
     XCTAssertNil(queryParam);
-}
 
-- (void)testAdvancedBiddingDisabled {
-    MPAdvancedBiddingManager.sharedManager.bidders = [NSMutableDictionary dictionary];
-    MPAdvancedBiddingManager.sharedManager.advancedBiddingEnabled = NO;
-    XCTestExpectation * expectation = [self expectationWithDescription:@"Expect advanced bidders to initialize"];
-
-    [MPAdvancedBiddingManager.sharedManager initializeBidders:@[MPStubAdvancedBidder.class] complete:^{
-        [expectation fulfill];
-    }];
-
-    [self waitForExpectationsWithTimeout:kTestTimeout handler:^(NSError *error) {
-        XCTAssertNil(error);
-    }];
-
-    NSString * queryParam = [MPAdServerURLBuilder advancedBiddingValue];
-
-    XCTAssertNil(queryParam);
+    NSString * tokens = [MPAdServerURLBuilder advancedBiddingValue];
+    XCTAssertNil(tokens);
 }
 
 #pragma mark - Open Endpoint

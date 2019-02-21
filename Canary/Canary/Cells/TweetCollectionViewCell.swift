@@ -1,7 +1,7 @@
 //
 //  TweetCollectionViewCell.swift
 //
-//  Copyright 2018 Twitter, Inc.
+//  Copyright 2018-2019 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
@@ -13,6 +13,7 @@ class TweetCollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var iconImageView: UIImageView!
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var contentLabel: UILabel!
+    @IBOutlet weak var stackView: UIStackView!
     
     // Constraints
     private var widthConstraint: NSLayoutConstraint!
@@ -69,6 +70,18 @@ class TweetCollectionViewCell: UICollectionViewCell {
         set {
             widthConstraint.constant = newValue
             widthConstraint.isActive = true
+            updateConstraintsIfNeeded()
         }
+    }
+    
+    /**
+     Calculates the estimated size of the cell.
+     */
+    var cellSize: CGSize {
+        let contentSize: CGSize = stackView.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize)
+        let margin: CGFloat = iconImageView.frame.origin.y
+        let height: CGFloat = max(contentSize.height, iconImageView.bounds.size.height).rounded(.up) + 2 * margin
+        
+        return CGSize(width: widthConstraint.constant, height: height)
     }
 }

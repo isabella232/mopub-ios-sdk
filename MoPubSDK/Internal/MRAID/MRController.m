@@ -1,7 +1,7 @@
 //
 //  MRController.m
 //
-//  Copyright 2018 Twitter, Inc.
+//  Copyright 2018-2019 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
@@ -61,7 +61,7 @@ static NSString *const kMRAIDCommandResize = @"resize";
 // Whether or not an interstitial requires precaching.  Does not affect banners.
 @property (nonatomic, assign) BOOL adRequiresPrecaching;
 @property (nonatomic, assign) BOOL isAdVastVideoPlayer;
-@property (nonatomic, assign) BOOL firedReadyEventForDefaultAd;
+@property (nonatomic, assign) BOOL didConfigureOrientationNotificationObservers;
 
 // Points to mraidAdView (one-part expand) or mraidAdViewTwoPart (two-part expand) while expanded.
 @property (nonatomic, strong) MPClosableView *expansionContentView;
@@ -88,15 +88,16 @@ static NSString *const kMRAIDCommandResize = @"resize";
 @implementation MRController
 
 - (instancetype)initWithAdViewFrame:(CGRect)adViewFrame
+              supportedOrientations:(MPInterstitialOrientationType)orientationType
                     adPlacementType:(MRAdViewPlacementType)placementType
                            delegate:(id<MRControllerDelegate>)delegate
 {
     if (self = [super init]) {
         _placementType = placementType;
         _currentState = MRAdViewStateDefault;
-        _forceOrientationMask = UIInterfaceOrientationMaskAll;
+        _forceOrientationMask = MPInterstitialOrientationTypeToUIInterfaceOrientationMask(orientationType);
         _isAnimatingAdSize = NO;
-        _firedReadyEventForDefaultAd = NO;
+        _didConfigureOrientationNotificationObservers = NO;
         _currentAdSize = CGSizeZero;
 
         _mraidDefaultAdFrame = adViewFrame;
@@ -180,11 +181,19 @@ static NSString *const kMRAIDCommandResize = @"resize";
 
 }
 
+- (void)handleMRAIDInterstitialWillPresentWithViewController:(MPMRAIDInterstitialViewController *)viewController
+{
+    self.interstitialViewController = viewController;
+    [self updateOrientation];
+    [self willBeginAnimatingAdSize];
+}
+
 - (void)handleMRAIDInterstitialDidPresentWithViewController:(MPMRAIDInterstitialViewController *)viewController
 {
     self.interstitialViewController = viewController;
-    [self enableRequestHandling];
-    [self checkViewability];
+    [self didEndAnimatingAdSize];
+    [self updateMRAIDProperties];
+    [self updateOrientation];
 
     // If viewability tracking has been deferred (i.e., if this is a non-banner ad), start tracking here now that the
     // ad has been presented. If viewability tracking was not deferred, we're already tracking and there's no need to
@@ -357,7 +366,7 @@ static NSString *const kMRAIDCommandResize = @"resize";
 
 #pragma mark - Executing Javascript
 
-- (void)initializeLoadedAdForBridge:(MRBridge *)bridge
+- (void)configureMraidEnvironmentToShowAdForBridge:(MRBridge *)bridge
 {
     // Set up some initial properties so mraid can operate.
     MPLogDebug(@"Injecting initial JavaScript state.");
@@ -665,8 +674,8 @@ static NSString *const kMRAIDCommandResize = @"resize";
         if (!self.adRequiresPrecaching) {
             // Only tell the delegate that the ad loaded when the view is the default ad view and not a two-part ad view.
             if (bridge == self.mraidBridge) {
-                // We do not intialize the javascript/fire ready event, or start our timer for a banner load yet.  We wait until
-                // the ad is in the view hierarchy. We are notified by the view when it is potentially added to the hierarchy in
+                // We do not start our timer for a banner load yet.  We wait until the ad is in the view hierarchy.
+                // We are notified by the view when it is potentially added to the hierarchy in
                 // -closableView:didMoveToWindow:.
                 [self adDidLoad];
             } else if (bridge == self.mraidBridgeTwoPart) {
@@ -680,7 +689,7 @@ static NSString *const kMRAIDCommandResize = @"resize";
 
                 // We initialize javascript and fire the ready event for the two part ad view once it loads
                 // since it'll already be in the view hierarchy.
-                [self initializeLoadedAdForBridge:bridge];
+                [self configureMraidEnvironmentToShowAdForBridge:bridge];
             }
         }
     }
@@ -714,7 +723,7 @@ static NSString *const kMRAIDCommandResize = @"resize";
     } else if (command == MPMoPubHostCommandRewardedVideoEnded) {
         [self.delegate rewardedVideoEnded];
     } else {
-        MPLogWarn(@"MRController - unsupported MoPub URL: %@", [url absoluteString]);
+        MPLogInfo(@"MRController - unsupported MoPub URL: %@", [url absoluteString]);
     }
 }
 
@@ -949,7 +958,7 @@ static NSString *const kMRAIDCommandResize = @"resize";
     // Fire the ready event and initialize properties if the view has a window.
     MRBridge *bridge = [self bridgeForAdView:closableView];
 
-    if (!self.firedReadyEventForDefaultAd && bridge == self.mraidBridge) {
+    if (!self.didConfigureOrientationNotificationObservers && bridge == self.mraidBridge) {
         // The window may be nil if it was removed from a window or added to a view that isn't attached to a window so make sure it actually has a window.
         if (window != nil) {
             // Just in case this code is executed twice, ensures that self is only added as
@@ -968,8 +977,7 @@ static NSString *const kMRAIDCommandResize = @"resize";
                                                        object:nil];
 
             [self.adPropertyUpdateTimer scheduleNow];
-            [self initializeLoadedAdForBridge:bridge];
-            self.firedReadyEventForDefaultAd = YES;
+            self.didConfigureOrientationNotificationObservers = YES;
         }
     }
 }
@@ -1055,7 +1063,7 @@ static NSString *const kMRAIDCommandResize = @"resize";
     MRBridge *activeBridge = [self bridgeForActiveAdView];
     [activeBridge fireSetCurrentPositionWithPositionRect:frame];
 
-    MPLogTrace(@"Current Position: %@", NSStringFromCGRect(frame));
+    MPLogDebug(@"Current Position: %@", NSStringFromCGRect(frame));
 }
 
 - (void)updateDefaultPosition
@@ -1066,7 +1074,7 @@ static NSString *const kMRAIDCommandResize = @"resize";
     [self.mraidBridge fireSetDefaultPositionWithPositionRect:defaultFrame];
     [self.mraidBridgeTwoPart fireSetDefaultPositionWithPositionRect:defaultFrame];
 
-    MPLogTrace(@"Default Position: %@", NSStringFromCGRect(defaultFrame));
+    MPLogDebug(@"Default Position: %@", NSStringFromCGRect(defaultFrame));
 }
 
 - (void)updateScreenSize
@@ -1078,7 +1086,7 @@ static NSString *const kMRAIDCommandResize = @"resize";
     [self.mraidBridge fireSetScreenSize:screenSize];
     [self.mraidBridgeTwoPart fireSetScreenSize:screenSize];
 
-    MPLogTrace(@"Screen Size: %@", NSStringFromCGSize(screenSize));
+    MPLogDebug(@"Screen Size: %@", NSStringFromCGSize(screenSize));
 }
 
 - (void)updateMaxSize
@@ -1090,7 +1098,15 @@ static NSString *const kMRAIDCommandResize = @"resize";
     [self.mraidBridge fireSetMaxSize:maxSize];
     [self.mraidBridgeTwoPart fireSetMaxSize:maxSize];
 
-    MPLogTrace(@"Max Size: %@", NSStringFromCGSize(maxSize));
+    MPLogDebug(@"Max Size: %@", NSStringFromCGSize(maxSize));
+}
+
+- (void)updateOrientation
+{
+    self.expandModalViewController.supportedOrientationMask = self.forceOrientationMask;
+    self.interstitialViewController.supportedOrientationMask = self.forceOrientationMask;
+
+    MPLogDebug(@"Orientation: %ud", (unsigned int)self.forceOrientationMask);
 }
 
 #pragma mark - MRAID events
@@ -1165,6 +1181,9 @@ static NSString *const kMRAIDCommandResize = @"resize";
 
 - (void)adDidLoad
 {
+    // Configure environment and fire ready event when ad is finished loading.
+    [self configureMraidEnvironmentToShowAdForBridge:self.mraidBridge];
+
     if ([self.delegate respondsToSelector:@selector(adDidLoad:)]) {
         [self.delegate adDidLoad:self.mraidAdView];
     }

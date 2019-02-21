@@ -1,7 +1,7 @@
 //
 //  MoPub.h
 //
-//  Copyright 2018 Twitter, Inc.
+//  Copyright 2018-2019 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
@@ -9,15 +9,17 @@
 #import "MPConstants.h"
 
 #import "MOPUBDisplayAgentType.h"
+#import "MPAdapterConfiguration.h"
 #import "MPAdConversionTracker.h"
 #import "MPAdImpressionTimer.h"
 #import "MPAdTargeting.h"
-#import "MPAdvancedBidder.h"
 #import "MPAdView.h"
 #import "MPBannerCustomEvent.h"
 #import "MPBannerCustomEventDelegate.h"
+#import "MPBaseAdapterConfiguration.h"
 #import "MPBool.h"
 #import "MPConsentChangedNotification.h"
+#import "MPConsentChangedReason.h"
 #import "MPConsentError.h"
 #import "MPConsentStatus.h"
 #import "MPError.h"
@@ -28,15 +30,12 @@
 #import "MPInterstitialCustomEventDelegate.h"
 #import "MPLogging.h"
 #import "MPLogLevel.h"
-#import "MPLogProvider.h"
-#import "MPMediationSdkInitializable.h"
 #import "MPMediationSettingsProtocol.h"
 #import "MPMoPubConfiguration.h"
 #import "MPRealTimeTimer.h"
 #import "MPRewardedVideo.h"
 #import "MPRewardedVideoReward.h"
 #import "MPRewardedVideoCustomEvent.h"
-#import "MPRewardedVideoCustomEvent+Caching.h"
 #import "MPRewardedVideoError.h"
 #import "MPViewabilityAdapter.h"
 #import "MPViewabilityOption.h"
@@ -131,15 +130,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) BOOL forceWKWebView;
 
 /**
- * SDK log level. The default value is `MPLogLevelInfo`.
+ * SDK log level. The default value is `MPLogLevelNone`.
  */
-@property (nonatomic, assign) MPLogLevel logLevel;
-
-/**
- * A boolean value indicating whether advanced bidding is enabled. This boolean defaults to `YES`.
- * To disable advanced bidding, set this value to `NO`.
- */
-@property (nonatomic, assign) BOOL enableAdvancedBidding;
+@property (nonatomic, assign) MPLogLevel logLevel __attribute((deprecated("Use the MPMoPubConfiguration.loggingLevel instead.")));
 
 /**
  * Initializes the MoPub SDK asynchronously on a background thread.
@@ -188,11 +181,6 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 @interface MoPub (Mediation)
-/**
- * Retrieves all currently cached mediated networks.
- * @return A list of all cached networks or @c nil.
- */
-- (NSArray<Class<MPMediationSdkInitializable>> * _Nullable)allCachedNetworks;
 
 /**
  * Clears all currently cached mediated networks.
@@ -235,6 +223,11 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Consent Acquisition
  */
+
+/**
+ This API can be used if you want to allow supported SDK networks to collect user information on the basis of legitimate interest. The default value is @c NO.
+ */
+@property (nonatomic, assign) BOOL allowLegitimateInterest;
 
 /**
  * `YES` if a consent dialog is presently loaded and ready to be shown; `NO` otherwise

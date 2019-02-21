@@ -1,16 +1,18 @@
 //
 //  AdUnitTableViewController.swift
 //
-//  Copyright 2018 Twitter, Inc.
+//  Copyright 2018-2019 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
 
 import UIKit
+import AVFoundation
 
 class AdUnitTableViewController: UIViewController {
     // Outlets from `Main.storyboard`
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet var cameraButton: UIBarButtonItem?
     
     // Table data source.
     fileprivate var dataSource: AdUnitDataSource? = nil
@@ -38,6 +40,12 @@ class AdUnitTableViewController: UIViewController {
         tableView.delegate = self
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        showCameraButtonBasedOnCameraAccess()
+    }
+    
     // MARK: - Ad Loading
     
     public func loadAd(with adUnit: AdUnit) {
@@ -46,7 +54,10 @@ class AdUnitTableViewController: UIViewController {
             return
         }
         
-        splitViewController?.showDetailViewController(destination, sender: self)
+        // Embed the destination ad view controller into a navigation controller so that
+        // pushing onto the navigation stack will work.
+        let navigationController: UINavigationController = UINavigationController(rootViewController: destination)
+        splitViewController?.showDetailViewController(navigationController, sender: self)
     }
     
     /**
@@ -56,6 +67,28 @@ class AdUnitTableViewController: UIViewController {
     public func reloadData() {
         dataSource?.reloadData()
         tableView.reloadData()
+    }
+    
+    // MARK: - Camera Button
+    
+    // Shows or hides the camera button based on whether the user has provided camera access.
+    fileprivate func showCameraButtonBasedOnCameraAccess() {
+        guard let cameraButton = cameraButton else {
+            return
+        }
+        
+        let cameraAuthorizationStatus = AVCaptureDevice.authorizationStatus(for: QRCodeCameraInterfaceViewController.defaultMediaType)
+        
+        switch cameraAuthorizationStatus {
+        case .authorized:
+            navigationItem.rightBarButtonItem = cameraButton
+        case .denied:
+            navigationItem.rightBarButtonItem = nil
+        case .restricted:
+            navigationItem.rightBarButtonItem = nil
+        case .notDetermined:
+            navigationItem.rightBarButtonItem = cameraButton
+        }
     }
 }
 

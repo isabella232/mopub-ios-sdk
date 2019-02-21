@@ -1,7 +1,7 @@
 //
 //  MRController.h
 //
-//  Copyright 2018 Twitter, Inc.
+//  Copyright 2018-2019 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
@@ -30,10 +30,12 @@
 @property (nonatomic, weak) id<MRControllerDelegate> delegate;
 
 - (instancetype)initWithAdViewFrame:(CGRect)adViewFrame
+              supportedOrientations:(MPInterstitialOrientationType)orientationType
                     adPlacementType:(MRAdViewPlacementType)placementType
                            delegate:(id<MRControllerDelegate>)delegate;
 
 - (void)loadAdWithConfiguration:(MPAdConfiguration *)configuration;
+- (void)handleMRAIDInterstitialWillPresentWithViewController:(MPMRAIDInterstitialViewController *)viewController;
 - (void)handleMRAIDInterstitialDidPresentWithViewController:(MPMRAIDInterstitialViewController *)viewController;
 - (void)enableRequestHandling;
 - (void)disableRequestHandling;

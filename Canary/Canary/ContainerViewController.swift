@@ -1,7 +1,7 @@
 //
 //  ContainerViewController.swift
 //
-//  Copyright 2018 Twitter, Inc.
+//  Copyright 2018-2019 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
@@ -9,12 +9,31 @@
 import UIKit
 
 class ContainerViewController: UIViewController {
+    // Constants
+    struct Constants {
+        static let menuAnimationDuration: TimeInterval = 0.25 //seconds
+    }
+    
     // MARK: - IBOutlets
-    @IBOutlet weak var scrollView: UIScrollView!
+    @IBOutlet weak var menuContainerLeadingEdgeConstraint: NSLayoutConstraint!
     @IBOutlet weak var menuContainerWidthConstraint: NSLayoutConstraint!
-    @IBOutlet weak var menuDismissButton: UIButton!
+    
+    // MARK: - Menu Gesture Recognizers
+    
+    private var menuCloseGestureRecognizer: UISwipeGestureRecognizer!
+    private var menuCloseTapGestureRecognizer: UITapGestureRecognizer!
+    private var menuOpenGestureRecognizer: UISwipeGestureRecognizer!
     
     // MARK: - Properties
+    
+    /**
+     Current collection of override traits for mainTabBarController.
+     */
+    var forcedTraitCollection: UITraitCollection?  = nil {
+        didSet {
+            updateForcedTraitCollection()
+        }
+    }
     
     /**
      Main TabBar Controller of the app.
@@ -25,6 +44,27 @@ class ContainerViewController: UIViewController {
      Menu TableView Controller of the app.
      */
     private(set) var menuViewController: MenuViewController? = nil
+    
+    // MARK: - Forced Traits
+    
+    func setForcedTraits(for size: CGSize) {
+        let device = traitCollection.userInterfaceIdiom
+        let isPortrait: Bool = view.bounds.size.width < view.bounds.size.height
+        
+        switch (device, isPortrait) {
+        case (.pad, true): forcedTraitCollection = UITraitCollection(horizontalSizeClass: .compact)
+        default: forcedTraitCollection = nil
+        }
+    }
+    
+    /**
+     Updates the Main Tab Bar controller with the new trait overrides.
+     */
+    func updateForcedTraitCollection() {
+        if let vc = mainTabBarController {
+            setOverrideTraitCollection(forcedTraitCollection, forChild: vc)
+        }
+    }
     
     // MARK: - Segues
     
@@ -47,81 +87,110 @@ class ContainerViewController: UIViewController {
     // MARK: - View Life Cycle
     
     override func viewDidLoad() {
-        if #available(iOS 11.0, *) {
-            // Do not adjust the content insets of the scroll view to accommodate
-            // the safe area since we want the container scroll view to go edge
-            // to edge.
-            scrollView.contentInsetAdjustmentBehavior = .never
-        }
+        super.viewDidLoad()
         
-        // Initially close menu programmatically. This needs to be done on the main thread initially in order to work.
-        DispatchQueue.main.async() {
-            self.closeMenu(animated: false)
-        }
+        // Setup trait overrides
+        setForcedTraits(for: view.bounds.size)
+        
+        // Initialize the gesture recognizers and attach them to the view.
+        menuCloseGestureRecognizer = UISwipeGestureRecognizer(target: self, action: #selector(swipeMenuClose(_:)))
+        menuCloseGestureRecognizer.direction = .left
+        view.addGestureRecognizer(menuCloseGestureRecognizer)
+        
+        menuCloseTapGestureRecognizer = UITapGestureRecognizer (target: self, action: #selector(tapMenuClose(_:)))
+        menuCloseTapGestureRecognizer.isEnabled = false
+        menuCloseTapGestureRecognizer.delegate = self
+        view.addGestureRecognizer(menuCloseTapGestureRecognizer)
+        
+        menuOpenGestureRecognizer = UISwipeGestureRecognizer(target: self, action: #selector(swipeMenuOpen(_:)))
+        menuOpenGestureRecognizer.direction = .right
+        view.addGestureRecognizer(menuOpenGestureRecognizer)
     }
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
-        
-        coordinator.animate(alongsideTransition: { (context) -> Void in
-            self.closeMenu(animated: true)
+        coordinator.animate(alongsideTransition: { _ in
+            self.setForcedTraits(for: size)
         }, completion: nil)
     }
 
     // MARK: - Menu
     
-    func closeMenu(animated: Bool = true) {
-        // Use scrollview content offset-x to slide the menu.
-        scrollView.setContentOffset(CGPoint(x: menuContainerWidthConstraint.constant, y: 0), animated: animated)
-        mainTabBarController?.view.isUserInteractionEnabled = true
-        menuDismissButton.isUserInteractionEnabled = false
+    /**
+     Closes the menu if it open.
+     */
+    func closeMenu() {
+        swipeMenuClose(menuCloseGestureRecognizer)
     }
     
-    var isMenuOpen: Bool {
-        return scrollView.contentOffset.x < menuContainerWidthConstraint.constant
-    }
-    
-    // Open is the natural state of the menu because of how the storyboard is setup.
-    func openMenu() {
-        scrollView.setContentOffset(CGPoint(x: 0, y: 0), animated: true)
-        mainTabBarController?.view.isUserInteractionEnabled = false
-        menuDismissButton.isUserInteractionEnabled = true
-    }
-    
-    @IBAction func onDismissMenu(_ sender: Any) {
-        if isMenuOpen {
-            closeMenu(animated: true)
+    @objc func swipeMenuClose(_ sender: UISwipeGestureRecognizer) {
+        // Do nothing if the menu is not fully open since it may either
+        // be closed, or in the process of being closed.
+        guard menuContainerLeadingEdgeConstraint.constant == 0 else {
+            return
         }
+        
+        // Disable the tap outside of menu to close gesture recognizer.
+        menuCloseTapGestureRecognizer.isEnabled = false
+        
+        // Close the menu by setting the leading edge constraint to the negative width,
+        // which will put it offscreen.
+        UIView.animate(withDuration: Constants.menuAnimationDuration, animations: {
+            self.menuContainerLeadingEdgeConstraint.constant = -self.menuContainerWidthConstraint.constant
+            self.view.layoutIfNeeded()
+        }) { _ in
+            // Re-enable user interaction for the main content container.
+            self.mainTabBarController?.view.isUserInteractionEnabled = true
+        }
+    }
+    
+    @objc func swipeMenuOpen(_ sender: UISwipeGestureRecognizer) {
+        // Do nothing if the menu is already open or in the process of opening.
+        guard (menuContainerWidthConstraint.constant + menuContainerLeadingEdgeConstraint.constant) == 0 else {
+            return
+        }
+        
+        // Disable user interaction for the main content container.
+        self.mainTabBarController?.view.isUserInteractionEnabled = false
+        
+        // Open the menu by setting the leading edge constraint back to zero.
+        UIView.animate(withDuration: Constants.menuAnimationDuration, animations: {
+            self.menuContainerLeadingEdgeConstraint.constant = 0
+            self.view.layoutIfNeeded()
+        }) { _ in
+            // Enable the tap outside of menu to close gesture recognizer.
+            self.menuCloseTapGestureRecognizer.isEnabled = true
+        }
+    }
+    
+    @objc func tapMenuClose(_ sender: UITapGestureRecognizer) {
+        // Allow any previously queued animations to finish before attempting to close the menu
+        view.layoutIfNeeded()
+        
+        // Close the menu
+        closeMenu()
     }
 }
 
-extension ContainerViewController : UIScrollViewDelegate {
-    // http://www.4byte.cn/question/49110/uiscrollview-change-contentoffset-when-change-frame.html
-    // When paging is enabled on a Scroll View,
-    // a private method _adjustContentOffsetIfNecessary gets called,
-    // presumably when present whatever controller is called.
-    // The idea is to disable paging.
-    // But we rely on paging to snap the slideout menu in place
-    // (if you're relying on the built-in pan gesture).
-    // So the approach is to keep paging disabled.
-    // But enable it at the last minute during scrollViewWillBeginDragging.
-    // And then turn it off once the scroll view stops moving.
-    //
-    // Approaches that don't work:
-    // 1. automaticallyAdjustsScrollViewInsets -- don't bother
-    // 2. overriding _adjustContentOffsetIfNecessary -- messing with private methods is a bad idea
-    // 3. disable paging altogether.  works, but at the loss of a feature
-    // 4. nest the scrollview inside UIView, so UIKit doesn't mess with it.  may have worked before,
-    //    but not anymore.
-    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
-        scrollView.isPagingEnabled = true
-        mainTabBarController?.view.isUserInteractionEnabled = false
-        menuDismissButton.isUserInteractionEnabled = true
-    }
+extension ContainerViewController: UIGestureRecognizerDelegate {
+    // MARK: - UIGestureRecognizerDelegate
     
-    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        scrollView.isPagingEnabled = false
-        mainTabBarController?.view.isUserInteractionEnabled = !isMenuOpen
-        menuDismissButton.isUserInteractionEnabled = isMenuOpen
+    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        // Only handle the menu tap to close gesture
+        guard gestureRecognizer == menuCloseTapGestureRecognizer else {
+            return true
+        }
+        
+        // If the menu is not fully open, disregard the tap.
+        guard menuContainerLeadingEdgeConstraint.constant == 0 else {
+            return false
+        }
+        
+        // If the tap intersects the open menu, disregard the tap.
+        guard gestureRecognizer.location(in: view).x > menuContainerWidthConstraint.constant else {
+            return false
+        }
+        
+        return true
     }
 }

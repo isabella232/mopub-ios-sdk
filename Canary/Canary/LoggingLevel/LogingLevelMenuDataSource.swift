@@ -1,7 +1,7 @@
 //
 //  LogingLevelMenuDataSource.swift
 //
-//  Copyright 2018 Twitter, Inc.
+//  Copyright 2018-2019 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
@@ -10,31 +10,21 @@ import UIKit
 import MoPub
 
 fileprivate enum LoggingLevelMenuOptions: String {
-    case all = "All"
-    case trace = "Trace"
     case debug = "Debug"
     case info = "Informational"
-    case warn = "Warnings"
-    case error = "Errors"
-    case fatal = "Fatal"
-    case off = "Off"
+    case none = "None"
     
     var logLevel: MPLogLevel {
         switch self {
-        case .all: return MPLogLevelAll
-        case .trace: return MPLogLevelTrace
-        case .debug: return MPLogLevelDebug
-        case .info: return MPLogLevelInfo
-        case .warn: return MPLogLevelWarn
-        case .error: return MPLogLevelError
-        case .fatal: return MPLogLevelFatal
-        case .off: return MPLogLevelOff
+        case .debug: return MPLogLevel.debug
+        case .info: return MPLogLevel.info
+        case .none: return MPLogLevel.none
         }
     }
 }
 
 class LogingLevelMenuDataSource {
-    fileprivate let items: [LoggingLevelMenuOptions] = [.all, .trace, .debug, .info, .warn, .error, .fatal, .off]
+    fileprivate let items: [LoggingLevelMenuOptions] = [.debug, .info, .none]
 }
 
 extension LogingLevelMenuDataSource: MenuDisplayable {
@@ -61,7 +51,7 @@ extension LogingLevelMenuDataSource: MenuDisplayable {
     func cell(forItem index: Int, inTableView tableView: UITableView) -> UITableViewCell {
         let cell: BasicMenuTableViewCell = basicMenuCell(inTableView: tableView)
         let item: LoggingLevelMenuOptions = items[index]
-        let currentLogLevel: MPLogLevel = MoPub.sharedInstance().logLevel
+        let currentLogLevel: MPLogLevel = MPLogging.consoleLogLevel
         
         cell.accessoryType = (currentLogLevel == item.logLevel ? .checkmark : .none)
         cell.title.text = item.rawValue
@@ -87,7 +77,7 @@ extension LogingLevelMenuDataSource: MenuDisplayable {
      */
     func didSelect(itemAt index: Int, inTableView tableView: UITableView, presentFrom viewController: UIViewController) -> Swift.Void {
         let item: LoggingLevelMenuOptions = items[index]
-        MoPub.sharedInstance().logLevel = item.logLevel
+        MPLogging.consoleLogLevel = item.logLevel
         
         tableView.reloadData()
     }

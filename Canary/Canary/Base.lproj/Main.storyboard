@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14113" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="o1Y-2Y-1cj">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="o1Y-2Y-1cj">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14088"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14460.20"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -61,16 +61,66 @@
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="PQr-Ze-W5v"/>
                     </view>
-                    <navigationItem key="navigationItem" id="B6C-0N-HQx"/>
+                    <navigationItem key="navigationItem" id="B6C-0N-HQx">
+                        <barButtonItem key="rightBarButtonItem" image="CameraButton" id="Wjr-ev-koK">
+                            <connections>
+                                <segue destination="9z9-xg-Dxa" kind="presentation" modalPresentationStyle="fullScreen" modalTransitionStyle="coverVertical" id="TRN-09-FQY"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" prompted="NO"/>
                     <simulatedTabBarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
+                        <outlet property="cameraButton" destination="Wjr-ev-koK" id="vap-yp-F4q"/>
                         <outlet property="tableView" destination="MeT-Ko-6xH" id="ahd-9A-NJ2"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="W5J-7L-Pyd" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="2821.5999999999999" y="-503.29835082458777"/>
+        </scene>
+        <!--Code Camera Interface View Controller-->
+        <scene sceneID="cUr-ck-AIH">
+            <objects>
+                <viewController id="9z9-xg-Dxa" customClass="QRCodeCameraInterfaceViewController" customModule="Canary" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="EAj-me-KIu">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="XYc-pV-OCa">
+                                <rect key="frame" x="-8" y="-8" width="391" height="683"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            </view>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="WBh-eH-Zg4">
+                                <rect key="frame" x="328" y="28" width="39" height="40"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <state key="normal" image="CloseButton">
+                                    <color key="titleColor" cocoaTouchSystemColor="lightTextColor"/>
+                                </state>
+                                <connections>
+                                    <action selector="closeButtonAction:" destination="9z9-xg-Dxa" eventType="touchUpInside" id="yIJ-IN-uNC"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="XYc-pV-OCa" firstAttribute="top" secondItem="EAj-me-KIu" secondAttribute="top" constant="-8" id="1M6-6i-NDi"/>
+                            <constraint firstItem="XYc-pV-OCa" firstAttribute="leading" secondItem="EAj-me-KIu" secondAttribute="leading" constant="-8" id="6fj-P7-Whh"/>
+                            <constraint firstItem="2Dk-z4-0o1" firstAttribute="trailing" secondItem="WBh-eH-Zg4" secondAttribute="trailing" constant="8" id="E6p-VR-fiR"/>
+                            <constraint firstAttribute="bottom" secondItem="XYc-pV-OCa" secondAttribute="bottom" constant="-8" id="OMP-dT-fOQ"/>
+                            <constraint firstItem="WBh-eH-Zg4" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="2Dk-z4-0o1" secondAttribute="leading" constant="328" id="PuT-Uh-eiW"/>
+                            <constraint firstAttribute="trailing" secondItem="XYc-pV-OCa" secondAttribute="trailing" constant="-8" id="nR0-qm-hXu"/>
+                            <constraint firstItem="WBh-eH-Zg4" firstAttribute="top" secondItem="2Dk-z4-0o1" secondAttribute="top" constant="8" id="qgT-nu-nse"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="2Dk-z4-0o1"/>
+                    </view>
+                    <connections>
+                        <outlet property="cameraFeedView" destination="XYc-pV-OCa" id="s4D-Ce-5m5"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="9NM-Sc-MJh" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="4201" y="-156"/>
         </scene>
         <!--Container View Controller-->
         <scene sceneID="gfT-eg-j4w">
@@ -80,75 +130,47 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" bounces="NO" pagingEnabled="YES" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" bouncesZoom="NO" translatesAutoresizingMaskIntoConstraints="NO" id="eoI-KY-UYT">
+                            <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="4Ke-0N-blI" userLabel="Main Container View">
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
-                                <subviews>
-                                    <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="1Ly-Qw-X6C">
-                                        <rect key="frame" x="0.0" y="0.0" width="260" height="667"/>
-                                        <constraints>
-                                            <constraint firstAttribute="width" constant="260" id="GA4-vs-G1t"/>
-                                        </constraints>
-                                        <connections>
-                                            <segue destination="gDc-Kc-NPN" kind="embed" identifier="onEmbedMenuController" id="WSJ-hU-JMu"/>
-                                        </connections>
-                                    </containerView>
-                                    <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="4Ke-0N-blI">
-                                        <rect key="frame" x="260" y="0.0" width="375" height="667"/>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="number" keyPath="layer.shadowOpacity">
-                                                <real key="value" value="0.80000000000000004"/>
-                                            </userDefinedRuntimeAttribute>
-                                        </userDefinedRuntimeAttributes>
-                                        <connections>
-                                            <segue destination="49e-Tb-3d3" kind="embed" identifier="onEmbedTabBarController" id="99g-DL-P45"/>
-                                        </connections>
-                                    </containerView>
-                                    <button opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3CI-F2-s3f">
-                                        <rect key="frame" x="260" y="0.0" width="375" height="667"/>
-                                        <connections>
-                                            <action selector="onDismissMenu:" destination="o1Y-2Y-1cj" eventType="touchUpInside" id="PVt-VB-G7R"/>
-                                        </connections>
-                                    </button>
-                                </subviews>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.shadowOpacity">
+                                        <real key="value" value="0.80000000000000004"/>
+                                    </userDefinedRuntimeAttribute>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <segue destination="49e-Tb-3d3" kind="embed" identifier="onEmbedTabBarController" id="99g-DL-P45"/>
+                                </connections>
+                            </containerView>
+                            <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="1Ly-Qw-X6C" userLabel="Menu Container View">
+                                <rect key="frame" x="-260" y="0.0" width="260" height="667"/>
                                 <constraints>
-                                    <constraint firstItem="3CI-F2-s3f" firstAttribute="leading" secondItem="1Ly-Qw-X6C" secondAttribute="trailing" id="1rT-Pe-FST"/>
-                                    <constraint firstAttribute="bottom" secondItem="1Ly-Qw-X6C" secondAttribute="bottom" id="8nB-eE-CST"/>
-                                    <constraint firstItem="4Ke-0N-blI" firstAttribute="leading" secondItem="1Ly-Qw-X6C" secondAttribute="trailing" id="DW4-Nf-Kmc"/>
-                                    <constraint firstItem="1Ly-Qw-X6C" firstAttribute="top" secondItem="eoI-KY-UYT" secondAttribute="top" id="IS1-l4-TFQ"/>
-                                    <constraint firstItem="3CI-F2-s3f" firstAttribute="width" secondItem="4Ke-0N-blI" secondAttribute="width" id="NSu-Ey-Fff"/>
-                                    <constraint firstAttribute="bottom" secondItem="4Ke-0N-blI" secondAttribute="bottom" id="XyK-T9-AW5"/>
-                                    <constraint firstAttribute="trailing" secondItem="4Ke-0N-blI" secondAttribute="trailing" id="dS7-TH-MqV"/>
-                                    <constraint firstItem="1Ly-Qw-X6C" firstAttribute="leading" secondItem="eoI-KY-UYT" secondAttribute="leading" id="ggx-xQ-Lzz"/>
-                                    <constraint firstAttribute="bottom" secondItem="3CI-F2-s3f" secondAttribute="bottom" id="jpz-fk-pPh"/>
-                                    <constraint firstItem="3CI-F2-s3f" firstAttribute="top" secondItem="eoI-KY-UYT" secondAttribute="top" id="nBd-ta-I29"/>
-                                    <constraint firstItem="4Ke-0N-blI" firstAttribute="top" secondItem="eoI-KY-UYT" secondAttribute="top" id="oyc-43-ckj"/>
-                                    <constraint firstItem="3CI-F2-s3f" firstAttribute="height" secondItem="4Ke-0N-blI" secondAttribute="height" id="vm9-Kp-A7o"/>
+                                    <constraint firstAttribute="width" constant="260" id="GA4-vs-G1t"/>
                                 </constraints>
                                 <connections>
-                                    <outlet property="delegate" destination="o1Y-2Y-1cj" id="FEC-6M-imZ"/>
+                                    <segue destination="gDc-Kc-NPN" kind="embed" identifier="onEmbedMenuController" id="WSJ-hU-JMu"/>
                                 </connections>
-                            </scrollView>
+                            </containerView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
-                            <constraint firstItem="4Ke-0N-blI" firstAttribute="height" secondItem="n0I-9P-N2T" secondAttribute="height" id="K6d-h2-Fsk"/>
-                            <constraint firstItem="eoI-KY-UYT" firstAttribute="top" secondItem="n0I-9P-N2T" secondAttribute="top" id="Lhg-bH-0Me"/>
-                            <constraint firstItem="eoI-KY-UYT" firstAttribute="bottom" secondItem="n0I-9P-N2T" secondAttribute="bottom" id="N0c-p9-efF"/>
-                            <constraint firstItem="eoI-KY-UYT" firstAttribute="trailing" secondItem="n0I-9P-N2T" secondAttribute="trailing" id="f1x-Qy-qSn"/>
-                            <constraint firstItem="eoI-KY-UYT" firstAttribute="leading" secondItem="n0I-9P-N2T" secondAttribute="leading" id="hib-7n-XCc"/>
-                            <constraint firstItem="4Ke-0N-blI" firstAttribute="width" secondItem="n0I-9P-N2T" secondAttribute="width" id="sWq-nh-z5h"/>
+                            <constraint firstItem="1Ly-Qw-X6C" firstAttribute="top" secondItem="n0I-9P-N2T" secondAttribute="top" id="7RJ-lk-u6d"/>
+                            <constraint firstItem="4Ke-0N-blI" firstAttribute="top" secondItem="n0I-9P-N2T" secondAttribute="top" id="Iyd-fG-CkY"/>
+                            <constraint firstItem="4Ke-0N-blI" firstAttribute="leading" secondItem="n0I-9P-N2T" secondAttribute="leading" id="dQk-43-yUD"/>
+                            <constraint firstItem="4Ke-0N-blI" firstAttribute="bottom" secondItem="n0I-9P-N2T" secondAttribute="bottom" id="eHf-KU-h1U"/>
+                            <constraint firstItem="1Ly-Qw-X6C" firstAttribute="leading" secondItem="n0I-9P-N2T" secondAttribute="leading" constant="-260" id="hEw-BU-XXR"/>
+                            <constraint firstItem="1Ly-Qw-X6C" firstAttribute="bottom" secondItem="n0I-9P-N2T" secondAttribute="bottom" id="jU3-4L-gFv"/>
+                            <constraint firstAttribute="trailing" secondItem="4Ke-0N-blI" secondAttribute="trailing" id="zNM-In-9rX"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="ImD-Ft-zh1"/>
                     </view>
                     <connections>
+                        <outlet property="menuContainerLeadingEdgeConstraint" destination="hEw-BU-XXR" id="koE-OL-CGq"/>
                         <outlet property="menuContainerWidthConstraint" destination="GA4-vs-G1t" id="9Cp-XT-h9U"/>
-                        <outlet property="menuDismissButton" destination="3CI-F2-s3f" id="v9E-57-bUy"/>
-                        <outlet property="scrollView" destination="eoI-KY-UYT" id="LdZ-0D-IaG"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ZTf-ar-GoR" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1390" y="-784"/>
+            <point key="canvasLocation" x="-1391.2" y="-784.85757121439292"/>
         </scene>
         <!--Privacy Info View Controller-->
         <scene sceneID="Pxl-II-9kg">
@@ -382,10 +404,17 @@
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="GE0-OI-QR8"/>
                     </view>
-                    <navigationItem key="navigationItem" id="gmn-hT-9Bs"/>
+                    <navigationItem key="navigationItem" id="gmn-hT-9Bs">
+                        <barButtonItem key="rightBarButtonItem" image="CameraButton" id="Rw2-Pr-sa5">
+                            <connections>
+                                <segue destination="9z9-xg-Dxa" kind="presentation" id="HGp-Qb-x1R"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" prompted="NO"/>
                     <simulatedTabBarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
+                        <outlet property="cameraButton" destination="Rw2-Pr-sa5" id="UPo-iG-ghm"/>
                         <outlet property="tableView" destination="gu9-Jr-zfy" id="hEu-9k-ZHq"/>
                     </connections>
                 </viewController>
@@ -395,7 +424,12 @@
         </scene>
     </scenes>
     <resources>
+        <image name="CameraButton" width="24" height="24"/>
+        <image name="CloseButton" width="40" height="40"/>
         <image name="List" width="23" height="23"/>
         <image name="Saved" width="23" height="23"/>
     </resources>
+    <inferredMetricsTieBreakers>
+        <segue reference="HGp-Qb-x1R"/>
+    </inferredMetricsTieBreakers>
 </document>

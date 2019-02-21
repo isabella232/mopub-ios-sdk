@@ -1,13 +1,12 @@
 //
 //  MainTabBarController.swift
 //
-//  Copyright 2018 Twitter, Inc.
+//  Copyright 2018-2019 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
 
 import UIKit
-import MoPub
 
 fileprivate enum Constants {
     /**
@@ -40,9 +39,6 @@ class MainTabBarController: UITabBarController {
             notificationButton.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             notificationButton.bottomAnchor.constraint(equalTo: tabBar.topAnchor)
         ])
-        
-        // Register for the consent broadcast notifications
-        NotificationCenter.default.addObserver(self, selector: #selector(MainTabBarController.onConsentChangedNotification(notification:)), name: NSNotification.Name.mpConsentChanged, object: nil)
     }
 
     // MARK: - Notifications
@@ -71,41 +67,6 @@ class MainTabBarController: UITabBarController {
     func dismissNotification() {
         UIView.animate(withDuration: Constants.notificationAnimationDuration) {
             self.notificationButton.alpha = 0.0
-        }
-    }
-    
-    // MARK: - Notification Listeners
-    
-    /**
-     Listens for changes in consent status and PII collection status.
-     - Parameter notification: Notification with payload in `userInfo`.
-     */
-    @objc
-    func onConsentChangedNotification(notification: NSNotification) {
-        // Extract the notification payload
-        if let payload: [String: NSNumber] = notification.userInfo as? [String: NSNumber],
-            let oldStatusNumber: NSNumber = payload[kMPConsentChangedInfoPreviousConsentStatusKey],
-            let newStatusNumber: NSNumber = payload[kMPConsentChangedInfoNewConsentStatusKey],
-            let canCollectPii: Bool = payload[kMPConsentChangedInfoCanCollectPersonalInfoKey]?.boolValue,
-            let oldStatus: MPConsentStatus = MPConsentStatus(rawValue: oldStatusNumber.intValue),
-            let newStatus: MPConsentStatus = MPConsentStatus(rawValue: newStatusNumber.intValue) {
-            // Text to display
-            var notificationText: String
-            
-            // There was a change in status; display the new status
-            if oldStatus != newStatus {
-                notificationText = "Consent changed to \(newStatus.description)"
-            }
-            // There was a change in the ability to collect PII
-            else if canCollectPii {
-                notificationText = "PII can be collected"
-            }
-            // Not allowed to collect PII
-            else {
-                notificationText = "PII is not allowed to be collected"
-            }
-            
-            showNotification(withText: notificationText)
         }
     }
 }

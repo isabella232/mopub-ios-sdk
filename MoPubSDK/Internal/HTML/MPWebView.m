@@ -1,13 +1,13 @@
 //
 //  MPWebView.m
 //
-//  Copyright 2018 Twitter, Inc.
+//  Copyright 2018-2019 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
 
 #import "MPWebView.h"
-
+#import "MPContentBlocker.h"
 #import <WebKit/WebKit.h>
 
 static BOOL const kMoPubAllowsInlineMediaPlaybackDefault = YES;
@@ -81,6 +81,14 @@ static BOOL gForceWKWebView = NO;
             config.mediaPlaybackRequiresUserAction = kMoPubRequiresUserActionForMediaPlaybackDefault;
         }
         config.userContentController = contentController;
+
+        if (@available(iOS 11.0, *)) {
+            [WKContentRuleListStore.defaultStore compileContentRuleListForIdentifier:@"ContentBlockingRules" encodedContentRuleList:MPContentBlocker.blockedResourcesList completionHandler:^(WKContentRuleList * rulesList, NSError * error) {
+                if (error == nil) {
+                    [config.userContentController addContentRuleList:rulesList];
+                }
+            }];
+        }
 
         WKWebView *wkWebView = [[WKWebView alloc] initWithFrame:self.bounds configuration:config];
 

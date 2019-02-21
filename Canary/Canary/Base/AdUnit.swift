@@ -1,7 +1,7 @@
 //
 //  AdUnit.swift
 //
-//  Copyright 2018 Twitter, Inc.
+//  Copyright 2018-2019 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
@@ -18,6 +18,11 @@ public struct AdUnitKey {
     static let UserDataKeywords: String = "userDataKeywords"
     static let CustomData: String = "custom_data"
     static let OverrideClass: String = "override_class"
+    
+    /**
+     Ad Unit ID to use when the current interface idiom is `pad`
+     */
+    static let OverridePadId: String = "overridePadAdUnitId"
 }
 
 /**
@@ -58,14 +63,18 @@ public class AdUnit : NSObject, Codable {
     /**
      Initializes an ad unit from a dictionary and a default rendering view controller.
      */
-    public init?(info: [String: String], defaultViewControllerClassName: String) {
-        guard let adUnitId = info[AdUnitKey.Id],
-              let adUnitName = info[AdUnitKey.Name] else {
+    required public init?(info: [String: String], defaultViewControllerClassName: String) {
+        guard let adUnitId = info[AdUnitKey.Id] else {
             return nil
         }
+        
+        // Determine the iPad version of the Ad Unit ID if available.
+        // If no override is available, use the existing Ad Unit ID.
+        let isPad: Bool = (UIDevice.current.userInterfaceIdiom == .pad)
+        let padAdUnitId: String = info[AdUnitKey.OverridePadId] ?? adUnitId
 
-        id = adUnitId
-        name = adUnitName
+        id = (isPad ? padAdUnitId : adUnitId)
+        name = info[AdUnitKey.Name] ?? adUnitId
         keywords = info[AdUnitKey.Keywords]
         userDataKeywords = info[AdUnitKey.UserDataKeywords]
         customData = info[AdUnitKey.CustomData]
@@ -76,5 +85,31 @@ public class AdUnit : NSObject, Codable {
         else {
             viewControllerClassName = defaultViewControllerClassName
         }
+    }
+    
+    /**
+     Attempts to convert a `mopub://` scheme deep link URL into an `AdUnit` object. Returns nil if the URL was not able
+     to be converted.
+     - Parameter url: MoPub deep link URL
+     - Returns: `AdUnit` object or nil if URL was unable to be converted
+     */
+    convenience public init?(url: URL) {
+        // Validate that the URL contains the required query parameters:
+        // 1. adUnitId (must be non-nil in value)
+        // 2. format (must be a valid format string)
+        guard let urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false),
+            let queryItems = urlComponents.queryItems,
+            queryItems.contains(where: { $0.name == AdUnitKey.Id }),
+            let formatString: String = queryItems.filter({ $0.name == "format" }).first?.value,
+            let format = AdFormat(rawValue: formatString) else {
+                return nil
+        }
+        
+        // Generate an `AdUnit` from the query parameters and extracted ad format.
+        let params: [String: String] = queryItems.reduce(into: [:], { (result, queryItem) in
+            result[queryItem.name] = queryItem.value ?? ""
+        })
+        
+        self.init(info: params, defaultViewControllerClassName: format.renderingViewController)
     }
 }

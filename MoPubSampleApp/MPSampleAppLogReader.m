@@ -1,13 +1,13 @@
 //
 //  MPSampleAppLogReader.m
 //
-//  Copyright 2018 Twitter, Inc.
+//  Copyright 2018-2019 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
 
 #import "MPSampleAppLogReader.h"
-#import "MPLogProvider.h"
+#import "MPLogging.h"
 
 @interface MPSampleAppLogReader () <MPLogger, UIAlertViewDelegate>
 
@@ -30,20 +30,20 @@
 
 - (void)dealloc
 {
-    [[MPLogProvider sharedLogProvider] removeLogger:self];
+    [MPLogging removeLogger:self];
 }
 
 - (void)beginReadingLogMessages
 {
-    [[MPLogProvider sharedLogProvider] removeLogger:self];
-    [[MPLogProvider sharedLogProvider] addLogger:self];
+    [MPLogging removeLogger:self];
+    [MPLogging addLogger:self];
 }
 
 #pragma mark - <MPLogger>
 
 - (MPLogLevel)logLevel
 {
-    return MPLogLevelAll;
+    return MPLogLevelDebug;
 }
 
 - (void)logMessage:(NSString *)message

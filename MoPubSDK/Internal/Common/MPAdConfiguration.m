@@ -1,7 +1,7 @@
 //
 //  MPAdConfiguration.m
 //
-//  Copyright 2018 Twitter, Inc.
+//  Copyright 2018-2019 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
@@ -46,7 +46,7 @@ NSString * const kRefreshTimeMetadataKey = @"x-refreshtime";
 NSString * const kAdTimeoutMetadataKey = @"x-ad-timeout-ms";
 NSString * const kWidthMetadataKey = @"x-width";
 NSString * const kDspCreativeIdKey = @"x-dspcreativeid";
-NSString * const kPrecacheRequiredKey = @"x-precacheRequired";
+NSString * const kPrecacheRequiredKey = @"x-precacherequired";
 NSString * const kIsVastVideoPlayerKey = @"x-vastvideoplayer";
 
 NSString * const kInterstitialAdTypeMetadataKey = @"x-fulladtype";
@@ -284,7 +284,7 @@ NSString * const kAdvancedBiddingMarkupMetadataKey = @"adm";
     Class customEventClass = NSClassFromString(customEventClassName);
 
     if (customEventClassName && !customEventClass) {
-        MPLogWarn(@"Could not find custom event class named %@", customEventClassName);
+        MPLogInfo(@"Could not find custom event class named %@", customEventClassName);
     }
 
     return customEventClass;
@@ -591,7 +591,7 @@ NSString * const kAdvancedBiddingMarkupMetadataKey = @"adm";
     // This is an error.
     NSArray * rewards = [currencies objectForKey:@"rewards"];
     if (rewards.count == 0) {
-        MPLogError(@"No available rewards found.");
+        MPLogDebug(@"No available rewards found.");
         return nil;
     }
 

@@ -1,7 +1,7 @@
 //
 //  NativeAdCollectionViewController.swift
 //
-//  Copyright 2018 Twitter, Inc.
+//  Copyright 2018-2019 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
@@ -12,6 +12,11 @@ import MoPub
 
 @objc(NativeAdCollectionViewController)
 class NativeAdCollectionViewController: UIViewController, AdViewController {
+    // MARK: - Constants
+    struct Constants {
+        static let iconSize: CGSize = CGSize(width: 50.0, height: 50.0)
+    }
+    
     // MARK: - IBOutlets
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var collectionViewLayout: UICollectionViewFlowLayout!
@@ -123,7 +128,7 @@ extension NativeAdCollectionViewController: UICollectionViewDataSource, UICollec
     
     func update(cell: TweetCollectionViewCell, at indexPath: IndexPath) -> TweetCollectionViewCell {
         let data = dataSource.data[indexPath.row]
-        let icon: UIImage = data.color.image(size: CGSize(width: 50, height: 50))
+        let icon: UIImage = data.color.image(size: Constants.iconSize)
         
         // Only for Regular:Regular size class will we attempt to display
         // the cells at half width (2 column) format.
@@ -134,6 +139,7 @@ extension NativeAdCollectionViewController: UICollectionViewDataSource, UICollec
         
         // Update the contents of the cell
         cell.refresh(userIcon: icon, userName: data.name, tweet: data.tweet)
+        cell.layoutIfNeeded()
         
         return cell
     }
@@ -163,7 +169,7 @@ extension NativeAdCollectionViewController: UICollectionViewDataSource, UICollec
         // Update the sizing cell with the current information and determine the minimum amount of
         // screen realestate needed to properly display the cell.
         let updatedSizingCell = update(cell: sizingCell, at: indexPath)
-        var size = updatedSizingCell.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize)
+        var size = updatedSizingCell.cellSize
         
         // Round up any fractional sizes to improve rendering performance.
         size.width.round(.down)

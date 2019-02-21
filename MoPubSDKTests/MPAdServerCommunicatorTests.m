@@ -1,7 +1,7 @@
 //
 //  MPAdServerCommunicatorTests.m
 //
-//  Copyright 2018 Twitter, Inc.
+//  Copyright 2018-2019 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
@@ -45,6 +45,55 @@ static NSString * const kAdResonsesContentKey = @"content";
     self.communicatorDelegateHandler = nil;
 
     [super tearDown];
+}
+
+#pragma mark - JSON Flattening
+
+- (void)testJSONFlattening {
+    // The response data is a JSON payload conforming to the structure:
+    // {
+    //     "ad-responses": [
+    //                      {
+    //                          "metadata": {
+    //                              "adm": "some advanced bidding payload",
+    //                              "x-ad-timeout-ms": 5000,
+    //                              "x-adtype": "rewarded_video",
+    //                          },
+    //                          "content": "Ad markup goes here"
+    //                      }
+    //                      ],
+    //     "x-other-key": "some value",
+    //     "x-next-url": "https:// ..."
+    // }
+
+    // Set up a valid response with three configurations
+    NSDictionary * responseDataDict = @{
+                                       kAdResponsesKey: @[
+                                               @{ kAdResonsesMetadataKey: @{ @"adm": @"advanced bidding markup" }, kAdResonsesContentKey: @"mopub ad content" },
+                                               @{ kAdResonsesMetadataKey: @{ @"x-adtype": @"banner" }, kAdResonsesContentKey: @"mopub ad content" },
+                                               @{ kAdResonsesMetadataKey: @{ @"x-adtype": @"banner" }, kAdResonsesContentKey: @"mopub ad content" },
+                                               ],
+                                       kNextUrlMetadataKey: @"https://www.mopub.com",
+                                       @"testing_1": @"testing_1",
+                                       @"testing_2": @"testing_2"
+                                       };
+
+    NSArray * topLevelJsonKeys = @[kNextUrlMetadataKey, @"testing_1", @"testing_2"];
+    NSArray * responses = [self.communicator getFlattenJsonResponses:responseDataDict keys:topLevelJsonKeys];
+
+    XCTAssertNotNil(responses);
+    XCTAssert(responses.count == 3);
+
+    for (NSDictionary * response in responses) {
+        XCTAssertNotNil(response);
+
+        NSDictionary * metadata = response[kAdResonsesMetadataKey];
+        XCTAssertNotNil(metadata);
+
+        XCTAssert([metadata[kNextUrlMetadataKey] isEqualToString:@"https://www.mopub.com"]);
+        XCTAssert([metadata[@"testing_1"] isEqualToString:@"testing_1"]);
+        XCTAssert([metadata[@"testing_2"] isEqualToString:@"testing_2"]);
+    }
 }
 
 #pragma mark - Multiple Responses

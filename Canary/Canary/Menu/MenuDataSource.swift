@@ -1,7 +1,7 @@
 //
 //  MenuDataSource.swift
 //
-//  Copyright 2018 Twitter, Inc.
+//  Copyright 2018-2019 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
@@ -14,7 +14,11 @@ class MenuDataSource {
     /**
      Ordered section titles
      */
-    private(set) var sections: [String] = []
+    private(set) var sections: [String] = [] {
+        didSet {
+            sections.sort()
+        }
+    }
     
     /**
      Internal data sources for each menu grouping
@@ -24,7 +28,6 @@ class MenuDataSource {
     // MARK: - Initialization
     
     init() {
-        add(menu: PrivacyMenuDataSource())
         add(menu: LogingLevelMenuDataSource())
     }
     
