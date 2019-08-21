@@ -16,6 +16,7 @@
 #import "MPBannerCustomEventAdapter+Testing.h"
 #import "MPMockAdServerCommunicator.h"
 #import "MPMockBannerCustomEvent.h"
+#import "MPAdServerKeys.h"
 
 static const NSTimeInterval kDefaultTimeout = 10;
 
@@ -25,23 +26,13 @@ static const NSTimeInterval kDefaultTimeout = 10;
 
 @implementation MPBannerAdManagerTests
 
-- (void)setUp {
-    [super setUp];
-    // Put setup code here. This method is called before the invocation of each test method in the class.
-}
-
-- (void)tearDown {
-    // Put teardown code here. This method is called after the invocation of each test method in the class.
-    [super tearDown];
-}
-
 #pragma mark - Networking
 
 - (void)testEmptyConfigurationArray {
     XCTestExpectation * expectation = [self expectationWithDescription:@"Wait for banner load"];
 
     MPBannerAdManagerDelegateHandler * handler = [MPBannerAdManagerDelegateHandler new];
-    handler.didFailToLoadAd = ^{
+    handler.didFailToLoadAd = ^(NSError * error){
         [expectation fulfill];
     };
 
@@ -59,7 +50,7 @@ static const NSTimeInterval kDefaultTimeout = 10;
     XCTestExpectation * expectation = [self expectationWithDescription:@"Wait for banner load"];
 
     MPBannerAdManagerDelegateHandler * handler = [MPBannerAdManagerDelegateHandler new];
-    handler.didFailToLoadAd = ^{
+    handler.didFailToLoadAd = ^(NSError * error){
         [expectation fulfill];
     };
 
@@ -80,7 +71,7 @@ static const NSTimeInterval kDefaultTimeout = 10;
     handler.didLoadAd = ^{
         [expectation fulfill];
     };
-    handler.didFailToLoadAd = ^{
+    handler.didFailToLoadAd = ^(NSError * error){
         XCTFail(@"Encountered an unexpected load failure");
         [expectation fulfill];
     };
@@ -113,7 +104,7 @@ static const NSTimeInterval kDefaultTimeout = 10;
     handler.didLoadAd = ^{
         [expectation fulfill];
     };
-    handler.didFailToLoadAd = ^{
+    handler.didFailToLoadAd = ^(NSError * error){
         XCTFail(@"Encountered an unexpected load failure");
         [expectation fulfill];
     };
@@ -146,7 +137,7 @@ static const NSTimeInterval kDefaultTimeout = 10;
     handler.didLoadAd = ^{
         [expectation fulfill];
     };
-    handler.didFailToLoadAd = ^{
+    handler.didFailToLoadAd = ^(NSError * error){
         XCTFail(@"Encountered an unexpected load failure");
         [expectation fulfill];
     };
@@ -176,7 +167,7 @@ static const NSTimeInterval kDefaultTimeout = 10;
     XCTestExpectation * expectation = [self expectationWithDescription:@"Wait for banner load"];
 
     MPBannerAdManagerDelegateHandler * handler = [MPBannerAdManagerDelegateHandler new];
-    handler.didFailToLoadAd = ^{
+    handler.didFailToLoadAd = ^(NSError * error){
         [expectation fulfill];
     };
 
@@ -206,7 +197,7 @@ static const NSTimeInterval kDefaultTimeout = 10;
     XCTestExpectation * expectation = [self expectationWithDescription:@"Wait for banner load"];
 
     MPBannerAdManagerDelegateHandler * handler = [MPBannerAdManagerDelegateHandler new];
-    handler.didFailToLoadAd = ^{
+    handler.didFailToLoadAd = ^(NSError * error){
         [expectation fulfill];
     };
 
@@ -243,7 +234,7 @@ static const NSTimeInterval kDefaultTimeout = 10;
     handler.didLoadAd = ^{
         [expectation fulfill];
     };
-    handler.didFailToLoadAd = ^{
+    handler.didFailToLoadAd = ^(NSError * error){
         XCTFail(@"Encountered an unexpected load failure");
         [expectation fulfill];
     };
@@ -257,7 +248,7 @@ static const NSTimeInterval kDefaultTimeout = 10;
     communicator.mockConfigurationsResponse = configurations;
     manager.communicator = communicator;
 
-    MPAdTargeting * targeting = [[MPAdTargeting alloc] init];
+    MPAdTargeting * targeting = [[MPAdTargeting alloc] initWithCreativeSafeSize:CGSizeZero];
     targeting.localExtras = @{ @"testing": @"YES" };
     [manager loadAdWithTargeting:targeting];
 
@@ -275,6 +266,72 @@ static const NSTimeInterval kDefaultTimeout = 10;
     XCTAssertNotNil(localExtras);
     XCTAssert([localExtras[@"testing"] isEqualToString:@"YES"]);
     XCTAssertTrue(customEvent.isLocalExtrasAvailableAtRequest);
+}
+
+#pragma mark - Impression Level Revenue Data
+
+- (void)testImpressionDelegateFiresWithoutILRD {
+    XCTestExpectation * expectation = [self expectationWithDescription:@"Wait for impression"];
+
+    MPBannerAdManagerDelegateHandler * handler = [MPBannerAdManagerDelegateHandler new];
+    handler.impressionDidFire = ^(MPImpressionData * impresionData) {
+        [expectation fulfill];
+
+        XCTAssertNil(impresionData);
+    };
+
+    // Generate the ad configurations
+    MPAdConfiguration * bannerThatShouldLoad = [MPAdConfigurationFactory defaultBannerConfigurationWithCustomEventClassName:@"MPMockBannerCustomEvent"];
+    NSArray * configurations = @[bannerThatShouldLoad];
+
+    MPBannerAdManager * manager = [[MPBannerAdManager alloc] initWithDelegate:handler];
+    MPMockAdServerCommunicator * communicator = [[MPMockAdServerCommunicator alloc] initWithDelegate:manager];
+    communicator.mockConfigurationsResponse = configurations;
+    manager.communicator = communicator;
+
+    MPAdTargeting * targeting = [[MPAdTargeting alloc] initWithCreativeSafeSize:CGSizeZero];
+    [manager loadAdWithTargeting:targeting];
+
+    [self waitForExpectationsWithTimeout:kDefaultTimeout handler:^(NSError * _Nullable error) {
+        if (error != nil) {
+            XCTFail(@"Timed out");
+        }
+    }];
+}
+
+- (void)testImpressionDelegateFiresWithILRD {
+    XCTestExpectation * expectation = [self expectationWithDescription:@"Wait for impression"];
+
+    NSString * adUnitIdSample = @"AD_UNIT_ID";
+
+    MPBannerAdManagerDelegateHandler * handler = [MPBannerAdManagerDelegateHandler new];
+    handler.impressionDidFire = ^(MPImpressionData * impresionData) {
+        [expectation fulfill];
+
+        XCTAssertNotNil(impresionData);
+        XCTAssert(impresionData.adUnitID == adUnitIdSample);
+    };
+
+    // Generate the ad configurations
+    MPAdConfiguration * bannerThatShouldLoad = [MPAdConfigurationFactory defaultBannerConfigurationWithCustomEventClassName:@"MPMockBannerCustomEvent"];
+    bannerThatShouldLoad.impressionData = [[MPImpressionData alloc] initWithDictionary:@{
+                                                                                         kImpressionDataAdUnitIDKey: adUnitIdSample
+                                                                                         }];
+    NSArray * configurations = @[bannerThatShouldLoad];
+
+    MPBannerAdManager * manager = [[MPBannerAdManager alloc] initWithDelegate:handler];
+    MPMockAdServerCommunicator * communicator = [[MPMockAdServerCommunicator alloc] initWithDelegate:manager];
+    communicator.mockConfigurationsResponse = configurations;
+    manager.communicator = communicator;
+
+    MPAdTargeting * targeting = [[MPAdTargeting alloc] initWithCreativeSafeSize:CGSizeZero];
+    [manager loadAdWithTargeting:targeting];
+
+    [self waitForExpectationsWithTimeout:kDefaultTimeout handler:^(NSError * _Nullable error) {
+        if (error != nil) {
+            XCTFail(@"Timed out");
+        }
+    }];
 }
 
 @end

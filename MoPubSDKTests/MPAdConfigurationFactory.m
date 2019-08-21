@@ -20,7 +20,7 @@ extern NSString *const kNativeVideoTrackersMetadataKey;
 + (MPAdConfiguration *)clearResponse
 {
     NSDictionary * metadata = @{ kAdTypeMetadataKey: kAdTypeClear };
-    return [[MPAdConfiguration alloc] initWithMetadata:metadata data:nil];
+    return [[MPAdConfiguration alloc] initWithMetadata:metadata data:nil adType:MPAdTypeFullscreen];
 }
 
 #pragma mark - Native
@@ -87,7 +87,7 @@ extern NSString *const kNativeVideoTrackersMetadataKey;
         [allProperties addEntriesFromDictionary:properties];
     }
 
-    return [[MPAdConfiguration alloc] initWithMetadata:headers data:[NSJSONSerialization dataWithJSONObject:allProperties options:NSJSONWritingPrettyPrinted error:nil]];
+    return [[MPAdConfiguration alloc] initWithMetadata:headers data:[NSJSONSerialization dataWithJSONObject:allProperties options:NSJSONWritingPrettyPrinted error:nil] adType:MPAdTypeInline];
 }
 
 #pragma mark - Banners
@@ -141,7 +141,7 @@ extern NSString *const kNativeVideoTrackersMetadataKey;
     HTMLString = HTMLString ? HTMLString : @"Publisher's Ad";
 
     return [[MPAdConfiguration alloc] initWithMetadata:headers
-                                                 data:[HTMLString dataUsingEncoding:NSUTF8StringEncoding]];
+                                                 data:[HTMLString dataUsingEncoding:NSUTF8StringEncoding] adType:MPAdTypeInline];
 }
 
 #pragma mark - Interstitials
@@ -224,7 +224,7 @@ extern NSString *const kNativeVideoTrackersMetadataKey;
     HTMLString = HTMLString ? HTMLString : @"Publisher's Interstitial";
 
     return [[MPAdConfiguration alloc] initWithMetadata:headers
-                                                 data:[HTMLString dataUsingEncoding:NSUTF8StringEncoding]];
+                                                 data:[HTMLString dataUsingEncoding:NSUTF8StringEncoding] adType:MPAdTypeInline];
 }
 
 #pragma mark - Rewarded Video
@@ -263,7 +263,7 @@ extern NSString *const kNativeVideoTrackersMetadataKey;
 
 + (MPAdConfiguration *)defaultRewardedVideoConfiguration
 {
-    MPAdConfiguration *adConfiguration = [[MPAdConfiguration alloc] initWithMetadata:[self defaultRewardedVideoHeaders] data:nil];
+    MPAdConfiguration *adConfiguration = [[MPAdConfiguration alloc] initWithMetadata:[self defaultRewardedVideoHeaders] data:nil adType:MPAdTypeFullscreen];
     return adConfiguration;
 }
 
@@ -280,25 +280,25 @@ extern NSString *const kNativeVideoTrackersMetadataKey;
         [metadata addEntriesFromDictionary:additionalMetadata];
     }
 
-    MPAdConfiguration *adConfiguration = [[MPAdConfiguration alloc] initWithMetadata:metadata data:nil];
+    MPAdConfiguration *adConfiguration = [[MPAdConfiguration alloc] initWithMetadata:metadata data:nil adType:MPAdTypeFullscreen];
     return adConfiguration;
 }
 
 + (MPAdConfiguration *)defaultRewardedVideoConfigurationWithReward
 {
-    MPAdConfiguration *adConfiguration = [[MPAdConfiguration alloc] initWithMetadata:[self defaultRewardedVideoHeadersWithReward] data:nil];
+    MPAdConfiguration *adConfiguration = [[MPAdConfiguration alloc] initWithMetadata:[self defaultRewardedVideoHeadersWithReward] data:nil adType:MPAdTypeFullscreen];
     return adConfiguration;
 }
 
 + (MPAdConfiguration *)defaultRewardedVideoConfigurationServerToServer
 {
-    MPAdConfiguration *adConfiguration = [[MPAdConfiguration alloc] initWithMetadata:[self defaultRewardedVideoHeadersServerToServer] data:nil];
+    MPAdConfiguration *adConfiguration = [[MPAdConfiguration alloc] initWithMetadata:[self defaultRewardedVideoHeadersServerToServer] data:nil adType:MPAdTypeFullscreen];
     return adConfiguration;
 }
 
 + (MPAdConfiguration *)defaultNativeVideoConfigurationWithVideoTrackers
 {
-    MPAdConfiguration *adConfiguration = [[MPAdConfiguration alloc] initWithMetadata:[self defaultNativeVideoHeadersWithTrackers] data:nil];
+    MPAdConfiguration *adConfiguration = [[MPAdConfiguration alloc] initWithMetadata:[self defaultNativeVideoHeadersWithTrackers] data:nil adType:MPAdTypeFullscreen];
     return adConfiguration;
 }
 

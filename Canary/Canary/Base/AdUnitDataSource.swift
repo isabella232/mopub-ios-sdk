@@ -20,13 +20,18 @@ class AdUnitDataSource {
     internal var adUnits: [String: [AdUnit]]
     
     /**
+     Internally stored alphabetically sorted sections. This is seperated from the
+     public getter `sections` to allow overriding `sections`.
+     */
+    internal var cachedSections: [String]
+    
+    /**
      Data source sections as human readable text meant for display as section
      headings to the user.
      */
-    private(set) lazy var sections: [String] = {
-        // Ad unit sections sorted alphabetically
-        return adUnits.keys.sorted()
-    }()
+    var sections: [String] {
+        return cachedSections
+    }
     
     // MARK: - Initializers
     
@@ -39,10 +44,12 @@ class AdUnitDataSource {
     required init(plistName: String, bundle: Bundle) {
         guard plistName.count > 0 else {
             adUnits = [:]
+            cachedSections = []
             return
         }
         
         adUnits = AdUnitDataSource.openPlist(resourceName: plistName, bundle: bundle) ?? [:]
+        cachedSections = adUnits.keys.sorted()
     }
     
     // MARK: - Ad Unit Accessors

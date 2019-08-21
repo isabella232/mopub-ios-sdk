@@ -84,9 +84,7 @@ static NSString * const kNativeAdErrorDomain = @"com.mopub.NativeAd";
 {
     if (handler) {
         self.URL = [MPAdServerURLBuilder URLWithAdUnitID:self.adUnitIdentifier
-                                                keywords:self.targeting.keywords
-                                        userDataKeywords:self.targeting.userDataKeywords
-                                                location:self.targeting.location
+                                               targeting:self.targeting
                                            desiredAssets:[self.targeting.desiredAssets allObjects]
                                              viewability:NO];
 
@@ -102,9 +100,7 @@ static NSString * const kNativeAdErrorDomain = @"com.mopub.NativeAd";
 {
     if (handler) {
         self.URL = [MPAdServerURLBuilder URLWithAdUnitID:self.adUnitIdentifier
-                                                keywords:self.targeting.keywords
-                                        userDataKeywords:self.targeting.userDataKeywords
-                                                location:self.targeting.location
+                                               targeting:self.targeting
                                            desiredAssets:[self.targeting.desiredAssets allObjects]
                                               adSequence:adSequence
                                              viewability:NO];
@@ -242,6 +238,8 @@ static NSString * const kNativeAdErrorDomain = @"com.mopub.NativeAd";
     self.remainingConfigurations = nil;
 
     adObject.renderer = self.customEventRenderer;
+    adObject.configuration = self.adConfiguration;
+    adObject.adUnitID = self.adUnitIdentifier;
 
     if ([(id)adObject.adAdapter respondsToSelector:@selector(setAdConfiguration:)]) {
         [(id)adObject.adAdapter performSelector:@selector(setAdConfiguration:) withObject:self.adConfiguration];
@@ -307,6 +305,14 @@ static NSString * const kNativeAdErrorDomain = @"com.mopub.NativeAd";
     [self completeAdRequestWithAdObject:nil error:MPNativeAdNSErrorForNetworkConnectionError()];
 }
 
+- (MPAdType)adTypeForAdServerCommunicator:(MPAdServerCommunicator *)adServerCommunicator {
+    return MPAdTypeInline;
+}
+
+- (NSString *)adUnitIDForAdServerCommunicator:(MPAdServerCommunicator *)adServerCommunicator {
+    return self.adUnitIdentifier;
+}
+
 #pragma mark - <MPNativeCustomEventDelegate>
 
 - (void)nativeCustomEvent:(MPNativeCustomEvent *)event didLoadAd:(MPNativeAd *)adObject
@@ -366,11 +372,10 @@ static NSString * const kNativeAdErrorDomain = @"com.mopub.NativeAd";
     NSTimeInterval timeInterval = (self.adConfiguration && self.adConfiguration.adTimeoutInterval >= 0) ? self.adConfiguration.adTimeoutInterval : NATIVE_TIMEOUT_INTERVAL;
 
     if (timeInterval > 0) {
-        self.timeoutTimer = [[MPCoreInstanceProvider sharedProvider] buildMPTimerWithTimeInterval:timeInterval
-                                                                                           target:self
-                                                                                         selector:@selector(timeout)
-                                                                                          repeats:NO];
-
+        self.timeoutTimer = [MPTimer timerWithTimeInterval:timeInterval
+                                                    target:self
+                                                  selector:@selector(timeout)
+                                                   repeats:NO];
         [self.timeoutTimer scheduleNow];
     }
 }

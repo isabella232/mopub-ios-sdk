@@ -13,13 +13,14 @@ public extension MPConsentStatus {
     /**
      Human readable description of the status.
      */
-    public var description: String {
+    var description: String {
         switch self {
         case .consented: return "Consented"
         case .denied: return "Denied"
         case .doNotTrack: return "Do not track"
         case .potentialWhitelist: return "Potentially whitelisted"
         case .unknown: return "Unknown"
+        @unknown default: fatalError("\(#function) unexpected enum case")
         }
     }
 }

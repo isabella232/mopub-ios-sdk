@@ -13,6 +13,7 @@
 
 @implementation MPAdServerCommunicator (Testing)
 @dynamic loading;
+@dynamic isRateLimited;
 @end
 
 #pragma clang diagnostic pop

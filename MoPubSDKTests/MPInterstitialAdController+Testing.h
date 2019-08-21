@@ -11,4 +11,5 @@
 
 @interface MPInterstitialAdController (Testing)
 @property (nonatomic, strong) MPInterstitialAdManager * manager;
+- (void)interstitialAdManager:(MPInterstitialAdManager *)manager didReceiveImpressionEventWithImpressionData:(MPImpressionData *)impressionData;
 @end

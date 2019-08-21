@@ -51,6 +51,9 @@ class NativeAdView: UIView {
             return
         }
         
+        // Accessibility
+        mainImageView.accessibilityIdentifier = AccessibilityIdentifier.nativeAdImageView
+        
         // Size the nib's view to the container and add it as a subview.
         view.frame = bounds
         addSubview(view)

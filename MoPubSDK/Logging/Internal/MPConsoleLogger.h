@@ -7,16 +7,16 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "MPLogger.h"
+#import "MPBLogger.h"
 
 /**
  Console logging destination routes all log messages to @c NSLog.
  */
-@interface MPConsoleLogger : NSObject<MPLogger>
+@interface MPConsoleLogger : NSObject<MPBLogger>
 
 /**
- Log level. By default, this is set to @c MPLogLevelInfo.
+ Log level. By default, this is set to @c MPBLogLevelInfo.
  */
-@property (nonatomic, assign) MPLogLevel logLevel;
+@property (nonatomic, assign) MPBLogLevel logLevel;
 
 @end

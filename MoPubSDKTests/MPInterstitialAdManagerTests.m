@@ -15,6 +15,7 @@
 #import "MPInterstitialCustomEventAdapter+Testing.h"
 #import "MPMockAdServerCommunicator.h"
 #import "MPMockInterstitialCustomEvent.h"
+#import "MPAdServerKeys.h"
 
 static const NSTimeInterval kDefaultTimeout = 10;
 
@@ -23,16 +24,6 @@ static const NSTimeInterval kDefaultTimeout = 10;
 @end
 
 @implementation MPInterstitialAdManagerTests
-
-- (void)setUp {
-    [super setUp];
-    // Put setup code here. This method is called before the invocation of each test method in the class.
-}
-
-- (void)tearDown {
-    // Put teardown code here. This method is called after the invocation of each test method in the class.
-    [super tearDown];
-}
 
 - (void)testEmptyConfigurationArray {
     XCTestExpectation * expectation = [self expectationWithDescription:@"Wait for interstitial load"];
@@ -254,7 +245,7 @@ static const NSTimeInterval kDefaultTimeout = 10;
     communicator.mockConfigurationsResponse = configurations;
     manager.communicator = communicator;
 
-    MPAdTargeting * targeting = [[MPAdTargeting alloc] init];
+    MPAdTargeting * targeting = [[MPAdTargeting alloc] initWithCreativeSafeSize:CGSizeZero];
     targeting.localExtras = @{ @"testing": @"YES" };
     [manager loadInterstitialWithAdUnitID:@"TEST_ADUNIT_ID" targeting:targeting];
 
@@ -272,6 +263,84 @@ static const NSTimeInterval kDefaultTimeout = 10;
     XCTAssertNotNil(localExtras);
     XCTAssert([localExtras[@"testing"] isEqualToString:@"YES"]);
     XCTAssertTrue(customEvent.isLocalExtrasAvailableAtRequest);
+}
+
+#pragma mark - Impression Level Revenue Data
+
+- (void)testImpressionDelegateFiresWithoutILRD {
+    XCTestExpectation * expectation = [self expectationWithDescription:@"Wait for impression"];
+    NSString * testAdUnitID = @"TEST_ADUNIT_ID";
+
+    MPInterstitialAdManagerDelegateHandler * handler = [MPInterstitialAdManagerDelegateHandler new];
+    handler.didReceiveImpression = ^(MPImpressionData * impressionData) {
+        [expectation fulfill];
+
+        XCTAssertNil(impressionData);
+    };
+
+    // Generate the ad configurations
+    MPAdConfiguration * interstitialThatShouldLoad = [MPAdConfigurationFactory defaultInterstitialConfigurationWithCustomEventClassName:@"MPMockInterstitialCustomEvent"];
+    NSArray * configurations = @[interstitialThatShouldLoad];
+
+    MPInterstitialAdManager * manager = [[MPInterstitialAdManager alloc] initWithDelegate:handler];
+    MPMockAdServerCommunicator * communicator = [[MPMockAdServerCommunicator alloc] initWithDelegate:manager];
+    communicator.mockConfigurationsResponse = configurations;
+    manager.communicator = communicator;
+
+    handler.didLoadAd = ^{
+        // Track the impression
+        MPInterstitialCustomEventAdapter * adapter = (MPInterstitialCustomEventAdapter *)manager.adapter;
+        [adapter trackImpression];
+    };
+
+    MPAdTargeting * targeting = [[MPAdTargeting alloc] initWithCreativeSafeSize:CGSizeZero];
+    [manager loadInterstitialWithAdUnitID:testAdUnitID targeting:targeting];
+
+    [self waitForExpectationsWithTimeout:kDefaultTimeout handler:^(NSError * _Nullable error) {
+        if (error != nil) {
+            XCTFail(@"Timed out");
+        }
+    }];
+}
+
+- (void)testImpressionDelegateFiresWithILRD {
+    XCTestExpectation * expectation = [self expectationWithDescription:@"Wait for impression"];
+    NSString * testAdUnitID = @"TEST_ADUNIT_ID";
+
+    MPInterstitialAdManagerDelegateHandler * handler = [MPInterstitialAdManagerDelegateHandler new];
+    handler.didReceiveImpression = ^(MPImpressionData * impressionData) {
+        [expectation fulfill];
+
+        XCTAssertNotNil(impressionData);
+        XCTAssert([impressionData.adUnitID isEqualToString:testAdUnitID]);
+    };
+
+    // Generate the ad configurations
+    MPAdConfiguration * interstitialThatShouldLoad = [MPAdConfigurationFactory defaultInterstitialConfigurationWithCustomEventClassName:@"MPMockInterstitialCustomEvent"];
+    interstitialThatShouldLoad.impressionData = [[MPImpressionData alloc] initWithDictionary:@{
+                                                                                               kImpressionDataAdUnitIDKey : testAdUnitID
+                                                                                               }];
+    NSArray * configurations = @[interstitialThatShouldLoad];
+
+    MPInterstitialAdManager * manager = [[MPInterstitialAdManager alloc] initWithDelegate:handler];
+    MPMockAdServerCommunicator * communicator = [[MPMockAdServerCommunicator alloc] initWithDelegate:manager];
+    communicator.mockConfigurationsResponse = configurations;
+    manager.communicator = communicator;
+
+    handler.didLoadAd = ^{
+        // Track the impression
+        MPInterstitialCustomEventAdapter * adapter = (MPInterstitialCustomEventAdapter *)manager.adapter;
+        [adapter trackImpression];
+    };
+
+    MPAdTargeting * targeting = [[MPAdTargeting alloc] initWithCreativeSafeSize:CGSizeZero];
+    [manager loadInterstitialWithAdUnitID:testAdUnitID targeting:targeting];
+
+    [self waitForExpectationsWithTimeout:kDefaultTimeout handler:^(NSError * _Nullable error) {
+        if (error != nil) {
+            XCTFail(@"Timed out");
+        }
+    }];
 }
 
 @end

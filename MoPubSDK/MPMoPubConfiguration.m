@@ -18,7 +18,7 @@
         _adUnitIdForAppInitialization = adUnitId;
         _allowLegitimateInterest = NO;
         _globalMediationSettings = nil;
-        _loggingLevel = MPLogLevelNone;
+        _loggingLevel = MPBLogLevelNone;
         _mediatedNetworkConfigurations = nil;
         _moPubRequestOptions = nil;
     }

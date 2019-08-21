@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "MPAdapterConfiguration.h"
-#import "MPLogLevel.h"
+#import "MPBLogLevel.h"
 #import "MPMediationSettingsProtocol.h"
 #import "MPRewardedVideo.h"
 
@@ -40,9 +40,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong, nullable) NSArray<id<MPMediationSettingsProtocol>> * globalMediationSettings;
 
 /**
- Optional logging level. By default, this value is set to @c MPLogLevelNone.
+ Optional logging level. By default, this value is set to @c MPBLogLevelNone.
  */
-@property (nonatomic, assign) MPLogLevel loggingLevel;
+@property (nonatomic, assign) MPBLogLevel loggingLevel;
 
 /**
  Optional configuration settings for mediated networks during initialization. To add entries

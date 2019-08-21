@@ -27,33 +27,40 @@ class BannerAdDataSource: NSObject, AdDataSource {
     /**
      Table of which events were triggered.
      */
-    private var eventTriggered: [AdEvent: Bool] = [:]
+    var eventTriggered: [AdEvent: Bool] = [:]
     
     /**
-     Reason for load failure.
+     The maximum desired ad size to request on a load
      */
-    private var loadFailureReason: String? = nil
+    private var maxDesiredAdSize: CGSize = kMPPresetMaxAdSizeMatchFrame
     
     /**
      Status event titles that correspond to the events found in `MPAdViewDelegate`
      */
-    private lazy var title: [AdEvent: String] = {
+    lazy var title: [AdEvent: String] = {
         var titleStrings: [AdEvent: String] = [:]
-        titleStrings[.didLoad] = "adViewDidLoadAd(_:)"
-        titleStrings[.didFailToLoad] = "adViewDidFailToLoadAd(_:)"
+        titleStrings[.didLoad] = "adViewDidLoadAd(_:, adSize _:)"
+        titleStrings[.didFailToLoad] = "adView(_:, didFailToLoadAdWithError _:)"
         titleStrings[.willPresentModal] = "willPresentModalViewForAd(_:)"
         titleStrings[.didDismissModal] = "didDismissModalViewForAd(_:)"
         titleStrings[.clicked] = "willLeaveApplicationFromAd(_:)"
+        titleStrings[.didTrackImpression] = "mopubAd(_:, didTrackImpressionWith _:)"
         
         return titleStrings
     }()
+    
+    /**
+     Optional status messages that correspond to the events found in the ad's delegate protocol.
+     These are reset as part of `clearStatus`.
+     */
+    var messages: [AdEvent: String] = [:]
     
     // MARK: - Initialization
     
     /**
      Initializes the Banner ad data source.
      - Parameter adUnit: Banner ad unit.
-     - Parameter size: Banner ad size.
+     - Parameter size: Maximum desired ad size.
      */
     init(adUnit: AdUnit, bannerSize size: CGSize) {
         super.init()
@@ -61,22 +68,17 @@ class BannerAdDataSource: NSObject, AdDataSource {
         
         // Instantiate the banner.
         adView = {
-            let view: MPAdView = MPAdView(adUnitId: adUnit.id, size: size)
+            let view: MPAdView = MPAdView(adUnitId: adUnit.id)
             view.delegate = self
             view.backgroundColor = .lightGray
-            
+            view.translatesAutoresizingMaskIntoConstraints = false
             return view
         }()
+        
+        maxDesiredAdSize = size
     }
     
     // MARK: - AdDataSource
-    
-    /**
-     The ad unit information sections available for the ad.
-     */
-    lazy var information: [AdInformation] = {
-        return [.id, .keywords, .userDataKeywords]
-    }()
     
     /**
      The actions available for the ad.
@@ -101,7 +103,7 @@ class BannerAdDataSource: NSObject, AdDataSource {
      The status events available for the ad.
      */
     lazy var events: [AdEvent] = {
-        return [.didLoad, .didFailToLoad, .willPresentModal, .didDismissModal, .clicked]
+        return [.didLoad, .didFailToLoad, .willPresentModal, .didDismissModal, .clicked, .didTrackImpression]
     }()
     
     /**
@@ -117,40 +119,23 @@ class BannerAdDataSource: NSObject, AdDataSource {
     }
     
     /**
-     Retrieves the display status for the event.
-     - Parameter event: Status event.
-     - Returns: A tuple containing the status display title, optional message, and highlighted state.
+     Queries if the data source has an ad loaded.
      */
-    func status(for event: AdEvent) -> (title: String, message: String?, isHighlighted: Bool) {
-        let message = (event == .didFailToLoad ? loadFailureReason : nil)
-        let isHighlighted = (eventTriggered[event] ?? false)
-        return (title: title[event] ?? "", message: message, isHighlighted: isHighlighted)
-    }
+    private(set) var isAdLoaded: Bool = false
     
     /**
-     Sets the status for the event to highlighted. If the status is already highlighted,
-     nothing is done.
-     - Parameter event: Status event.
-     - Parameter complete: Completion closure.
+     Queries if the data source currently requesting an ad.
      */
-    func setStatus(for event: AdEvent, complete:(() -> Swift.Void)) {
-        eventTriggered[event] = true
-        complete()
-    }
-    
-    /**
-     Clears the highlighted state for all status events.
-     - Parameter complete: Completion closure.
-     */
-    func clearStatus(complete:(() -> Swift.Void)) {
-        loadFailureReason = nil
-        eventTriggered = [:]
-        complete()
-    }
+    private(set) var isAdLoading: Bool = false
     
     // MARK: - Ad Loading
     
     private func loadAd() {
+        guard !isAdLoading else {
+            return
+        }
+        
+        isAdLoading = true
         clearStatus { [weak self] in
             self?.delegate?.adPresentationTableView.reloadData()
         }
@@ -159,7 +144,7 @@ class BannerAdDataSource: NSObject, AdDataSource {
         // to load.
         adView.keywords = adUnit.keywords
         adView.userDataKeywords = adUnit.userDataKeywords
-        adView.loadAd()
+        adView.loadAd(withMaxAdSize: maxDesiredAdSize)
     }
 }
 
@@ -170,22 +155,24 @@ extension BannerAdDataSource: MPAdViewDelegate {
         return delegate?.adPresentationViewController
     }
     
-    func adViewDidLoadAd(_ view: MPAdView!) {
-        setStatus(for: .didLoad) { [weak self] in
-            if let strongSelf = self {
-                strongSelf.loadFailureReason = nil
-                strongSelf.delegate?.adPresentationTableView.reloadData()
-            }
+    func adViewDidLoadAd(_ view: MPAdView!, adSize: CGSize) {
+        isAdLoading = false
+        isAdLoaded = true
+        
+        // Resize the MPAdView frame to match the creative height
+        view.frame.size.height = adSize.height
+        delegate?.adPresentationViewController?.view.setNeedsLayout()
+                
+        setStatus(for: .didLoad, message: "The ad size is \(adSize)") { [weak self] in
+            self?.delegate?.adPresentationTableView.reloadData()
         }
     }
     
-    func adViewDidFail(toLoadAd view: MPAdView!) {
-        setStatus(for: .didFailToLoad) { [weak self] in
-            if let strongSelf = self {
-                // The banner load failure doesn't give back an error reason; assume clear response
-                strongSelf.loadFailureReason = "No ad available"
-                strongSelf.delegate?.adPresentationTableView.reloadData()
-            }
+    func adView(_ view: MPAdView!, didFailToLoadAdWithError error: Error!) {
+        isAdLoading = false
+        isAdLoaded = false
+        setStatus(for: .didFailToLoad, message: "\(error!.localizedDescription)") { [weak self] in
+           self?.delegate?.adPresentationTableView.reloadData()
         }
     }
     
@@ -203,6 +190,13 @@ extension BannerAdDataSource: MPAdViewDelegate {
     
     func willLeaveApplication(fromAd view: MPAdView!) {
         setStatus(for: .clicked) { [weak self] in
+            self?.delegate?.adPresentationTableView.reloadData()
+        }
+    }
+    
+    func mopubAd(_ ad: MPMoPubAd, didTrackImpressionWith impressionData: MPImpressionData?) {
+        let message = impressionData?.description ?? "No impression data"
+        setStatus(for: .didTrackImpression, message: message) { [weak self] in
             self?.delegate?.adPresentationTableView.reloadData()
         }
     }

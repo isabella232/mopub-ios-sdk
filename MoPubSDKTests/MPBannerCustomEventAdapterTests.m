@@ -36,7 +36,7 @@
 // When an AD is in the imp tracking experiment, banner impressions (include all banner formats) are fired from SDK.
 - (void)testShouldTrackImpOnDisplayWhenExperimentEnabled {
     NSDictionary *headers = @{ kBannerImpressionVisableMsMetadataKey: @"0", kBannerImpressionMinPixelMetadataKey:@"1"};
-    MPAdConfiguration *config = [[MPAdConfiguration alloc] initWithMetadata:headers data:nil];
+    MPAdConfiguration *config = [[MPAdConfiguration alloc] initWithMetadata:headers data:nil adType:MPAdTypeInline];
 
     MPBannerCustomEventAdapter *adapter = [MPBannerCustomEventAdapter new];
 

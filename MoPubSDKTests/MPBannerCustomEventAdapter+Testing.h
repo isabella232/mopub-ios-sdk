@@ -17,6 +17,7 @@
 
 - (void)loadAdWithConfiguration:(MPAdConfiguration *)configuration customEvent:(MPBannerCustomEvent *)customEvent;
 - (void)setHasTrackedImpression:(BOOL)hasTrackedImpression;
+- (void)adViewWillLogImpression:(UIView *)adView;
 
 - (BOOL)shouldTrackImpressionOnDisplay;
 - (void)startTimeoutTimer;

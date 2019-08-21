@@ -14,11 +14,11 @@ fileprivate enum LoggingLevelMenuOptions: String {
     case info = "Informational"
     case none = "None"
     
-    var logLevel: MPLogLevel {
+    var logLevel: MPBLogLevel {
         switch self {
-        case .debug: return MPLogLevel.debug
-        case .info: return MPLogLevel.info
-        case .none: return MPLogLevel.none
+        case .debug: return MPBLogLevel.debug
+        case .info: return MPBLogLevel.info
+        case .none: return MPBLogLevel.none
         }
     }
 }
@@ -49,9 +49,9 @@ extension LogingLevelMenuDataSource: MenuDisplayable {
      - Returns: A configured `UITableViewCell`
      */
     func cell(forItem index: Int, inTableView tableView: UITableView) -> UITableViewCell {
-        let cell: BasicMenuTableViewCell = basicMenuCell(inTableView: tableView)
+        let cell = tableView.dequeueCellFromNib(cellType: BasicMenuTableViewCell.self)
         let item: LoggingLevelMenuOptions = items[index]
-        let currentLogLevel: MPLogLevel = MPLogging.consoleLogLevel
+        let currentLogLevel: MPBLogLevel = MPLogging.consoleLogLevel
         
         cell.accessoryType = (currentLogLevel == item.logLevel ? .checkmark : .none)
         cell.title.text = item.rawValue
@@ -71,14 +71,16 @@ extension LogingLevelMenuDataSource: MenuDisplayable {
     
     /**
      Performs an optional selection action for the menu item
-     - Parameter index: Menu item index assumed to be in bounds
+     - Parameter indexPath: Menu item indexPath assumed to be in bounds
      - Parameter tableView: `UITableView` that rendered the item
      - Parameter viewController: Presenting view controller
+     - Returns: `true` if the menu should collapse when selected; `false` otherwise.
      */
-    func didSelect(itemAt index: Int, inTableView tableView: UITableView, presentFrom viewController: UIViewController) -> Swift.Void {
-        let item: LoggingLevelMenuOptions = items[index]
+    func didSelect(itemAt indexPath: IndexPath, inTableView tableView: UITableView, presentFrom viewController: UIViewController) -> Bool {
+        let item: LoggingLevelMenuOptions = items[indexPath.row]
         MPLogging.consoleLogLevel = item.logLevel
         
         tableView.reloadData()
+        return true
     }
 }

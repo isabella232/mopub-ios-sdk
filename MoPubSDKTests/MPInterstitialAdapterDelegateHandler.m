@@ -19,5 +19,6 @@
 - (void)interstitialDidExpireForAdapter:(MPBaseInterstitialAdapter *)adapter { if (self.didExpire) self.didExpire(adapter); }
 - (void)interstitialDidReceiveTapEventForAdapter:(MPBaseInterstitialAdapter *)adapter { if (self.didReceiveTapEvent) self.didReceiveTapEvent(adapter); }
 - (void)interstitialWillLeaveApplicationForAdapter:(MPBaseInterstitialAdapter *)adapter { if (self.willLeaveApplication) self.willLeaveApplication(adapter); }
+- (void)interstitialDidReceiveImpressionEventForAdapter:(MPBaseInterstitialAdapter *)adapter { if (self.didReceiveTapEvent) self.didReceiveTapEvent(adapter); }
 
 @end

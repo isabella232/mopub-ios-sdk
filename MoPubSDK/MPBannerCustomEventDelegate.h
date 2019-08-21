@@ -133,4 +133,20 @@
  */
 - (void)trackClick;
 
+/**
+ * Call this method when the banner ad is expanding or resizing from its default size.
+ *
+ * @param event You should pass `self` to allow the MoPub SDK to associate this event with the correct
+ * instance of your custom event.
+ */
+- (void)bannerCustomEventWillExpandAd:(MPBannerCustomEvent *)event;
+
+/**
+ * Call this method when the banner ad is collapsing back to its default size.
+ *
+ * @param event You should pass `self` to allow the MoPub SDK to associate this event with the correct
+ * instance of your custom event.
+ */
+- (void)bannerCustomEventDidCollapseAd:(MPBannerCustomEvent *)event;
+
 @end

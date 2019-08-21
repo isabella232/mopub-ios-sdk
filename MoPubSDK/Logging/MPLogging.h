@@ -8,16 +8,16 @@
 
 #import <Foundation/Foundation.h>
 #import "MPLogEvent.h"
-#import "MPLogger.h"
-#import "MPLogLevel.h"
+#import "MPBLogger.h"
+#import "MPBLogLevel.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 extern NSString * const kMPClearErrorLogFormatWithAdUnitID;
 extern NSString * const kMPWarmingUpErrorLogFormatWithAdUnitID;
 
-#define MPLogDebug(...) [MPLogging logEvent:[MPLogEvent eventWithMessage:[NSString stringWithFormat:__VA_ARGS__] level:MPLogLevelDebug] source:nil fromClass:self.class]
-#define MPLogInfo(...) [MPLogging logEvent:[MPLogEvent eventWithMessage:[NSString stringWithFormat:__VA_ARGS__] level:MPLogLevelInfo] source:nil fromClass:self.class]
+#define MPLogDebug(...) [MPLogging logEvent:[MPLogEvent eventWithMessage:[NSString stringWithFormat:__VA_ARGS__] level:MPBLogLevelDebug] source:nil fromClass:self.class]
+#define MPLogInfo(...) [MPLogging logEvent:[MPLogEvent eventWithMessage:[NSString stringWithFormat:__VA_ARGS__] level:MPBLogLevelInfo] source:nil fromClass:self.class]
 
 // MPLogTrace, MPLogWarn, MPLogError, and MPLogFatal will be deprecated in
 // future SDK versions. Please use MPLogInfo or MPLogDebug
@@ -37,21 +37,21 @@ extern NSString * const kMPWarmingUpErrorLogFormatWithAdUnitID;
  */
 @interface MPLogging : NSObject
 /**
- Current log level of the SDK console logger. The default value is @c MPLogLevelNone.
+ Current log level of the SDK console logger. The default value is @c MPBLogLevelNone.
  */
-@property (class, nonatomic, assign) MPLogLevel consoleLogLevel;
+@property (class, nonatomic, assign) MPBLogLevel consoleLogLevel;
 
 /**
 Registers a logging destination.
 @param logger Logger to receive log events.
 */
-+ (void)addLogger:(id<MPLogger>)logger;
++ (void)addLogger:(id<MPBLogger>)logger;
 
 /**
  Removes a logger from receiving log events.
  @param logger Logger to remove.
  */
-+ (void)removeLogger:(id<MPLogger>)logger;
++ (void)removeLogger:(id<MPBLogger>)logger;
 
 /**
  Logs the event generated from the calling class. The format of the log message
@@ -63,7 +63,7 @@ Registers a logging destination.
  @param source Optional source of the event. This will generally be ad unit ID for ad-related events.
  @param aClass Class that generated the event.
  */
-+ (void)logEvent:(MPLogEvent *)event source:(NSString * _Nullable)source fromClass:(Class)aClass;
++ (void)logEvent:(MPLogEvent *)event source:(NSString * _Nullable)source fromClass:(Class _Nullable)aClass;
 
 @end
 

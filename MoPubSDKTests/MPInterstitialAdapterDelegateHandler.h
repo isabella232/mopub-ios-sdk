@@ -26,6 +26,7 @@ typedef void(^MPInterstitialAdapterDelegateHandlerErrorBlock)(MPBaseInterstitial
 @property (nonatomic, copy) MPInterstitialAdapterDelegateHandlerBlock didDisppear;
 @property (nonatomic, copy) MPInterstitialAdapterDelegateHandlerBlock didExpire;
 @property (nonatomic, copy) MPInterstitialAdapterDelegateHandlerBlock didReceiveTapEvent;
+@property (nonatomic, copy) MPInterstitialAdapterDelegateHandlerBlock didReceiveImpressionEvent;
 @property (nonatomic, copy) MPInterstitialAdapterDelegateHandlerBlock willLeaveApplication;
 
 @end

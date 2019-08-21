@@ -9,7 +9,7 @@
 #import "MPSampleAppLogReader.h"
 #import "MPLogging.h"
 
-@interface MPSampleAppLogReader () <MPLogger, UIAlertViewDelegate>
+@interface MPSampleAppLogReader () <MPBLogger, UIAlertViewDelegate>
 
 @property (nonatomic, strong) UIAlertView *warmingUpAlertView;
 
@@ -39,11 +39,11 @@
     [MPLogging addLogger:self];
 }
 
-#pragma mark - <MPLogger>
+#pragma mark - <MPBLogger>
 
-- (MPLogLevel)logLevel
+- (MPBLogLevel)logLevel
 {
-    return MPLogLevelDebug;
+    return MPBLogLevelDebug;
 }
 
 - (void)logMessage:(NSString *)message

@@ -82,8 +82,11 @@ static NSString * const kTableViewAdPlacerReuseIdentifier = @"MPTableViewAdPlace
 - (void)loadAdsForAdUnitID:(NSString *)adUnitID targeting:(MPNativeAdRequestTargeting *)targeting
 {
     if (!self.insertionTimer) {
-        self.insertionTimer = [MPTimer timerWithTimeInterval:kUpdateVisibleCellsInterval target:self selector:@selector(updateVisibleCells) repeats:YES];
-        self.insertionTimer.runLoopMode = NSRunLoopCommonModes;
+        self.insertionTimer = [MPTimer timerWithTimeInterval:kUpdateVisibleCellsInterval
+                                                      target:self
+                                                    selector:@selector(updateVisibleCells)
+                                                     repeats:YES
+                                                 runLoopMode:NSRunLoopCommonModes];
         [self.insertionTimer scheduleNow];
     }
     [self.streamAdPlacer loadAdsForAdUnitID:adUnitID targeting:targeting];
@@ -143,6 +146,14 @@ static NSString * const kTableViewAdPlacerReuseIdentifier = @"MPTableViewAdPlace
 {
     if ([self.delegate respondsToSelector:@selector(nativeAdWillLeaveApplicationFromTableViewAdPlacer:)]) {
         [self.delegate nativeAdWillLeaveApplicationFromTableViewAdPlacer:self];
+    }
+}
+
+- (void)mopubAdPlacer:(id<MPMoPubAdPlacer>)adPlacer didTrackImpressionForAd:(id<MPMoPubAd>)ad withImpressionData:(MPImpressionData *)impressionData {
+    if ([self.delegate respondsToSelector:@selector(mopubAdPlacer:didTrackImpressionForAd:withImpressionData:)]) {
+        [self.delegate mopubAdPlacer:self
+             didTrackImpressionForAd:ad
+                  withImpressionData:impressionData];
     }
 }
 

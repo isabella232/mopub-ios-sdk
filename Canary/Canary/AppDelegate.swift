@@ -10,7 +10,6 @@ import UIKit
 import MoPub
 
 let kAppId = "112358"
-let kAdUnitId = "0ac59b0996d947309c33f59d6676399f"
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -32,6 +31,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     // MARK: - UIApplicationDelegate
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        if UserDefaults.standard.shouldClearCachedNetworks {
+            MoPub.sharedInstance().clearCachedNetworks() // do this before initializing the MoPub SDK
+            print("\(#function) cached networks are cleared")
+        }
+        
         // Extract the UI elements for easier manipulation later.
         // Calls to `loadViewIfNeeded()` are needed to load any children view controllers
         // before `viewDidLoad()` occurs.
@@ -45,17 +49,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         #endif
 
         // MoPub SDK initialization
-        let sdkConfig = MPMoPubConfiguration(adUnitIdForAppInitialization: kAdUnitId)
-        sdkConfig.globalMediationSettings = []
-        sdkConfig.loggingLevel = .info
-        
-        MoPub.sharedInstance().initializeSdk(with: sdkConfig) {
-            // Request user consent to collect personally identifiable information
-            // used for targeted ads
-            if let tabBarController = self.containerViewController.mainTabBarController {
-                self.displayConsentDialog(from: tabBarController)
-            }
-        }
+        checkAndInitializeSdk()
 
         // Conversion tracking
         MPAdConversionTracker.shared().reportApplicationOpen(forApplicationID: kAppId)
@@ -107,8 +101,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         DispatchQueue.main.async {
             // If the ad unit should be saved, we will switch the tab to the saved ads
             // tab and then push the view controller on that navigation stack.
+            self.containerViewController.mainTabBarController?.selectedIndex = 1
             if shouldSave {
-                self.containerViewController.mainTabBarController?.selectedIndex = 1
                 SavedAdsManager.sharedInstance.addSavedAd(adUnit: adUnit)
             }
             

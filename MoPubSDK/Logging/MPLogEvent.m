@@ -15,15 +15,15 @@
 @implementation MPLogEvent
 
 - (instancetype)initWithMessage:(NSString *)message {
-    return [self initWithMessage:message level:MPLogLevelDebug];
+    return [self initWithMessage:message level:MPBLogLevelDebug];
 }
 
-- (instancetype)initWithMessage:(NSString *)message level:(MPLogLevel)level {
+- (instancetype)initWithMessage:(NSString *)message level:(MPBLogLevel)level {
     if (self = [super init]) {
         _message = message;
         _logLevel = level;
     }
-    
+
     return self;
 }
 
@@ -33,7 +33,7 @@
     return [[MPLogEvent alloc] initWithMessage:logMessage];
 }
 
-+ (instancetype)eventWithMessage:(NSString *)message level:(MPLogLevel)level {
++ (instancetype)eventWithMessage:(NSString *)message level:(MPBLogLevel)level {
     return [[MPLogEvent alloc] initWithMessage:message level:level];
 }
 
@@ -55,32 +55,32 @@
 
 + (instancetype)adLoadAttempt {
     static NSString * const message = @"Attempting to load ad";
-    return [[MPLogEvent alloc] initWithMessage:message level:MPLogLevelInfo];
+    return [[MPLogEvent alloc] initWithMessage:message level:MPBLogLevelInfo];
 }
 
 + (instancetype)adShowAttempt {
     static NSString * const message = @"Attempting to show ad";
-    return [[MPLogEvent alloc] initWithMessage:message level:MPLogLevelInfo];
+    return [[MPLogEvent alloc] initWithMessage:message level:MPBLogLevelInfo];
 }
 
 + (instancetype)adShowSuccess {
     static NSString * const message = @"Ad shown";
-    return [[MPLogEvent alloc] initWithMessage:message level:MPLogLevelInfo];
+    return [[MPLogEvent alloc] initWithMessage:message level:MPBLogLevelInfo];
 }
 
 + (instancetype)adShowFailedWithError:(NSError *)error {
     NSString * message = [NSString stringWithFormat:@"Ad failed to show: (%@) %@", @(error.code), error.localizedDescription];
-    return [[MPLogEvent alloc] initWithMessage:message level:MPLogLevelInfo];
+    return [[MPLogEvent alloc] initWithMessage:message level:MPBLogLevelInfo];
 }
 
 + (instancetype)adDidLoad {
     static NSString * const message = @"Ad loaded";
-    return [[MPLogEvent alloc] initWithMessage:message level:MPLogLevelInfo];
+    return [[MPLogEvent alloc] initWithMessage:message level:MPBLogLevelInfo];
 }
 
 + (instancetype)adFailedToLoadWithError:(NSError *)error {
     NSString * message = [NSString stringWithFormat:@"Ad failed to load: (%@) %@", @(error.code), error.localizedDescription];
-    return [[MPLogEvent alloc] initWithMessage:message level:MPLogLevelInfo];
+    return [[MPLogEvent alloc] initWithMessage:message level:MPBLogLevelInfo];
 }
 
 + (instancetype)adExpiredWithTimeInterval:(NSTimeInterval)expirationInterval {
@@ -226,9 +226,9 @@
         [networkVersions addObject:message];
     }];
     NSString * networksMessage = (networkVersions.count > 0 ? [networkVersions componentsJoinedByString:@"\n\t"] : @"No adapters initialized");
-    
+
     NSString * message = [NSString stringWithFormat:@"SDK initialized and ready to display ads.\n\tInitialized adapters:\n\t%@\n", networksMessage];
-    return [[MPLogEvent alloc] initWithMessage:message level:MPLogLevelInfo];
+    return [[MPLogEvent alloc] initWithMessage:message level:MPBLogLevelInfo];
 }
 
 @end

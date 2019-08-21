@@ -82,4 +82,10 @@
 // Called after the rewarded video finishes playing
 - (void)rewardedVideoEnded;
 
+// Called just before the ad will expand or resize
+- (void)adWillExpand:(UIView *)adView;
+
+// Called after the ad collapsed from an expanded or resized state
+- (void)adDidCollapse:(UIView *)adView;
+
 @end

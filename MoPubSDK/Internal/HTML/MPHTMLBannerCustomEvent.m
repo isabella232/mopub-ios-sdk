@@ -21,8 +21,6 @@
 
 @implementation MPHTMLBannerCustomEvent
 
-@synthesize bannerAgent = _bannerAgent;
-
 - (BOOL)enableAutomaticImpressionAndClickTracking
 {
     return NO;
@@ -46,7 +44,7 @@
 
 - (void)rotateToOrientation:(UIInterfaceOrientation)newOrientation
 {
-    [self.bannerAgent rotateToOrientation:newOrientation];
+    [self.bannerAgent forceRedraw];
 }
 
 #pragma mark - MPAdWebViewAgentDelegate

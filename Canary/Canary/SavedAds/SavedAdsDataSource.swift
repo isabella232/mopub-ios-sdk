@@ -11,7 +11,9 @@ import Foundation
 /**
  Saved ad units data source
  */
-class SavedAdsDataSource: AdUnitDataSource {
+final class SavedAdsDataSource: AdUnitDataSource {
+    private let savedAdSectionTitle = "Saved Ads"
+    
     // MARK: - Overrides
     
     /**
@@ -22,13 +24,20 @@ class SavedAdsDataSource: AdUnitDataSource {
      */
     required init(plistName: String = "", bundle: Bundle = Bundle.main) {
         super.init(plistName: plistName, bundle: bundle)
-        self.adUnits = ["Saved Ads": SavedAdsManager.sharedInstance.loadSavedAds()]
+        self.adUnits = [savedAdSectionTitle: SavedAdsManager.sharedInstance.savedAds]
     }
     
     /**
      Reloads the data source.
      */
     override func reloadData() {
-        self.adUnits = ["Saved Ads": SavedAdsManager.sharedInstance.loadSavedAds()]
+        self.adUnits = [savedAdSectionTitle: SavedAdsManager.sharedInstance.savedAds]
+    }
+    
+    /**
+     Data source sections as human readable text meant for display as section headings to the user.
+     */
+    override var sections: [String] {
+        return [savedAdSectionTitle]
     }
 }

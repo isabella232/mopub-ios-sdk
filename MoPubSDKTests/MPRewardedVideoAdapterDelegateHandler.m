@@ -28,5 +28,6 @@
 - (void)rewardedVideoDidReceiveTapEventForAdapter:(MPRewardedVideoAdapter *)adapter { if (self.rewardedVideoDidReceiveTapEvent) self.rewardedVideoDidReceiveTapEvent(adapter); }
 - (void)rewardedVideoWillLeaveApplicationForAdapter:(MPRewardedVideoAdapter *)adapter { if (self.rewardedVideoWillLeaveApplication) self.rewardedVideoWillLeaveApplication(adapter); }
 - (void)rewardedVideoShouldRewardUserForAdapter:(MPRewardedVideoAdapter *)adapter reward:(MPRewardedVideoReward *)reward { if (self.rewardedVideoShouldRewardUser) self.rewardedVideoShouldRewardUser(adapter, reward); }
+- (void)rewardedVideoDidReceiveImpressionEventForAdapter:(MPRewardedVideoAdapter *)adapter { if (self.rewardedVideoDidReceiveImpressionEvent) self.rewardedVideoDidReceiveImpressionEvent(adapter); }
 
 @end

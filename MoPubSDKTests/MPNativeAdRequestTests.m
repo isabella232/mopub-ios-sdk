@@ -8,6 +8,7 @@
 
 #import <XCTest/XCTest.h>
 #import "MPAdConfigurationFactory.h"
+#import "MPAdServerKeys.h"
 #import "MPAPIEndpoints.h"
 #import "MPConstants.h"
 #import "MPError.h"
@@ -19,7 +20,12 @@
 #import "MPStaticNativeAdRenderer.h"
 #import "MPNativeAdRendererConfiguration.h"
 #import "MPStaticNativeAdRendererSettings.h"
+#import "MPURL.h"
 #import "NSURLComponents+Testing.h"
+#import "MPNativeAdDelegateHandler.h"
+#import "MPNativeAd+Testing.h"
+#import "MPAdServerKeys.h"
+#import "MPImpressionTrackedNotification.h"
 
 static const NSTimeInterval kTestTimeout   = 2; // seconds
 
@@ -377,6 +383,164 @@ static const NSTimeInterval kTestTimeout   = 2; // seconds
     XCTAssertNotNil(localExtras);
     XCTAssert([localExtras[@"testing"] isEqualToString:@"YES"]);
     XCTAssertTrue(customEvent.isLocalExtrasAvailableAtRequest);
+}
+
+#pragma mark - Impression Level Revenue Data
+
+- (void)testImpressionDelegateFiresWithoutILRD {
+    XCTestExpectation * delegateExpectation = [self expectationWithDescription:@"Wait for impression delegate"];
+    XCTestExpectation * notificationExpectation = [self expectationWithDescription:@"Wait for impression notification"];
+    NSString * testAdUnitId = @"FAKE_AD_UNIT_ID";
+
+    __block MPNativeAd * nativeAd = nil;
+
+    // Make delegate handler
+    MPNativeAdDelegateHandler * handler = [[MPNativeAdDelegateHandler alloc] init];
+    handler.didTrackImpression = ^(MPNativeAd * ad, MPImpressionData * impressionData) {
+        [delegateExpectation fulfill];
+
+        XCTAssertNil(impressionData);
+    };
+
+    // Make notification handler
+    id notificationObserver = [[NSNotificationCenter defaultCenter] addObserverForName:kMPImpressionTrackedNotification
+                                                                                object:nil
+                                                                                 queue:[NSOperationQueue mainQueue]
+                                                                            usingBlock:^(NSNotification * note){
+                                                                                [notificationExpectation fulfill];
+
+                                                                                XCTAssertNil(note.userInfo[kMPImpressionTrackedInfoImpressionDataKey]);
+                                                                                XCTAssert([nativeAd isEqual:note.object]);
+                                                                                XCTAssert([note.userInfo[kMPImpressionTrackedInfoAdUnitIDKey] isEqualToString:nativeAd.adUnitID]);
+                                                                            }];
+
+    // Generate the ad configurations
+    MPAdConfiguration * nativeAdThatShouldLoad = [MPAdConfigurationFactory defaultNativeAdConfigurationWithCustomEventClassName:@"MPMockNativeCustomEvent"];
+    NSArray * configurations = @[nativeAdThatShouldLoad];
+
+    // Generate ad request
+    MPNativeAdRequest * nativeAdRequest = [MPNativeAdRequest requestWithAdUnitIdentifier:testAdUnitId rendererConfigurations:self.rendererConfigurations];
+    MPMockAdServerCommunicator * communicator = [[MPMockAdServerCommunicator alloc] initWithDelegate:nativeAdRequest];
+    communicator.mockConfigurationsResponse = configurations;
+    nativeAdRequest.communicator = communicator;
+
+    nativeAdRequest.targeting = [MPNativeAdRequestTargeting targeting];
+    [nativeAdRequest startWithCompletionHandler:^(MPNativeAdRequest *request, MPNativeAd *response, NSError *error) {
+        if (error != nil) {
+            XCTFail(@"Unexpected failure");
+        }
+
+        nativeAd = response;
+        response.delegate = handler;
+        [response trackImpression];
+    }];
+
+    [self waitForExpectationsWithTimeout:kTestTimeout handler:^(NSError * _Nullable error) {
+        if (error != nil) {
+            XCTFail(@"Timed out");
+        }
+    }];
+
+    [[NSNotificationCenter defaultCenter] removeObserver:notificationObserver];
+}
+
+- (void)testImpressionDelegateFiresWithILRD {
+    XCTestExpectation * delegateExpectation = [self expectationWithDescription:@"Wait for impression delegate"];
+    XCTestExpectation * notificationExpectation = [self expectationWithDescription:@"Wait for impression notification"];
+    NSString * testAdUnitId = @"FAKE_AD_UNIT_ID";
+
+    __block MPNativeAd * nativeAd = nil;
+
+    // Make delegate handler
+    MPNativeAdDelegateHandler * handler = [[MPNativeAdDelegateHandler alloc] init];
+    handler.didTrackImpression = ^(MPNativeAd * ad, MPImpressionData * impressionData) {
+        [delegateExpectation fulfill];
+
+        XCTAssertNotNil(impressionData);
+        XCTAssert([impressionData.adUnitID isEqualToString:testAdUnitId]);
+    };
+
+    // Make notification handler
+    id notificationObserver = [[NSNotificationCenter defaultCenter] addObserverForName:kMPImpressionTrackedNotification
+                                                                                object:nil
+                                                                                 queue:[NSOperationQueue mainQueue]
+                                                                            usingBlock:^(NSNotification * note){
+                                                                                [notificationExpectation fulfill];
+
+                                                                                MPImpressionData * impressionData = note.userInfo[kMPImpressionTrackedInfoImpressionDataKey];
+                                                                                XCTAssertNotNil(impressionData);
+                                                                                XCTAssert([impressionData.adUnitID isEqualToString:testAdUnitId]);
+                                                                                XCTAssert([nativeAd isEqual:note.object]);
+                                                                                XCTAssert([note.userInfo[kMPImpressionTrackedInfoAdUnitIDKey] isEqualToString:nativeAd.adUnitID]);
+                                                                            }];
+
+    // Generate the ad configurations
+    MPAdConfiguration * nativeAdThatShouldLoad = [MPAdConfigurationFactory defaultNativeAdConfigurationWithCustomEventClassName:@"MPMockNativeCustomEvent"];
+    nativeAdThatShouldLoad.impressionData = [[MPImpressionData alloc] initWithDictionary:@{
+                                                                                           kImpressionDataAdUnitIDKey: testAdUnitId
+                                                                                           }];
+    NSArray * configurations = @[nativeAdThatShouldLoad];
+
+    // Generate ad request
+    MPNativeAdRequest * nativeAdRequest = [MPNativeAdRequest requestWithAdUnitIdentifier:testAdUnitId rendererConfigurations:self.rendererConfigurations];
+    MPMockAdServerCommunicator * communicator = [[MPMockAdServerCommunicator alloc] initWithDelegate:nativeAdRequest];
+    communicator.mockConfigurationsResponse = configurations;
+    nativeAdRequest.communicator = communicator;
+
+    nativeAdRequest.targeting = [MPNativeAdRequestTargeting targeting];
+    [nativeAdRequest startWithCompletionHandler:^(MPNativeAdRequest *request, MPNativeAd *response, NSError *error) {
+        if (error != nil) {
+            XCTFail(@"Unexpected failure");
+        }
+
+        nativeAd = response;
+        response.delegate = handler;
+        [response trackImpression];
+    }];
+
+    [self waitForExpectationsWithTimeout:kTestTimeout handler:^(NSError * _Nullable error) {
+        if (error != nil) {
+            XCTFail(@"Timed out");
+        }
+    }];
+
+    [[NSNotificationCenter defaultCenter] removeObserver:notificationObserver];
+}
+
+#pragma mark - Ad Sizing
+
+- (void)testNativeCreativeSizeSentAsZero {
+    XCTestExpectation * expectation = [self expectationWithDescription:@"Wait for native load"];
+
+    // Generate ad request
+    MPNativeAdRequest * nativeAdRequest = [MPNativeAdRequest requestWithAdUnitIdentifier:@"FAKE_AD_UNIT_ID" rendererConfigurations:self.rendererConfigurations];
+    MPMockAdServerCommunicator * communicator = [[MPMockAdServerCommunicator alloc] initWithDelegate:nativeAdRequest];
+    communicator.mockConfigurationsResponse = @[];
+
+    nativeAdRequest.communicator = communicator;
+    [nativeAdRequest startWithCompletionHandler:^(MPNativeAdRequest *request, MPNativeAd *response, NSError *error) {
+        if (error == nil) {
+            XCTFail(@"Unexpected success");
+        }
+        [expectation fulfill];
+    }];
+
+    [self waitForExpectationsWithTimeout:kTestTimeout handler:^(NSError * _Nullable error) {
+        if (error != nil) {
+            XCTFail(@"Timed out");
+        }
+    }];
+
+    XCTAssertTrue(communicator.numberOfBeforeLoadEventsFired == 0);
+    XCTAssertTrue(communicator.numberOfAfterLoadEventsFired == 0);
+
+    MPURL * url = [communicator.lastUrlLoaded isKindOfClass:[MPURL class]] ? (MPURL *)communicator.lastUrlLoaded : nil;
+    XCTAssertNotNil(url);
+
+    NSNumber * cw = [url numberForPOSTDataKey:kCreativeSafeWidthKey];
+    NSNumber * ch = [url numberForPOSTDataKey:kCreativeSafeHeightKey];
+    XCTAssert(cw.floatValue == 0.0);
+    XCTAssert(ch.floatValue == 0.0);
 }
 
 @end

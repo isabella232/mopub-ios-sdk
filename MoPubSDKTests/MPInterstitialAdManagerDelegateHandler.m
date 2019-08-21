@@ -42,4 +42,8 @@
     if (self.didTap != nil) { self.didTap(); }
 }
 
+- (void)interstitialAdManager:(MPInterstitialAdManager *)manager didReceiveImpressionEventWithImpressionData:(MPImpressionData *)impressionData {
+    if (self.didReceiveImpression != nil) { self.didReceiveImpression(impressionData); }
+}
+
 @end

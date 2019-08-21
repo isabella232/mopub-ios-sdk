@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "MPConsentStatus.h"
-#import "MPLogLevel.h"
+#import "MPBLogLevel.h"
 
 @protocol MPAdapterConfiguration;
 @class MPRewardedVideoReward;
@@ -28,7 +28,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Level at which the message should be logged.
  */
-@property (nonatomic, assign, readonly) MPLogLevel logLevel;
+@property (nonatomic, assign, readonly) MPBLogLevel logLevel;
 
 /**
  Default initialization is disallowed.
@@ -49,7 +49,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param level Level at which the message should be logged
  @return Log event
  */
-- (instancetype)initWithMessage:(NSString *)message level:(MPLogLevel)level NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithMessage:(NSString *)message level:(MPBLogLevel)level NS_DESIGNATED_INITIALIZER;
 
 /**
  Initializes a generic error log event with optional message. The message and error
@@ -67,7 +67,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param level Level at which the message should be logged
  @return Log event
  */
-+ (instancetype)eventWithMessage:(NSString *)message level:(MPLogLevel)level;
++ (instancetype)eventWithMessage:(NSString *)message level:(MPBLogLevel)level;
 
 @end
 

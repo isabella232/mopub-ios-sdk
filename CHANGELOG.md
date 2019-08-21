@@ -1,3 +1,51 @@
+## Version 5.8.0 (July 22, 2019)
+- **Features**
+  - Minimum version of the MoPub SDK bumped to iOS 9.
+  - StoreKit Improvement: New Apple URL schemes for apps.apple.com, books.apple.com, and music.apple.com are now parsed for `SKStoreProductViewController`.
+  - StoreKit Improvement: Affiliate token and campagin token are now parsed for `SKStoreProductViewController`.
+  - Existing banner constants are deprecated in favor of new, configurable height-based constants. To use these, `MPAdView`'s frame must be set before an ad load is attempted.
+  - Updated `MPAdView`'s `initWithAdUnitId:size:`, `loadAd`, and `adViewDidLoadAd:` APIs by providing overloads `initWithAdUnitId:`, `loadAdWithMaxAdSize:`, and `adViewDidLoadAd:adSize:` which move the requested ad size to load time instead of at initialization time.
+  - `SFSafariViewController` is now exclusively used for in-app clickthrough destinations.
+  - Disallow the sending of empty ad unit IDs for consent.
+
+- **Bug Fixes**
+  - iOS 13 fixes: Explicitly set `modalPresentationStyle` for all modals in the MoPubSDK to `UIModalPresentationFullSCreen` since iOS 13 beta 1 changed the default modal presentation behavior.
+  - Fixed occasional crash due with `MPTimer` by ensuring it is always run on the main runloop.
+  - Fixed bug where banner and medium rectangle auto refresh timer was being fired even if the refresh interval was zero.
+  - Fixed bug where updated ad targeting parameters were not sent when banners were auto refreshing.
+  - Fixed a bug where the `UIButton+MPAdditions` category was impacting all `UIButton`s in the app. MoPub-specific `UIButton` customization is now contained in a subclass.
+
+## Version 5.7.1 (June 3, 2019)
+- **Features**
+  - Impression Level Revenue Data can now be received via a notification
+
+- **Bug Fixes**
+  - Fixed occasional crash due to multithreading bug
+
+## Version 5.7.0 (May 20, 2019)
+- **Features**
+  - Impression Level Revenue Data: A data object that includes revenue information associated with each impression
+  - Verizon Ads SDK now supported as a mediated network
+
+- **Bug Fixes**
+  - Fixed bug where native video fires an impression when main image asset is missing
+  - Fixed MRAID off-screen compliance for resized ads on tablets
+  - Fixed crash in Canary App when tapping on the `+` on iPad
+  - Replaced deprecated usage of `openURL:` with `openURL:options:completionHandler:` for iOS10+
+  - Fixed bug where click trackers can fire more than once on HTML banners and HTML interstitials
+  - Fixed bug in Canary App where ad units that were read using the QR code reader were not being saved
+  - Fixed bug where GDPR consent dialog was allowed to be presented twice in a row
+
+## Version 5.6.0 (March 18, 2019)
+- **Features**
+  - Added `+` button to the Canary sample app allowing manual entry of custom ad units
+
+- **Bug Fixes**
+  - MRAID orientation, expansion, and resizing edge case bug fixes
+  - MRAID expansion will no longer trigger a click tracking event
+  - MRAID logging no longer spams the device console
+  - Fixed position bug of the Rewarded Video countdown timer when rotating the device after the ad loads
+
 ## Version 5.5.0 (January 28, 2019)
 - **Features**
   - Advanced Bidding automatically initializes

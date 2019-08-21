@@ -8,69 +8,81 @@
 
 import Foundation
 
-class SavedAdsManager {
+final class SavedAdsManager {
+    /**
+     Notify when `savedAds` is changed.
+     */
+    struct DataUpdatedNotification: TypedNotification {
+        static let name = Notification.Name(rawValue: String(describing: DataUpdatedNotification.self))
+    }
 
-    static let savedAdsKey = "com.mopub.adunitids"
-
+    /**
+     Use a singleton to represent the global resource stored in `UserDefaults.standard`.
+     */
     static let sharedInstance = SavedAdsManager()
 
-    private var savedAds: [AdUnit] = Array()
-
-    // If a new Ad is added or removed from savedAdsManager, isDirty will be marked as true, which means
-    // persistent storage (UserDefault) and memory data (stored in savedAds array) have inconsistent data.
-    // To get updated saved ads, caller needs to invoke method loadSavedAds() again.
-    var isDirty: Bool
-
-    private init() {
-        isDirty = false
+    /**
+     An sorted array `AdUnit` with the most recently saved ad comes first.
+     */
+    private(set) var savedAds: [AdUnit]
+    
+    private let userDefaults: UserDefaults
+    
+    init(userDefaults: UserDefaults = .standard) {
+        self.userDefaults = userDefaults
+        savedAds = userDefaults.persistentAdUnits
     }
 
+    /**
+     Add the ad unit and remove duplicate if there is any.
+     Note: A `DataUpdatedNotification` is posted before returning.
+     */
     func addSavedAd(adUnit: AdUnit) {
-        removeSavedAd(adUnit: adUnit)
-        savedAds.append(adUnit)
-        persistSavedAds()
-        isDirty = true
+        savedAds.removeAll(where: { adUnit.id == $0.id }) // avoid duplicate
+        savedAds.insert(adUnit, at: 0) // latest first
+        userDefaults.persistentAdUnits = savedAds
+        DataUpdatedNotification().post()
     }
-
-    func loadSavedAds() -> [AdUnit] {
-        savedAds = [] 
-        guard let encodedSavedAdsData = UserDefaults.standard.object(forKey: SavedAdsManager.savedAdsKey) as? Data else {
-            return []
-        }
-
-        guard let savedAdsFromPersistentStore: [AdUnit] = try? JSONDecoder().decode(Array.self, from: encodedSavedAdsData) else {
-            return []
-        }
-        savedAds += savedAdsFromPersistentStore
-        isDirty = false
-        return savedAds
-    }
-
+    
+    /**
+     Remove the provided ad unti from persistent storage.
+     Note: A `DataUpdatedNotification` is posted before returning.
+     */
     func removeSavedAd(adUnit: AdUnit) {
-        if let targetAdUnit = savedAdForId(adId: adUnit.id) {
-            if let index = savedAds.index(of:targetAdUnit) {
-                savedAds.remove(at: index)
-            }
-            isDirty = true
-        }
+        savedAds.removeAll(where: { adUnit.id == $0.id })
+        DataUpdatedNotification().post()
     }
+}
 
-    private func persistSavedAds() {
-        let jsonEncoder = JSONEncoder()
-        let persistData = try? jsonEncoder.encode(savedAds)
-        let defaults = UserDefaults.standard
-        defaults.set(persistData, forKey: SavedAdsManager.savedAdsKey)
-        defaults.synchronize()
+// MARK: - Persistent storage with `UserDefaults`
+
+private extension UserDefaults {
+    /**
+     The private `UserDefaults.Key` for accessing `persistentAdUnits`.
+     */
+    private var adUnitDataKey: Key<Data?> {
+        return Key<Data?>("AdUnitData", defaultValue: nil)
     }
-
-    private func savedAdForId(adId: String) -> AdUnit? {
-        var savedAd: AdUnit?
-        for ad in savedAds {
-            if ad.id == adId {
-                savedAd = ad
-                break
+    
+    var persistentAdUnits: [AdUnit] {
+        get {
+            do {
+                guard let data = self[adUnitDataKey] else {
+                    return []
+                }
+                return try JSONDecoder().decode([AdUnit].self, from: data)
+            } catch {
+                print("\(#function) caught error: \(error)")
+                return []
             }
         }
-        return savedAd
+        set {
+            do {
+                let data = try JSONEncoder().encode(newValue)
+                self[adUnitDataKey] = data
+            } catch {
+                print("\(#function) caught error: \(error)")
+            }
+        }
     }
 }

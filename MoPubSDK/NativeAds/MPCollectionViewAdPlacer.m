@@ -55,8 +55,11 @@ static NSString * const kCollectionViewAdPlacerReuseIdentifier = @"MPCollectionV
         _streamAdPlacer = [MPStreamAdPlacer placerWithViewController:controller adPositioning:positioning rendererConfigurations:rendererConfigurations];
         _streamAdPlacer.delegate = self;
 
-        _insertionTimer = [MPTimer timerWithTimeInterval:kUpdateVisibleCellsInterval target:self selector:@selector(updateVisibleCells) repeats:YES];
-        _insertionTimer.runLoopMode = NSRunLoopCommonModes;
+        _insertionTimer = [MPTimer timerWithTimeInterval:kUpdateVisibleCellsInterval
+                                                  target:self
+                                                selector:@selector(updateVisibleCells)
+                                                 repeats:YES
+                                             runLoopMode:NSRunLoopCommonModes];
         [_insertionTimer scheduleNow];
 
         _originalDataSource = collectionView.dataSource;
@@ -145,6 +148,14 @@ static NSString * const kCollectionViewAdPlacerReuseIdentifier = @"MPCollectionV
 {
     if ([self.delegate respondsToSelector:@selector(nativeAdWillLeaveApplicationFromCollectionViewAdPlacer:)]) {
         [self.delegate nativeAdWillLeaveApplicationFromCollectionViewAdPlacer:self];
+    }
+}
+
+- (void)mopubAdPlacer:(id<MPMoPubAdPlacer>)adPlacer didTrackImpressionForAd:(id<MPMoPubAd>)ad withImpressionData:(MPImpressionData *)impressionData {
+    if ([self.delegate respondsToSelector:@selector(mopubAdPlacer:didTrackImpressionForAd:withImpressionData:)]) {
+        [self.delegate mopubAdPlacer:self
+             didTrackImpressionForAd:ad
+                  withImpressionData:impressionData];
     }
 }
 

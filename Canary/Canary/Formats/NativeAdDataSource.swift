@@ -32,26 +32,28 @@ class NativeAdDataSource: BaseNativeAdDataSource, AdDataSource {
     /**
      Table of which events were triggered.
      */
-    private var eventTriggered: [AdEvent: Bool] = [:]
-    
-    /**
-     Reason for load failure.
-     */
-    private var loadFailureReason: String? = nil
+    var eventTriggered: [AdEvent: Bool] = [:]
     
     /**
      Status event titles that correspond to the events found in `MPNativeAdDelegate`
      */
-    private lazy var title: [AdEvent: String] = {
+    lazy var title: [AdEvent: String] = {
         var titleStrings: [AdEvent: String] = [:]
-        titleStrings[.didLoad]          = "nativeAdDidLoad(_:)"
-        titleStrings[.didFailToLoad]    = "nativeAdDidFailToLoad(_:_:)"
-        titleStrings[.willPresentModal] = "willPresentModal(_:)"
-        titleStrings[.didDismissModal]  = "didDismissModal(_:)"
-        titleStrings[.willLeaveApp]     = "willLeaveApplication(_:)"
+        titleStrings[.didLoad]            = "nativeAdDidLoad(_:)"
+        titleStrings[.didFailToLoad]      = "nativeAdDidFailToLoad(_:_:)"
+        titleStrings[.willPresentModal]   = "willPresentModal(_:)"
+        titleStrings[.didDismissModal]    = "didDismissModal(_:)"
+        titleStrings[.willLeaveApp]       = "willLeaveApplication(_:)"
+        titleStrings[.didTrackImpression] = "mopubAd(_:, didTrackImpressionWith _:)"
         
         return titleStrings
     }()
+    
+    /**
+     Optional status messages that correspond to the events found in the ad's delegate protocol.
+     These are reset as part of `clearStatus`.
+     */
+    var messages: [AdEvent: String] = [:]
     
     // MARK: - Initialization
     
@@ -68,13 +70,6 @@ class NativeAdDataSource: BaseNativeAdDataSource, AdDataSource {
     }
     
     // MARK: - AdDataSource
-    
-    /**
-     The ad unit information sections available for the ad.
-     */
-    lazy var information: [AdInformation] = {
-        return [.id, .keywords, .userDataKeywords]
-    }()
     
     /**
      The actions available for the ad.
@@ -99,7 +94,7 @@ class NativeAdDataSource: BaseNativeAdDataSource, AdDataSource {
      The status events available for the ad.
      */
     lazy var events: [AdEvent] = {
-        return [.didLoad, .didFailToLoad, .willPresentModal, .didDismissModal, .willLeaveApp]
+        return [.didLoad, .didFailToLoad, .willPresentModal, .didDismissModal, .willLeaveApp, .didTrackImpression]
     }()
     
     /**
@@ -115,36 +110,14 @@ class NativeAdDataSource: BaseNativeAdDataSource, AdDataSource {
     }
     
     /**
-     Retrieves the display status for the event.
-     - Parameter event: Status event.
-     - Returns: A tuple containing the status display title, optional message, and highlighted state.
+     Queries if the data source has an ad loaded.
      */
-    func status(for event: AdEvent) -> (title: String, message: String?, isHighlighted: Bool) {
-        let message = (event == .didFailToLoad ? loadFailureReason : nil)
-        let isHighlighted = (eventTriggered[event] ?? false)
-        return (title: title[event] ?? "", message: message, isHighlighted: isHighlighted)
-    }
+    private(set) var isAdLoaded: Bool = false
     
     /**
-     Sets the status for the event to highlighted. If the status is already highlighted,
-     nothing is done.
-     - Parameter event: Status event.
-     - Parameter complete: Completion closure.
+     Queries if the data source currently requesting an ad.
      */
-    func setStatus(for event: AdEvent, complete:(() -> Swift.Void)) {
-        eventTriggered[event] = true
-        complete()
-    }
-    
-    /**
-     Clears the highlighted state for all status events.
-     - Parameter complete: Completion closure.
-     */
-    func clearStatus(complete:(() -> Swift.Void)) {
-        loadFailureReason = nil
-        eventTriggered = [:]
-        complete()
-    }
+    private(set) var isAdLoading: Bool = false
     
     // MARK: - Ad Loading
     
@@ -198,6 +171,11 @@ class NativeAdDataSource: BaseNativeAdDataSource, AdDataSource {
     }
     
     private func loadAd() {
+        guard !isAdLoading else {
+            return
+        }
+        
+        isAdLoading = true
         clearStatus { [weak self] in
             self?.delegate?.adPresentationTableView.reloadData()
         }
@@ -207,10 +185,13 @@ class NativeAdDataSource: BaseNativeAdDataSource, AdDataSource {
         adRequest.targeting = targetting
         adRequest.start { [weak self] (request, nativeAd, error) in
             if let strongSelf = self {
+                // No longer loading regardless of result
+                strongSelf.isAdLoading = false
+                
                 // Error loading the native ad
                 guard error == nil else {
-                    strongSelf.loadFailureReason = error?.localizedDescription
-                    strongSelf.setStatus(for: .didFailToLoad) { [weak self] in
+                    strongSelf.isAdLoaded = false
+                    strongSelf.setStatus(for: .didFailToLoad, message: error?.localizedDescription) { [weak self] in
                         self?.delegate?.adPresentationTableView.reloadData()
                     }
                     return
@@ -223,6 +204,7 @@ class NativeAdDataSource: BaseNativeAdDataSource, AdDataSource {
                     strongSelf.addToAdContainer(view: nativeAdView)
                 }
                 
+                strongSelf.isAdLoaded = true
                 strongSelf.setStatus(for: .didLoad) { [weak self] in
                     self?.delegate?.adPresentationTableView.reloadData()
                 }
@@ -254,5 +236,12 @@ extension NativeAdDataSource: MPNativeAdDelegate {
     
     func viewControllerForPresentingModalView() -> UIViewController! {
         return delegate?.adPresentationViewController
+    }
+    
+    func mopubAd(_ ad: MPMoPubAd, didTrackImpressionWith impressionData: MPImpressionData?) {
+        let message = impressionData?.description ?? "No impression data"
+        setStatus(for: .didTrackImpression, message: message) { [weak self] in
+            self?.delegate?.adPresentationTableView.reloadData()
+        }
     }
 }

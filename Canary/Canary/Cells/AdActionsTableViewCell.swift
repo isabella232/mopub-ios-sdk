@@ -8,7 +8,7 @@
 
 import UIKit
 
-class AdActionsTableViewCell: UITableViewCell {
+final class AdActionsTableViewCell: UITableViewCell, TableViewCellRegisterable {
     // MARK: - IBOutlets
     @IBOutlet weak var stackView: UIStackView!
     @IBOutlet weak var showAdButton: RoundedButton!
@@ -27,17 +27,29 @@ class AdActionsTableViewCell: UITableViewCell {
         willShowAd?(sender)
     }
     
+    // MARK: - Life Cycle
+    
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        
+        // Accessibility
+        loadAdButton.accessibilityIdentifier = AccessibilityIdentifier.adActionsLoad
+        showAdButton.accessibilityIdentifier = AccessibilityIdentifier.adActionsShow
+    }
+    
     // MARK: - Refreshing
-    func refresh(loadAdHandler: AdActionHandler? = nil, showAdHandler: AdActionHandler? = nil) {
+    func refresh(isAdLoading: Bool = false, loadAdHandler: AdActionHandler? = nil, showAdHandler: AdActionHandler? = nil, showButtonEnabled: Bool = false) {
         willLoadAd = loadAdHandler
         willShowAd = showAdHandler
         
+        // Loading button state is only disabled if
+        // 1. the show button is enabled and has a valid handler
+        // OR
+        // 2. the ad is currently loading.
+        loadAdButton.isEnabled = (showAdHandler == nil || !showButtonEnabled) && !isAdLoading
+        
         // Showing an ad is optional. Hide it if there is no show handler.
         showAdButton.isHidden = (showAdHandler == nil)
+        showAdButton.isEnabled = showButtonEnabled
     }
-}
-
-extension AdActionsTableViewCell: TableViewCellRegisterable {
-    // MARK: - TableViewCellRegisterable
-    static private(set) var reuseId: String = "AdActionsTableViewCell"
 }

@@ -8,25 +8,20 @@
 
 import UIKit
 
-class SavedAdsViewController: AdUnitTableViewController {
+final class SavedAdsViewController: AdUnitTableViewController {
+    private var notificationTokens = [Notification.Token]()
+    
     // MARK: - View Lifecycle
     
     override func viewDidLoad() {
-        // Initialize the data source before invoking the base class's
-        // `viewDidLoad()` method.
-        let dataSource: SavedAdsDataSource = SavedAdsDataSource()
-        super.initialize(with: dataSource)
-        
+        // Initialize the data source before invoking the base class's `viewDidLoad()` method.
+        super.initialize(with: SavedAdsDataSource())
         super.viewDidLoad()
-    }
-
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-
-        // If persistent storage (UserDefault) and memory data (stored in savedAds array) have inconsistent data,
-        // reload tableView data.
-        if SavedAdsManager.sharedInstance.isDirty {
-            reloadData()
-        }
+        
+        reloadData()
+        
+        notificationTokens.append(SavedAdsManager.DataUpdatedNotification.addObserver { [weak self] _ in
+            self?.reloadData()
+        })
     }
 }

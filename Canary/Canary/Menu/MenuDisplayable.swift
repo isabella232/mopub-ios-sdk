@@ -37,20 +37,18 @@ protocol MenuDisplayable {
     
     /**
      Performs an optional selection action for the menu item
-     - Parameter index: Menu item index assumed to be in bounds
+     - Parameter indexPath: Menu item indexPath assumed to be in bounds
      - Parameter tableView: `UITableView` that rendered the item
      - Parameter viewController: Presenting view controller
+     - Returns: `true` if the menu should collapse when selected; `false` otherwise.
      */
-    func didSelect(itemAt index: Int, inTableView tableView: UITableView, presentFrom viewController: UIViewController) -> Swift.Void
-    
-    // MARK: - Menu Cells
+    func didSelect(itemAt indexPath: IndexPath, inTableView tableView: UITableView, presentFrom viewController: UIViewController) -> Bool
     
     /**
-     Provides a reusable basic menu cell that can be further customized.
-     - Parameter tableView: `UITableView` to retrieve the cell from
-     - Returns: A `BasicMenuTableViewCell`
+     Updates the data source if needed.
+     - Returns: `true` update happened; `false` otherwise.
      */
-    func basicMenuCell(inTableView tableView: UITableView) -> BasicMenuTableViewCell
+    func updateIfNeeded() -> Bool
 }
 
 extension MenuDisplayable {
@@ -59,19 +57,11 @@ extension MenuDisplayable {
         return false
     }
     
-    func didSelect(itemAt index: Int, inTableView tableView: UITableView, presentFrom viewController: UIViewController) -> Swift.Void {
-        return
+    func didSelect(itemAt indexPath: IndexPath, inTableView tableView: UITableView, presentFrom viewController: UIViewController) -> Bool {
+        return true
     }
     
-    func basicMenuCell(inTableView tableView: UITableView) -> BasicMenuTableViewCell {
-        let basicCellReuseIdentifier: String = "BasicMenuTableViewCell"
-        
-        var cell = tableView.dequeueReusableCell(withIdentifier: basicCellReuseIdentifier) as? BasicMenuTableViewCell
-        if cell == nil {
-            tableView.register(UINib(nibName: basicCellReuseIdentifier, bundle: nil), forCellReuseIdentifier: basicCellReuseIdentifier)
-            cell = tableView.dequeueReusableCell(withIdentifier: basicCellReuseIdentifier) as? BasicMenuTableViewCell
-        }
-        
-        return cell!
+    func updateIfNeeded() -> Bool {
+        return false
     }
 }

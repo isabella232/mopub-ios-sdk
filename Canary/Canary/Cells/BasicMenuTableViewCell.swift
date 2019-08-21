@@ -8,6 +8,6 @@
 
 import UIKit
 
-class BasicMenuTableViewCell: UITableViewCell {
+final class BasicMenuTableViewCell: UITableViewCell, TableViewCellRegisterable {
     @IBOutlet weak var title: UILabel!
 }

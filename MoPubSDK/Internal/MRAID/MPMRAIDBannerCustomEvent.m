@@ -103,4 +103,18 @@
     [self.mraidController.viewabilityTracker startTracking];
 }
 
+- (void)adWillExpand:(UIView *)adView
+{
+    if ([self.delegate respondsToSelector:@selector(bannerCustomEventWillExpandAd:)]) {
+        [self.delegate bannerCustomEventWillExpandAd:self];
+    }
+}
+
+- (void)adDidCollapse:(UIView *)adView
+{
+    if ([self.delegate respondsToSelector:@selector(bannerCustomEventDidCollapseAd:)]) {
+        [self.delegate bannerCustomEventDidCollapseAd:self];
+    }
+}
+
 @end

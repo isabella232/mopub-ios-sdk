@@ -9,10 +9,15 @@
 import UIKit
 import AVFoundation
 
+struct AdUnitTableViewControllerSegueIdentifier {
+    static let ModallyPresentCameraInterfaceSegueIdentifier = "modallyPresentCameraInterfaceViewController"
+    static let ModallyPresentManualEntryInterfaceSegueIdentifier = "modallyPresentManualEntryInterfaceViewController"
+}
+
 class AdUnitTableViewController: UIViewController {
     // Outlets from `Main.storyboard`
     @IBOutlet weak var tableView: UITableView!
-    @IBOutlet var cameraButton: UIBarButtonItem?
+    @IBOutlet var addButton: UIBarButtonItem?
     
     // Table data source.
     fileprivate var dataSource: AdUnitDataSource? = nil
@@ -40,12 +45,6 @@ class AdUnitTableViewController: UIViewController {
         tableView.delegate = self
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        showCameraButtonBasedOnCameraAccess()
-    }
-    
     // MARK: - Ad Loading
     
     public func loadAd(with adUnit: AdUnit) {
@@ -69,26 +68,42 @@ class AdUnitTableViewController: UIViewController {
         tableView.reloadData()
     }
     
-    // MARK: - Camera Button
+    // MARK: - IBActions
     
-    // Shows or hides the camera button based on whether the user has provided camera access.
-    fileprivate func showCameraButtonBasedOnCameraAccess() {
-        guard let cameraButton = cameraButton else {
+    @IBAction func addButtonAction(_ sender: Any) {
+        let cameraAuthorizationStatus = AVCaptureDevice.authorizationStatus(for: QRCodeCameraInterfaceViewController.defaultMediaType)
+        let showCameraButton = cameraAuthorizationStatus == .authorized || cameraAuthorizationStatus == .notDetermined ? true : false
+        
+        // If camera use is not authorized, show the manual interface without giving a choice
+        if !showCameraButton {
+            performSegue(withIdentifier: AdUnitTableViewControllerSegueIdentifier.ModallyPresentManualEntryInterfaceSegueIdentifier, sender: self)
             return
         }
         
-        let cameraAuthorizationStatus = AVCaptureDevice.authorizationStatus(for: QRCodeCameraInterfaceViewController.defaultMediaType)
+        // If camera use is authorized, show action sheet with a choice between manual interface and camera interface
         
-        switch cameraAuthorizationStatus {
-        case .authorized:
-            navigationItem.rightBarButtonItem = cameraButton
-        case .denied:
-            navigationItem.rightBarButtonItem = nil
-        case .restricted:
-            navigationItem.rightBarButtonItem = nil
-        case .notDetermined:
-            navigationItem.rightBarButtonItem = cameraButton
+        let actionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        
+        actionSheet.addAction(UIAlertAction(title: "Enter Ad Unit ID Manually", style: .default, handler: { [unowned self] _ in
+            self.performSegue(withIdentifier: AdUnitTableViewControllerSegueIdentifier.ModallyPresentManualEntryInterfaceSegueIdentifier, sender: self)
+        }))
+        
+        actionSheet.addAction(UIAlertAction(title: "Use QR Code", style: .default, handler: { [unowned self] _ in
+            self.performSegue(withIdentifier: AdUnitTableViewControllerSegueIdentifier.ModallyPresentCameraInterfaceSegueIdentifier, sender: self)
+        }))
+        
+        actionSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        
+        if let popoverPresentationController = actionSheet.popoverPresentationController {
+            guard let barButtonItem = sender as? UIBarButtonItem else {
+                assertionFailure("\(#function) sender is not `UIBarButtonItem` as expected")
+                return
+            }
+            // ADF-4094: app will crash if popover source is not set for popover presentation
+            popoverPresentationController.barButtonItem = barButtonItem
         }
+        
+        present(actionSheet, animated: true, completion: nil)
     }
 }
 
@@ -104,11 +119,12 @@ extension AdUnitTableViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let adUnitCell: AdUnitTableViewCell = tableView.dequeueReusableCell(withIdentifier: AdUnitTableViewCell.reuseId, for: indexPath) as? AdUnitTableViewCell,
-            let adUnit: AdUnit = dataSource?.item(at: indexPath) else {
+        guard let adUnit: AdUnit = dataSource?.item(at: indexPath) else {
             return UITableViewCell()
         }
         
+        let adUnitCell = tableView.dequeueCellFromNib(cellType: AdUnitTableViewCell.self)
+        adUnitCell.accessibilityIdentifier = adUnit.id
         adUnitCell.refresh(adUnit: adUnit)
         adUnitCell.setNeedsLayout()
         return adUnitCell
@@ -119,15 +135,12 @@ extension AdUnitTableViewController: UITableViewDelegate {
     // MARK: - UITableViewDelegate
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        // Intentionally not to deselect cell to help user to keep track of the long list
         guard let adUnit: AdUnit = dataSource?.item(at: indexPath) else {
-            tableView.deselectRow(at: indexPath, animated: true)
             return
         }
         
         loadAd(with: adUnit)
-        
-        // Unselect the row.
-        tableView.deselectRow(at: indexPath, animated: true)
     }
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {

@@ -56,7 +56,7 @@ class NativeAdCollectionDataSource: BaseNativeAdDataSource {
     /**
      Computed native ad targetting settings.
      */
-    var targetting: MPNativeAdRequestTargeting {
+    var targeting: MPNativeAdRequestTargeting {
         let target: MPNativeAdRequestTargeting = MPNativeAdRequestTargeting()
         target.desiredAssets = Set(arrayLiteral: kAdTitleKey, kAdTextKey, kAdCTATextKey, kAdIconImageKey, kAdMainImageKey, kAdStarRatingKey, kAdIconImageViewKey, kAdMainMediaViewKey)
         target.keywords = adUnit.keywords

@@ -20,8 +20,8 @@
     if (self.didLoadAd != nil) { self.didLoadAd(); }
 }
 
-- (void)managerDidFailToLoadAd {
-    if (self.didFailToLoadAd != nil) { self.didFailToLoadAd(); }
+- (void)managerDidFailToLoadAdWithError:(NSError *)error {
+    if (self.didFailToLoadAd != nil) { self.didFailToLoadAd(error); }
 }
 
 - (void)userActionWillBegin {
@@ -34,6 +34,10 @@
 
 - (void)userWillLeaveApplication {
     if (self.willLeaveApplication != nil) { self.willLeaveApplication(); }
+}
+
+- (void)impressionDidFireWithImpressionData:(MPImpressionData *)impressionData {
+    if (self.impressionDidFire != nil) { self.impressionDidFire(impressionData); }
 }
 
 @end

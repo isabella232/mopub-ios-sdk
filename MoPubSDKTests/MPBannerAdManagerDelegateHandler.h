@@ -9,8 +9,11 @@
 #import <Foundation/Foundation.h>
 #import "MPBannerAdManager.h"
 #import "MPBannerAdManagerDelegate.h"
+#import "MPImpressionData.h"
 
 typedef void(^MPBannerAdManagerDelegateHandlerBlock)(void);
+typedef void(^MPBannerAdManagerDelegateHandlerImpressionBlock)(MPImpressionData * impressionData);
+typedef void(^MPBannerAdManagerDelegateHandlerErrorBlock)(NSError * error);
 
 @interface MPBannerAdManagerDelegateHandler : NSObject <MPBannerAdManagerDelegate>
 
@@ -25,9 +28,10 @@ typedef void(^MPBannerAdManagerDelegateHandlerBlock)(void);
 @property (nonatomic, strong) UIViewController * viewControllerForPresentingModalView;
 
 @property (nonatomic, copy) MPBannerAdManagerDelegateHandlerBlock didLoadAd;
-@property (nonatomic, copy) MPBannerAdManagerDelegateHandlerBlock didFailToLoadAd;
+@property (nonatomic, copy) MPBannerAdManagerDelegateHandlerErrorBlock didFailToLoadAd;
 @property (nonatomic, copy) MPBannerAdManagerDelegateHandlerBlock willBeginUserAction;
 @property (nonatomic, copy) MPBannerAdManagerDelegateHandlerBlock didEndUserAction;
 @property (nonatomic, copy) MPBannerAdManagerDelegateHandlerBlock willLeaveApplication;
+@property (nonatomic, copy) MPBannerAdManagerDelegateHandlerImpressionBlock impressionDidFire;
 
 @end

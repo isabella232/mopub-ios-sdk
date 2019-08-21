@@ -27,4 +27,7 @@ typedef void(^MPBannerAdapterDelegateHandlerFailureBlock)(NSError * error);
 @property (nonatomic, copy) MPBannerAdapterDelegateHandlerBlock willLeaveApplication;
 @property (nonatomic, copy) MPBannerAdapterDelegateHandlerBlock didTrackImpression;
 
+@property (nonatomic, copy) MPBannerAdapterDelegateHandlerBlock willExpand;
+@property (nonatomic, copy) MPBannerAdapterDelegateHandlerBlock didCollapse;
+
 @end

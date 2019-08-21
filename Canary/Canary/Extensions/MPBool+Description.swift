@@ -10,11 +10,12 @@ import Foundation
 import MoPub
 
 public extension MPBool {
-    public var description: String {
+    var description: String {
         switch self {
         case .unknown: return "unknown"
         case .yes: return "true"
         case .no: return "false"
+        @unknown default: fatalError("\(#function) unexpected enum case")
         }
     }
 }

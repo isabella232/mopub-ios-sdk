@@ -26,6 +26,7 @@ typedef id<MPMediationSettingsProtocol> (^MPRewardedVideoAdapterDelegateHandlerI
 @property (nonatomic, copy) MPRewardedVideoAdapterDelegateHandlerBlock rewardedVideoWillDisappear;
 @property (nonatomic, copy) MPRewardedVideoAdapterDelegateHandlerBlock rewardedVideoDidDisappear;
 @property (nonatomic, copy) MPRewardedVideoAdapterDelegateHandlerBlock rewardedVideoDidReceiveTapEvent;
+@property (nonatomic, copy) MPRewardedVideoAdapterDelegateHandlerBlock rewardedVideoDidReceiveImpressionEvent;
 @property (nonatomic, copy) MPRewardedVideoAdapterDelegateHandlerBlock rewardedVideoWillLeaveApplication;
 @property (nonatomic, copy) MPRewardedVideoAdapterDelegateHandlerRewardBlock rewardedVideoShouldRewardUser;
 

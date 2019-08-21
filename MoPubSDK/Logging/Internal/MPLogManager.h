@@ -8,9 +8,9 @@
 
 #import <Foundation/Foundation.h>
 #import "MPLogEvent.h"
-#import "MPLogger.h"
+#import "MPBLogger.h"
 #import "MPLogging.h"
-#import "MPLogLevel.h"
+#import "MPBLogLevel.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -23,7 +23,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Current log level of the console logger.
  */
-@property (nonatomic, assign) MPLogLevel consoleLogLevel;
+@property (nonatomic, assign) MPBLogLevel consoleLogLevel;
 
 /**
  Retrieves the singleton instance of @c MPLogManager.
@@ -34,13 +34,13 @@ NS_ASSUME_NONNULL_BEGIN
  Registers a logging destination.
  @param logger Logger to receive log events.
  */
-- (void)addLogger:(id<MPLogger>)logger;
+- (void)addLogger:(id<MPBLogger>)logger;
 
 /**
  Removes a logger from receiving log events.
  @param logger Logger to remove.
  */
-- (void)removeLogger:(id<MPLogger>)logger;
+- (void)removeLogger:(id<MPBLogger>)logger;
 
 /**
  Logs the message to all available logging destinations at the
@@ -48,7 +48,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param message Message to log.
  @param level Log level.
  */
-- (void)logMessage:(NSString *)message atLogLevel:(MPLogLevel)level;
+- (void)logMessage:(NSString *)message atLogLevel:(MPBLogLevel)level;
 
 /**
  Logs the event generated from the calling class. The format of the log message

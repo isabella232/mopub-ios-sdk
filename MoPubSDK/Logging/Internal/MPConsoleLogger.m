@@ -15,9 +15,9 @@
         // The console logging level is set to info by default in the event
         // that an error needs to be logged to the console prior to SDK
         // initialization.
-        _logLevel = MPLogLevelInfo;
+        _logLevel = MPBLogLevelInfo;
     }
-    
+
     return self;
 }
 

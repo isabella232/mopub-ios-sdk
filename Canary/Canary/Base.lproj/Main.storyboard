@@ -62,17 +62,19 @@
                         <viewLayoutGuide key="safeArea" id="PQr-Ze-W5v"/>
                     </view>
                     <navigationItem key="navigationItem" id="B6C-0N-HQx">
-                        <barButtonItem key="rightBarButtonItem" image="CameraButton" id="Wjr-ev-koK">
+                        <barButtonItem key="rightBarButtonItem" systemItem="add" id="Wjr-ev-koK">
                             <connections>
-                                <segue destination="9z9-xg-Dxa" kind="presentation" modalPresentationStyle="fullScreen" modalTransitionStyle="coverVertical" id="TRN-09-FQY"/>
+                                <action selector="addButtonAction:" destination="9pv-A4-QxB" id="Dkq-y2-CAi"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
                     <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" prompted="NO"/>
                     <simulatedTabBarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
-                        <outlet property="cameraButton" destination="Wjr-ev-koK" id="vap-yp-F4q"/>
+                        <outlet property="addButton" destination="Wjr-ev-koK" id="tEL-uh-E1H"/>
                         <outlet property="tableView" destination="MeT-Ko-6xH" id="ahd-9A-NJ2"/>
+                        <segue destination="9z9-xg-Dxa" kind="presentation" identifier="modallyPresentCameraInterfaceViewController" id="PsO-sh-cLW"/>
+                        <segue destination="X3E-6H-OVp" kind="presentation" identifier="modallyPresentManualEntryInterfaceViewController" id="MLl-ZY-iDG"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="W5J-7L-Pyd" sceneMemberID="firstResponder"/>
@@ -120,7 +122,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="9NM-Sc-MJh" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="4201" y="-156"/>
+            <point key="canvasLocation" x="3798" y="-503"/>
         </scene>
         <!--Container View Controller-->
         <scene sceneID="gfT-eg-j4w">
@@ -405,31 +407,210 @@
                         <viewLayoutGuide key="safeArea" id="GE0-OI-QR8"/>
                     </view>
                     <navigationItem key="navigationItem" id="gmn-hT-9Bs">
-                        <barButtonItem key="rightBarButtonItem" image="CameraButton" id="Rw2-Pr-sa5">
+                        <barButtonItem key="rightBarButtonItem" systemItem="add" id="Rw2-Pr-sa5">
                             <connections>
-                                <segue destination="9z9-xg-Dxa" kind="presentation" id="HGp-Qb-x1R"/>
+                                <action selector="addButtonAction:" destination="Itg-BM-BiX" id="0qM-4h-fIe"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
                     <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" prompted="NO"/>
                     <simulatedTabBarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
-                        <outlet property="cameraButton" destination="Rw2-Pr-sa5" id="UPo-iG-ghm"/>
+                        <outlet property="addButton" destination="Rw2-Pr-sa5" id="GAq-r2-oPn"/>
                         <outlet property="tableView" destination="gu9-Jr-zfy" id="hEu-9k-ZHq"/>
+                        <segue destination="9z9-xg-Dxa" kind="presentation" identifier="modallyPresentCameraInterfaceViewController" id="83r-rZ-ABX"/>
+                        <segue destination="X3E-6H-OVp" kind="presentation" identifier="modallyPresentManualEntryInterfaceViewController" id="hbh-pL-mrK"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="6A4-xB-4B0" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="2822" y="260"/>
         </scene>
+        <!--Enter Ad Unit ID-->
+        <scene sceneID="kKr-2G-6gW">
+            <objects>
+                <viewController id="Z6d-tR-9AW" customClass="ManualEntryInterfaceViewController" customModule="Canary" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="WWP-VL-xkB">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="1000" text="Ad Unit ID" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="FzH-f6-hB8">
+                                <rect key="frame" x="16" y="114" width="69" height="18"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="oFN-hx-Uaz">
+                                <rect key="frame" x="90" y="78" width="65" height="21"/>
+                                <fontDescription key="fontDescription" name="HelveticaNeue-Bold" family="Helvetica Neue" pointSize="17"/>
+                                <inset key="contentEdgeInsets" minX="6" minY="0.0" maxX="0.0" maxY="0.0"/>
+                                <state key="normal" title="Banner"/>
+                                <connections>
+                                    <action selector="adFormatButtonAction:" destination="Z6d-tR-9AW" eventType="touchUpInside" id="j1v-9s-Gdc"/>
+                                </connections>
+                            </button>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Enter a Name (Optional)" adjustsFontSizeToFit="NO" minimumFontSize="8" clearButtonMode="whileEditing" translatesAutoresizingMaskIntoConstraints="NO" id="B1n-Cx-WSS">
+                                <rect key="frame" x="90" y="143.5" width="269" height="30"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                <textInputTraits key="textInputTraits" autocorrectionType="no" returnKeyType="done"/>
+                                <connections>
+                                    <outlet property="delegate" destination="Z6d-tR-9AW" id="a6N-gT-3zm"/>
+                                </connections>
+                            </textField>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="1000" text="Ad Type" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Mlm-g7-4Tm">
+                                <rect key="frame" x="16" y="80" width="69" height="18"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Enter Ad Unit ID" adjustsFontSizeToFit="NO" minimumFontSize="8" clearButtonMode="whileEditing" translatesAutoresizingMaskIntoConstraints="NO" id="Ooi-Md-Ale">
+                                <rect key="frame" x="90" y="109.5" width="269" height="30"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                <textInputTraits key="textInputTraits" autocorrectionType="no" returnKeyType="done"/>
+                                <connections>
+                                    <outlet property="delegate" destination="Z6d-tR-9AW" id="uBT-5z-3PH"/>
+                                </connections>
+                            </textField>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="1000" text="Name" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3LQ-oO-59f">
+                                <rect key="frame" x="16" y="148" width="69" height="18"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Or" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ZXP-93-g8o">
+                                <rect key="frame" x="179" y="189.5" width="17" height="18"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kZR-L1-fSD" customClass="RoundedButton" customModule="Canary" customModuleProvider="target">
+                                <rect key="frame" x="16" y="621" width="167.5" height="30"/>
+                                <state key="normal" title="Show"/>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="boolean" keyPath="rounded" value="YES"/>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="borderWidth">
+                                        <real key="value" value="1"/>
+                                    </userDefinedRuntimeAttribute>
+                                    <userDefinedRuntimeAttribute type="color" keyPath="borderColor">
+                                        <color key="value" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                    </userDefinedRuntimeAttribute>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="showAction:" destination="Z6d-tR-9AW" eventType="touchUpInside" id="DLU-yt-gYF"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lvB-FU-cPG" customClass="RoundedButton" customModule="Canary" customModuleProvider="target">
+                                <rect key="frame" x="191.5" y="621" width="167.5" height="30"/>
+                                <state key="normal" title="Show and Save"/>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="boolean" keyPath="rounded" value="YES"/>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="borderWidth">
+                                        <real key="value" value="1"/>
+                                    </userDefinedRuntimeAttribute>
+                                    <userDefinedRuntimeAttribute type="color" keyPath="borderColor">
+                                        <color key="value" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                    </userDefinedRuntimeAttribute>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="showAndSaveAction:" destination="Z6d-tR-9AW" eventType="touchUpInside" id="9ak-9t-bKE"/>
+                                </connections>
+                            </button>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Enter a Deep Link URL" adjustsFontSizeToFit="NO" minimumFontSize="8" clearButtonMode="whileEditing" translatesAutoresizingMaskIntoConstraints="NO" id="2Hw-d7-whK">
+                                <rect key="frame" x="123" y="223.5" width="236" height="30"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                <textInputTraits key="textInputTraits" autocorrectionType="no" returnKeyType="done"/>
+                                <connections>
+                                    <outlet property="delegate" destination="Z6d-tR-9AW" id="p8a-fH-9fl"/>
+                                </connections>
+                            </textField>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="1000" text="Deep Link URL" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="wFQ-y4-rzh">
+                                <rect key="frame" x="16" y="228" width="102" height="18"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="ZXP-93-g8o" firstAttribute="top" secondItem="B1n-Cx-WSS" secondAttribute="bottom" constant="16" id="1K6-dj-ahc"/>
+                            <constraint firstItem="FzH-f6-hB8" firstAttribute="trailing" secondItem="3LQ-oO-59f" secondAttribute="trailing" id="31L-b6-A9g"/>
+                            <constraint firstItem="FzH-f6-hB8" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="rb1-nu-VRq" secondAttribute="leading" constant="16" id="3Kw-zm-W2p"/>
+                            <constraint firstItem="2Hw-d7-whK" firstAttribute="leading" secondItem="wFQ-y4-rzh" secondAttribute="trailing" constant="5" id="4MT-LK-ZHH"/>
+                            <constraint firstItem="FzH-f6-hB8" firstAttribute="top" secondItem="Mlm-g7-4Tm" secondAttribute="bottom" constant="16" id="4Vu-WR-9SL"/>
+                            <constraint firstItem="ZXP-93-g8o" firstAttribute="centerX" secondItem="rb1-nu-VRq" secondAttribute="centerX" id="6pm-i2-HQf"/>
+                            <constraint firstItem="ZXP-93-g8o" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="rb1-nu-VRq" secondAttribute="leading" constant="16" id="8fa-R5-8LX"/>
+                            <constraint firstItem="B1n-Cx-WSS" firstAttribute="leading" secondItem="3LQ-oO-59f" secondAttribute="trailing" constant="5" id="9WA-hk-ubm"/>
+                            <constraint firstItem="2Hw-d7-whK" firstAttribute="trailing" secondItem="B1n-Cx-WSS" secondAttribute="trailing" id="AbJ-z9-JxG"/>
+                            <constraint firstItem="lvB-FU-cPG" firstAttribute="firstBaseline" secondItem="kZR-L1-fSD" secondAttribute="firstBaseline" id="AyQ-O0-lil"/>
+                            <constraint firstItem="3LQ-oO-59f" firstAttribute="top" secondItem="FzH-f6-hB8" secondAttribute="bottom" constant="16" id="Bfv-um-oRu"/>
+                            <constraint firstItem="rb1-nu-VRq" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="ZXP-93-g8o" secondAttribute="trailing" constant="16" id="FyS-aJ-SiO"/>
+                            <constraint firstItem="rb1-nu-VRq" firstAttribute="trailing" secondItem="B1n-Cx-WSS" secondAttribute="trailing" constant="16" id="Ge8-wB-YiR"/>
+                            <constraint firstItem="Mlm-g7-4Tm" firstAttribute="leading" secondItem="rb1-nu-VRq" secondAttribute="leading" priority="950" constant="16" id="Nb5-nZ-O1T"/>
+                            <constraint firstItem="Mlm-g7-4Tm" firstAttribute="firstBaseline" secondItem="oFN-hx-Uaz" secondAttribute="firstBaseline" id="OJa-zC-ZcM"/>
+                            <constraint firstItem="FzH-f6-hB8" firstAttribute="firstBaseline" secondItem="Ooi-Md-Ale" secondAttribute="firstBaseline" id="PkF-pc-YbO"/>
+                            <constraint firstItem="Mlm-g7-4Tm" firstAttribute="trailing" secondItem="FzH-f6-hB8" secondAttribute="trailing" id="Pzc-jz-g3K"/>
+                            <constraint firstItem="lvB-FU-cPG" firstAttribute="leading" secondItem="kZR-L1-fSD" secondAttribute="trailing" constant="8" id="RAK-7R-qzS"/>
+                            <constraint firstItem="FzH-f6-hB8" firstAttribute="leading" secondItem="rb1-nu-VRq" secondAttribute="leading" priority="950" constant="16" id="Yer-Hk-w9K"/>
+                            <constraint firstItem="oFN-hx-Uaz" firstAttribute="leading" secondItem="Mlm-g7-4Tm" secondAttribute="trailing" constant="5" id="aFl-lj-Eeg"/>
+                            <constraint firstItem="kZR-L1-fSD" firstAttribute="leading" secondItem="rb1-nu-VRq" secondAttribute="leading" constant="16" id="bYv-X4-KGw"/>
+                            <constraint firstItem="3LQ-oO-59f" firstAttribute="leading" secondItem="rb1-nu-VRq" secondAttribute="leading" priority="950" constant="16" id="cet-IN-MbS"/>
+                            <constraint firstItem="rb1-nu-VRq" firstAttribute="trailing" secondItem="Ooi-Md-Ale" secondAttribute="trailing" constant="16" id="eJo-Yx-BmQ"/>
+                            <constraint firstItem="rb1-nu-VRq" firstAttribute="bottom" secondItem="kZR-L1-fSD" secondAttribute="bottom" constant="16" id="fyg-o2-Dxa"/>
+                            <constraint firstItem="3LQ-oO-59f" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="rb1-nu-VRq" secondAttribute="leading" constant="16" id="gDv-J2-3P6"/>
+                            <constraint firstItem="B1n-Cx-WSS" firstAttribute="width" secondItem="Ooi-Md-Ale" secondAttribute="width" id="jPW-YM-7Ye"/>
+                            <constraint firstItem="2Hw-d7-whK" firstAttribute="top" secondItem="ZXP-93-g8o" secondAttribute="bottom" constant="16" id="kda-71-Fsz"/>
+                            <constraint firstItem="wFQ-y4-rzh" firstAttribute="firstBaseline" secondItem="2Hw-d7-whK" secondAttribute="firstBaseline" id="mJf-eu-m9o"/>
+                            <constraint firstItem="wFQ-y4-rzh" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="rb1-nu-VRq" secondAttribute="leading" constant="16" id="mMg-Xs-bc0"/>
+                            <constraint firstItem="rb1-nu-VRq" firstAttribute="trailing" secondItem="lvB-FU-cPG" secondAttribute="trailing" constant="16" id="mVi-sf-47g"/>
+                            <constraint firstItem="wFQ-y4-rzh" firstAttribute="leading" secondItem="rb1-nu-VRq" secondAttribute="leading" priority="950" constant="16" id="r3a-k8-jg0"/>
+                            <constraint firstItem="Ooi-Md-Ale" firstAttribute="leading" secondItem="FzH-f6-hB8" secondAttribute="trailing" constant="5" id="sLy-EZ-SrJ"/>
+                            <constraint firstItem="Mlm-g7-4Tm" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="rb1-nu-VRq" secondAttribute="leading" constant="16" id="srr-be-Hyd"/>
+                            <constraint firstItem="rb1-nu-VRq" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="oFN-hx-Uaz" secondAttribute="trailing" constant="16" id="sx7-R3-bVE"/>
+                            <constraint firstItem="3LQ-oO-59f" firstAttribute="firstBaseline" secondItem="B1n-Cx-WSS" secondAttribute="firstBaseline" id="tUc-zu-nsD"/>
+                            <constraint firstItem="Mlm-g7-4Tm" firstAttribute="top" secondItem="rb1-nu-VRq" secondAttribute="top" constant="16" id="zUe-Sc-rlG"/>
+                            <constraint firstItem="kZR-L1-fSD" firstAttribute="width" secondItem="lvB-FU-cPG" secondAttribute="width" id="zzz-GG-tXk"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="rb1-nu-VRq"/>
+                    </view>
+                    <navigationItem key="navigationItem" title="Enter Ad Unit ID" id="Cd4-75-E91">
+                        <barButtonItem key="rightBarButtonItem" systemItem="cancel" id="uX4-sl-hUU">
+                            <connections>
+                                <action selector="cancelButtonAction:" destination="Z6d-tR-9AW" id="kj3-lN-Gt9"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
+                    <connections>
+                        <outlet property="adFormatButton" destination="oFN-hx-Uaz" id="yBF-qS-yeY"/>
+                        <outlet property="adUnitIdTextField" destination="Ooi-Md-Ale" id="llC-hp-yxh"/>
+                        <outlet property="deepLinkURLTextField" destination="2Hw-d7-whK" id="kYM-Da-V55"/>
+                        <outlet property="nameTextField" destination="B1n-Cx-WSS" id="BUu-cd-xNi"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="6nh-ag-d1o" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="4736.8000000000002" y="259.52023988005999"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="ZMb-FT-x1V">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="X3E-6H-OVp" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="SlL-8w-AQ2">
+                        <rect key="frame" x="0.0" y="20" width="375" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="Z6d-tR-9AW" kind="relationship" relationship="rootViewController" id="tF2-F1-2kr"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="F0g-H3-qyG" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="3797.5999999999999" y="259.52023988005999"/>
+        </scene>
     </scenes>
     <resources>
-        <image name="CameraButton" width="24" height="24"/>
         <image name="CloseButton" width="40" height="40"/>
         <image name="List" width="23" height="23"/>
         <image name="Saved" width="23" height="23"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="HGp-Qb-x1R"/>
+        <segue reference="MLl-ZY-iDG"/>
+        <segue reference="PsO-sh-cLW"/>
     </inferredMetricsTieBreakers>
 </document>

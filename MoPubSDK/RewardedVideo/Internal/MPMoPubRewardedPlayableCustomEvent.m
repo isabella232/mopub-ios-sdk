@@ -118,16 +118,27 @@ const NSTimeInterval kDefaultCountdownTimerIntervalInSeconds = 30;
     }
 
     // Add the countdown timer to the interstitial and start the timer.
-    self.timerView = [[MPCountdownTimerView alloc] initWithFrame:viewController.view.bounds duration:self.countdownDuration];
-    [self.interstitial.view addSubview:self.timerView];
-
-    [self.timerView startWithTimerCompletion:^(BOOL hasElapsed) {
+    self.timerView = [[MPCountdownTimerView alloc] initWithDuration:self.countdownDuration timerCompletion:^(BOOL hasElapsed) {
         __typeof__(self) strongSelf = weakSelf;
         if (strongSelf != nil) {
             [strongSelf rewardUserWithConfiguration:strongSelf.configuration timerHasElapsed:hasElapsed];
             [strongSelf showCloseButton];
         }
     }];
+    [self.interstitial.view addSubview:self.timerView];
+
+    NSArray * constraints;
+    if (@available(iOS 11, *)) { // consider safe area
+        constraints = @[[self.timerView.topAnchor constraintEqualToAnchor:self.interstitial.view.safeAreaLayoutGuide.topAnchor],
+                        [self.timerView.rightAnchor constraintEqualToAnchor:self.interstitial.view.safeAreaLayoutGuide.rightAnchor]];
+    } else {
+        constraints = @[[self.timerView.topAnchor constraintEqualToAnchor:self.interstitial.view.topAnchor],
+                        [self.timerView.rightAnchor constraintEqualToAnchor:self.interstitial.view.rightAnchor]];
+    }
+    [NSLayoutConstraint activateConstraints:constraints];
+    self.timerView.translatesAutoresizingMaskIntoConstraints = NO;
+
+    [self.timerView start];
 
     [self.interstitial presentInterstitialFromViewController:viewController complete:^(NSError * error) {
         if (error != nil) {

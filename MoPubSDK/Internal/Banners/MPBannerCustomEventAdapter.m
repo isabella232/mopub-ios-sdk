@@ -189,6 +189,23 @@
     }
 }
 
+- (void)bannerCustomEventWillExpandAd:(MPBannerCustomEvent *)event
+{
+    [self.delegate adWillExpandForAdapter:self];
+}
+
+- (void)bannerCustomEventDidCollapseAd:(MPBannerCustomEvent *)event
+{
+    [self.delegate adDidCollapseForAdapter:self];
+}
+
+- (void)trackImpression {
+    [super trackImpression];
+
+    // Notify delegate that an impression tracker was fired
+    [self.delegate adapterDidTrackImpressionForAd:self];
+}
+
 #pragma mark - MPAdImpressionTimerDelegate
 
 - (void)adViewWillLogImpression:(UIView *)adView
@@ -199,9 +216,6 @@
     [self.bannerCustomEvent trackImpressionsIncludedInMarkup];
     // Start viewability tracking
     [self.bannerCustomEvent startViewabilityTracker];
-
-    // Notify delegate that an impression tracker was fired
-    [self.delegate adapter:self didTrackImpressionForAd:adView];
 }
 
 @end

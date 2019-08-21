@@ -104,9 +104,7 @@ extension NativeAdTableViewController: UITableViewDataSource, UITableViewDelegat
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell: StatusTableViewCell = tableView.mp_dequeueReusableCell(withIdentifier: StatusTableViewCell.reuseId, for: indexPath) as? StatusTableViewCell else {
-            return UITableViewCell()
-        }
+        let cell = tableView.dequeueCellFromNib(cellType: StatusTableViewCell.self)
         
         // Update the cell
         let fontName: String = dataSource.data[indexPath.row]

@@ -11,4 +11,5 @@
 
 @interface MPAdView (Testing)
 @property (nonatomic, strong) MPBannerAdManager *adManager;
+- (void)impressionDidFireWithImpressionData:(MPImpressionData *)impressionData;
 @end

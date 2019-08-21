@@ -18,6 +18,7 @@ public struct AdUnitKey {
     static let UserDataKeywords: String = "userDataKeywords"
     static let CustomData: String = "custom_data"
     static let OverrideClass: String = "override_class"
+    static let Format: String = "format"
     
     /**
      Ad Unit ID to use when the current interface idiom is `pad`
@@ -100,7 +101,7 @@ public class AdUnit : NSObject, Codable {
         guard let urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false),
             let queryItems = urlComponents.queryItems,
             queryItems.contains(where: { $0.name == AdUnitKey.Id }),
-            let formatString: String = queryItems.filter({ $0.name == "format" }).first?.value,
+            let formatString: String = queryItems.filter({ $0.name == AdUnitKey.Format }).first?.value,
             let format = AdFormat(rawValue: formatString) else {
                 return nil
         }
@@ -111,5 +112,37 @@ public class AdUnit : NSObject, Codable {
         })
         
         self.init(info: params, defaultViewControllerClassName: format.renderingViewController)
+    }
+    
+    /**
+     Attempts to create an `AdUnit` object using an `adUnitId`, `format`, and optionally a `name`. Returns `nil`
+     if `AdUnit` object was not able to be created with information provided.
+     - Parameter adUnitId: ad unit ID in the form of a string
+     - Parameter format: `AdFormat` enum value signifying the ad format
+     - Parameter name: optional name in the form of the string. If `nil` is provided, adUnitId will be used instead.
+     - Returns: `AdUnit` or `nil`
+     */
+    convenience init?(adUnitId: String, format: AdFormat, name: String?) {
+        var params: [String: String] = [AdUnitKey.Id: adUnitId, AdUnitKey.Format: format.rawValue]
+        if let name = name, name.count > 0 {
+            params[AdUnitKey.Name] = name
+        }
+        self.init(info: params, defaultViewControllerClassName: format.renderingViewController)
+    }
+}
+
+extension AdUnit {
+    // MARK: - Filtering
+    
+    /**
+     Queries if the `AdUnit` contains the inputted string. The comparison is case-insensitive.
+     - Parameter string: String to search for.
+     - Returns: `true` if the `AdUnit` contains the string term; otherwise `false`.
+     */
+    public func contains(_ string: String) -> Bool {
+        let nameContainsFilterTerm: Bool = (name.range(of: string, options: .caseInsensitive) != nil)
+        let idContainsFilterTerm: Bool = (id.range(of: string, options: .caseInsensitive) != nil)
+        
+        return nameContainsFilterTerm || idContainsFilterTerm
     }
 }

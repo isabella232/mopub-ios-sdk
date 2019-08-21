@@ -19,7 +19,7 @@ copyMRAIDToResources() {
         MRAID_JS_FILE_CONTENT=`cat "${MRAID_FILE_LOCATION}"`
 
         # Insert the comment before the mraid.js content and output it to the mraid.js in our resources.
-        echo -n "${MRAID_JS_COMMENT}${MRAID_JS_FILE_CONTENT}" > "$1/MoPubSDK/Resources/MRAID.bundle/mraid.js"
+        echo "${MRAID_JS_COMMENT}${MRAID_JS_FILE_CONTENT}" > "$1/MoPubSDK/Resources/MRAID.bundle/mraid.js"
     else
         echo "Could not find mraid.js at location ${MRAID_FILE_LOCATION}. Will not copy mraid.js from mopub-sdk-common to MoPub resources."
     fi

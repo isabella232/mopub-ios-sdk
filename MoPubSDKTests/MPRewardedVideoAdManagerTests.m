@@ -20,6 +20,8 @@
 #import "MPMockRewardedVideoCustomEvent.h"
 #import "MPURL.h"
 #import "NSURLComponents+Testing.h"
+#import "MPRewardedVideo+Testing.h"
+#import "MPImpressionTrackedNotification.h"
 
 static NSString * const kTestAdUnitId = @"967f82c7-c059-4ae8-8cb6-41c34265b1ef";
 static const NSTimeInterval kTestTimeout   = 2; // seconds
@@ -37,7 +39,7 @@ static const NSTimeInterval kTestTimeout   = 2; // seconds
     NSDictionary * headers = @{ kRewardedVideoCurrencyNameMetadataKey: @"Diamonds",
                                 kRewardedVideoCurrencyAmountMetadataKey: @"3",
                                 };
-    MPAdConfiguration * config = [[MPAdConfiguration alloc] initWithMetadata:headers data:nil];
+    MPAdConfiguration * config = [[MPAdConfiguration alloc] initWithMetadata:headers data:nil adType:MPAdTypeFullscreen];
 
     // Semaphore to wait for asynchronous method to finish before continuing the test.
     XCTestExpectation * expectation = [self expectationWithDescription:@"Wait for reward completion block to fire."];
@@ -70,7 +72,7 @@ static const NSTimeInterval kTestTimeout   = 2; // seconds
     //   ]
     // }
     NSDictionary * headers = @{ kRewardedCurrenciesMetadataKey: @{ @"rewards": @[ @{ @"name": @"Coins", @"amount": @(8) } ] } };
-    MPAdConfiguration * config = [[MPAdConfiguration alloc] initWithMetadata:headers data:nil];
+    MPAdConfiguration * config = [[MPAdConfiguration alloc] initWithMetadata:headers data:nil adType:MPAdTypeFullscreen];
 
     // Semaphore to wait for asynchronous method to finish before continuing the test.
     XCTestExpectation * expectation = [self expectationWithDescription:@"Wait for reward completion block to fire."];
@@ -105,7 +107,7 @@ static const NSTimeInterval kTestTimeout   = 2; // seconds
     //   ]
     // }
     NSDictionary * headers = @{ kRewardedCurrenciesMetadataKey: @{ @"rewards": @[ @{ @"name": @"Coins", @"amount": @(8) }, @{ @"name": @"Diamonds", @"amount": @(1) }, @{ @"name": @"Energy", @"amount": @(20) } ] } };
-    MPAdConfiguration * config = [[MPAdConfiguration alloc] initWithMetadata:headers data:nil];
+    MPAdConfiguration * config = [[MPAdConfiguration alloc] initWithMetadata:headers data:nil adType:MPAdTypeFullscreen];
 
     // Semaphore to wait for asynchronous method to finish before continuing the test.
     XCTestExpectation * expectation = [self expectationWithDescription:@"Wait for reward completion block to fire."];
@@ -140,7 +142,7 @@ static const NSTimeInterval kTestTimeout   = 2; // seconds
     //   ]
     // }
     NSDictionary * headers = @{ kRewardedCurrenciesMetadataKey: @{ @"rewards": @[ @{ @"name": @"Coins", @"amount": @(8) }, @{ @"name": @"Diamonds", @"amount": @(1) }, @{ @"name": @"Energy", @"amount": @(20) } ] } };
-    MPAdConfiguration * config = [[MPAdConfiguration alloc] initWithMetadata:headers data:nil];
+    MPAdConfiguration * config = [[MPAdConfiguration alloc] initWithMetadata:headers data:nil adType:MPAdTypeFullscreen];
 
     // Semaphore to wait for asynchronous method to finish before continuing the test.
     XCTestExpectation * expectation = [self expectationWithDescription:@"Wait for reward completion block to fire."];
@@ -182,7 +184,7 @@ static const NSTimeInterval kTestTimeout   = 2; // seconds
     //   ]
     // }
     NSDictionary * headers = @{ kRewardedCurrenciesMetadataKey: @{ @"rewards": @[ @{ @"name": @"Coins", @"amount": @(8) }, @{ @"name": @"Diamonds", @"amount": @(1) }, @{ @"name": @"Energy", @"amount": @(20) } ] } };
-    MPAdConfiguration * config = [[MPAdConfiguration alloc] initWithMetadata:headers data:nil];
+    MPAdConfiguration * config = [[MPAdConfiguration alloc] initWithMetadata:headers data:nil adType:MPAdTypeFullscreen];
 
     // Semaphore to wait for asynchronous method to finish before continuing the test.
     XCTestExpectation * expectation = [self expectationWithDescription:@"Wait for reward completion block to fire."];
@@ -224,7 +226,7 @@ static const NSTimeInterval kTestTimeout   = 2; // seconds
     //   ]
     // }
     NSDictionary * headers = @{ kRewardedCurrenciesMetadataKey: @{ @"rewards": @[ @{ @"name": @"Coins", @"amount": @(8) }, @{ @"name": @"Diamonds", @"amount": @(1) }, @{ @"name": @"Energy", @"amount": @(20) } ] } };
-    MPAdConfiguration * config = [[MPAdConfiguration alloc] initWithMetadata:headers data:nil];
+    MPAdConfiguration * config = [[MPAdConfiguration alloc] initWithMetadata:headers data:nil adType:MPAdTypeFullscreen];
 
     // Semaphore to wait for asynchronous method to finish before continuing the test.
     XCTestExpectation * expectation = [self expectationWithDescription:@"Wait for reward completion block to fire."];
@@ -528,7 +530,7 @@ static const NSTimeInterval kTestTimeout   = 2; // seconds
     communicator.mockConfigurationsResponse = configurations;
     manager.communicator = communicator;
 
-    MPAdTargeting * targeting = [[MPAdTargeting alloc] init];
+    MPAdTargeting * targeting = [[MPAdTargeting alloc] initWithCreativeSafeSize:CGSizeZero];
     targeting.localExtras = @{ @"testing": @"YES" };
     [manager loadRewardedVideoAdWithCustomerId:@"CUSTOMER_ID" targeting:targeting];
 
@@ -546,6 +548,128 @@ static const NSTimeInterval kTestTimeout   = 2; // seconds
     XCTAssertNotNil(localExtras);
     XCTAssert([localExtras[@"testing"] isEqualToString:@"YES"]);
     XCTAssertTrue(customEvent.isLocalExtrasAvailableAtRequest);
+}
+
+#pragma mark - Impression Level Revenue Data
+
+- (void)testImpressionDelegateFiresWithoutILRD {
+    XCTestExpectation * delegateExpectation = [self expectationWithDescription:@"Wait for impression delegate"];
+    XCTestExpectation * notificationExpectation = [self expectationWithDescription:@"Wait for impression notification"];
+
+    __block MPRewardedVideoAdManager * manager = nil;
+
+    // Make delegate handler
+    MPRewardedVideoDelegateHandler * handler = [MPRewardedVideoDelegateHandler new];
+    handler.didReceiveImpression = ^(MPImpressionData * impressionData) {
+        [delegateExpectation fulfill];
+
+        XCTAssertNil(impressionData);
+    };
+
+    // Make notification handler
+    id notificationObserver = [[NSNotificationCenter defaultCenter] addObserverForName:kMPImpressionTrackedNotification
+                                                                                object:nil
+                                                                                 queue:[NSOperationQueue mainQueue]
+                                                                            usingBlock:^(NSNotification * note){
+                                                                                [notificationExpectation fulfill];
+
+                                                                                MPImpressionData * impressionData = note.userInfo[kMPImpressionTrackedInfoImpressionDataKey];
+                                                                                XCTAssertNil(impressionData);
+                                                                                XCTAssertNil(note.object);
+                                                                                XCTAssert([note.userInfo[kMPImpressionTrackedInfoAdUnitIDKey] isEqualToString:manager.adUnitID]);
+                                                                            }];
+
+    // Generate the ad configurations
+    MPAdConfiguration * rewardedVideoThatShouldLoad = [MPAdConfigurationFactory defaultRewardedVideoConfigurationWithCustomEventClassName:@"MPMockRewardedVideoCustomEvent"];
+    NSArray * configurations = @[rewardedVideoThatShouldLoad];
+
+    manager = [[MPRewardedVideoAdManager alloc] initWithAdUnitID:kTestAdUnitId delegate:handler];
+    MPMockAdServerCommunicator * communicator = [[MPMockAdServerCommunicator alloc] initWithDelegate:manager];
+    communicator.mockConfigurationsResponse = configurations;
+    manager.communicator = communicator;
+
+    handler.didLoadAd = ^{
+        // Track impression
+        MPRewardedVideoAdapter * adapter = (MPRewardedVideoAdapter *)manager.adapter;
+        [adapter trackImpression];
+
+        // Simulate impression to @c MPRewardedVideo proper
+        [[MPRewardedVideo sharedInstance] rewardedVideoAdManager:manager didReceiveImpressionEventWithImpressionData:nil];
+    };
+
+    MPAdTargeting * targeting = [[MPAdTargeting alloc] initWithCreativeSafeSize:CGSizeZero];
+    [manager loadRewardedVideoAdWithCustomerId:@"CUSTOMER_ID" targeting:targeting];
+
+    [self waitForExpectationsWithTimeout:kTestTimeout handler:^(NSError * _Nullable error) {
+        if (error != nil) {
+            XCTFail(@"Timed out");
+        }
+    }];
+
+    [[NSNotificationCenter defaultCenter] removeObserver:notificationObserver];
+}
+
+- (void)testImpressionDelegateFiresWithILRD {
+    XCTestExpectation * delegateExpectation = [self expectationWithDescription:@"Wait for impression delegate"];
+    XCTestExpectation * notificationExpectation = [self expectationWithDescription:@"Wait for impression notification"];
+    NSString * testAdUnitID = @"TEST_ADUNIT_ID";
+
+    __block MPRewardedVideoAdManager * manager = nil;
+
+    // Make delegate handler
+    MPRewardedVideoDelegateHandler * handler = [MPRewardedVideoDelegateHandler new];
+    handler.didReceiveImpression = ^(MPImpressionData * impressionData) {
+        [delegateExpectation fulfill];
+
+        XCTAssertNotNil(impressionData);
+        XCTAssert([impressionData.adUnitID isEqualToString:testAdUnitID]);
+    };
+
+    // Make notification handler
+    id notificationObserver = [[NSNotificationCenter defaultCenter] addObserverForName:kMPImpressionTrackedNotification
+                                                                                object:nil
+                                                                                 queue:[NSOperationQueue mainQueue]
+                                                                            usingBlock:^(NSNotification * note){
+                                                                                [notificationExpectation fulfill];
+
+                                                                                MPImpressionData * impressionData = note.userInfo[kMPImpressionTrackedInfoImpressionDataKey];
+                                                                                XCTAssertNotNil(impressionData);
+                                                                                XCTAssert([impressionData.adUnitID isEqualToString:testAdUnitID]);
+                                                                                XCTAssertNil(note.object);
+                                                                                XCTAssert([note.userInfo[kMPImpressionTrackedInfoAdUnitIDKey] isEqualToString:manager.adUnitID]);
+                                                                            }];
+
+    // Generate the ad configurations
+    MPAdConfiguration * rewardedVideoThatShouldLoad = [MPAdConfigurationFactory defaultRewardedVideoConfigurationWithCustomEventClassName:@"MPMockRewardedVideoCustomEvent"];
+    rewardedVideoThatShouldLoad.impressionData = [[MPImpressionData alloc] initWithDictionary:@{
+                                                                                                kImpressionDataAdUnitIDKey: testAdUnitID
+                                                                                                }];
+    NSArray * configurations = @[rewardedVideoThatShouldLoad];
+
+    manager = [[MPRewardedVideoAdManager alloc] initWithAdUnitID:kTestAdUnitId delegate:handler];
+    MPMockAdServerCommunicator * communicator = [[MPMockAdServerCommunicator alloc] initWithDelegate:manager];
+    communicator.mockConfigurationsResponse = configurations;
+    manager.communicator = communicator;
+
+    handler.didLoadAd = ^{
+        // Track impression
+        MPRewardedVideoAdapter * adapter = (MPRewardedVideoAdapter *)manager.adapter;
+        [adapter trackImpression];
+
+        // Simulate impression to @c MPRewardedVideo proper
+        [[MPRewardedVideo sharedInstance] rewardedVideoAdManager:manager didReceiveImpressionEventWithImpressionData:rewardedVideoThatShouldLoad.impressionData];
+    };
+
+    MPAdTargeting * targeting = [[MPAdTargeting alloc] initWithCreativeSafeSize:CGSizeZero];
+    [manager loadRewardedVideoAdWithCustomerId:@"CUSTOMER_ID" targeting:targeting];
+
+    [self waitForExpectationsWithTimeout:kTestTimeout handler:^(NSError * _Nullable error) {
+        if (error != nil) {
+            XCTFail(@"Timed out");
+        }
+    }];
+
+    [[NSNotificationCenter defaultCenter] removeObserver:notificationObserver];
 }
 
 @end

@@ -8,7 +8,7 @@
 
 import UIKit
 
-class TextEntryTableViewCell: UITableViewCell {
+final class TextEntryTableViewCell: UITableViewCell, TableViewCellRegisterable {
     // MARK: - IBOutlets
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var textField: UITextField!
@@ -30,9 +30,4 @@ extension TextEntryTableViewCell: UITextFieldDelegate {
     func textFieldDidEndEditing(_ textField: UITextField) {
         onTextDidChange?(textField.text)
     }
-}
-
-extension TextEntryTableViewCell: TableViewCellRegisterable {
-    // MARK: - TableViewCellRegisterable
-    static private(set) var reuseId: String = "TextEntryTableViewCell"
 }

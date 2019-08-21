@@ -32,7 +32,7 @@ static NSTimeInterval const kTestTimeout = 2;
     [MPMediationManager.sharedManager clearCache];
 
     [MoPub sharedInstance].forceWKWebView = NO;
-    MPLogging.consoleLogLevel = MPLogLevelInfo;
+    MPLogging.consoleLogLevel = MPBLogLevelInfo;
 }
 
 #pragma mark - Initialization
@@ -205,7 +205,7 @@ static NSTimeInterval const kTestTimeout = 2;
                                 kRewardedCurrenciesMetadataKey: @{ @"rewards": @[ @{ @"name": @"Coins", @"amount": @(8) }, @{ @"name": @"Diamonds", @"amount": @(1) }, @{ @"name": @"Energy", @"amount": @(20) } ] }
                                 };
 
-    MPAdConfiguration * config = [[MPAdConfiguration alloc] initWithMetadata:headers data:nil];
+    MPAdConfiguration * config = [[MPAdConfiguration alloc] initWithMetadata:headers data:nil adType:MPAdTypeFullscreen];
 
     MRController * controller = [[MRController alloc] initWithAdViewFrame:CGRectZero supportedOrientations:MPInterstitialOrientationTypeAll adPlacementType:MRAdViewPlacementTypeInterstitial delegate:nil];
     [controller loadAdWithConfiguration:config];
@@ -224,7 +224,7 @@ static NSTimeInterval const kTestTimeout = 2;
                                 kRewardedCurrenciesMetadataKey: @{ @"rewards": @[ @{ @"name": @"Coins", @"amount": @(8) }, @{ @"name": @"Diamonds", @"amount": @(1) }, @{ @"name": @"Energy", @"amount": @(20) } ] }
                                 };
 
-    MPAdConfiguration * config = [[MPAdConfiguration alloc] initWithMetadata:headers data:nil];
+    MPAdConfiguration * config = [[MPAdConfiguration alloc] initWithMetadata:headers data:nil adType:MPAdTypeFullscreen];
 
     MRController * controller = [[MRController alloc] initWithAdViewFrame:CGRectZero supportedOrientations:MPInterstitialOrientationTypeAll adPlacementType:MRAdViewPlacementTypeInterstitial delegate:nil];
     [controller loadAdWithConfiguration:config];
@@ -236,9 +236,9 @@ static NSTimeInterval const kTestTimeout = 2;
 #pragma mark - Logging
 
 - (void)testSetLogLevel {
-    MPLogging.consoleLogLevel = MPLogLevelDebug;
+    MPLogging.consoleLogLevel = MPBLogLevelDebug;
 
-    XCTAssertTrue(MPLogging.consoleLogLevel == MPLogLevelDebug);
+    XCTAssertTrue(MPLogging.consoleLogLevel == MPBLogLevelDebug);
 }
 
 @end

@@ -118,7 +118,7 @@ class NativeAdCollectionViewController: UIViewController, AdViewController {
      Loads the ads for table placer
      */
     fileprivate func loadAds() {
-        collectionPlacer.loadAds(forAdUnitID: adUnit.id, targeting: dataSource.targetting)
+        collectionPlacer.loadAds(forAdUnitID: adUnit.id, targeting: dataSource.targeting)
     }
 }
 

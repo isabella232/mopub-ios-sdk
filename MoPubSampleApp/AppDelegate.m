@@ -42,7 +42,7 @@
 
     MPMoPubConfiguration * sdkConfig = [[MPMoPubConfiguration alloc] initWithAdUnitIdForAppInitialization: @"0ac59b0996d947309c33f59d6676399f"];
     sdkConfig.globalMediationSettings = @[];
-    sdkConfig.loggingLevel = MPLogLevelInfo;
+    sdkConfig.loggingLevel = MPBLogLevelInfo;
     [[MoPub sharedInstance] initializeSdkWithConfiguration:sdkConfig completion:^{
         NSLog(@"SDK initialization complete");
     }];

@@ -103,7 +103,7 @@
     return YES;
 }
 
-#pragma mark - <MPInterstitialAdControllerDelegate>
+#pragma mark - <MPRewardedVideoDelegate>
 
 - (void)rewardedVideoAdDidLoadForAdUnitID:(NSString *)adUnitID
 {
