@@ -128,6 +128,23 @@ class BannerAdDataSource: NSObject, AdDataSource {
      */
     private(set) var isAdLoading: Bool = false
     
+    /**
+    Optional ad size used for requesting inline ads. This should be `nil` for non-inline ads.
+    */
+    var requestedAdSize: CGSize? {
+        get {
+            return maxDesiredAdSize
+        }
+        set {
+            guard let newValue = newValue else {
+                maxDesiredAdSize = kMPPresetMaxAdSizeMatchFrame
+                return
+            }
+            
+            maxDesiredAdSize = newValue
+        }
+    }
+    
     // MARK: - Ad Loading
     
     private func loadAd() {

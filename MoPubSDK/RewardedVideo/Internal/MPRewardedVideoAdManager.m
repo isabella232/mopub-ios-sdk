@@ -25,6 +25,7 @@
 @property (nonatomic, strong) MPAdServerCommunicator *communicator;
 @property (nonatomic, strong) MPAdConfiguration *configuration;
 @property (nonatomic, strong) NSMutableArray<MPAdConfiguration *> *remainingConfigurations;
+@property (nonatomic, strong) NSURL *mostRecentlyLoadedURL;  // ADF-4286: avoid infinite ad reloads
 @property (nonatomic, assign) BOOL loading;
 @property (nonatomic, assign) BOOL playedAd;
 @property (nonatomic, assign) BOOL ready;
@@ -172,6 +173,7 @@
     }
 
     self.loading = YES;
+    self.mostRecentlyLoadedURL = URL;
     [self.communicator loadURL:URL];
 }
 
@@ -288,7 +290,8 @@
         [self fetchAdWithConfiguration:self.configuration];
     }
     // No more configurations to try. Send new request to Ads server to get more Ads.
-    else if (self.configuration.nextURL != nil) {
+    else if (self.configuration.nextURL != nil
+             && [self.configuration.nextURL isEqual:self.mostRecentlyLoadedURL] == false) {
         self.ready = NO;
         self.loading = NO;
         [self loadAdWithURL:self.configuration.nextURL];

@@ -12,11 +12,18 @@
 
 @class CLLocation;
 
+/**
+ The purpose of this @c MPInterstitialViewController protocol is to define the common interface
+ between interstitial view controllers without forcing them to subclass @c MPInterstitialViewController.
+ */
+@protocol MPInterstitialViewController <NSObject>
+@end
+
 @protocol MPInterstitialViewControllerDelegate;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@interface MPInterstitialViewController : UIViewController
+@interface MPInterstitialViewController : UIViewController <MPInterstitialViewController>
 
 @property (nonatomic, assign) MPInterstitialCloseButtonStyle closeButtonStyle;
 @property (nonatomic, assign) MPInterstitialOrientationType orientationType;
@@ -36,17 +43,22 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@protocol MPInterstitialViewControllerDelegate <NSObject>
+@protocol MPInterstitialViewControllerAppearanceDelegate <NSObject>
+
+- (void)interstitialWillAppear:(id<MPInterstitialViewController>)interstitial;
+- (void)interstitialDidAppear:(id<MPInterstitialViewController>)interstitial;
+- (void)interstitialWillDisappear:(id<MPInterstitialViewController>)interstitial;
+- (void)interstitialDidDisappear:(id<MPInterstitialViewController>)interstitial;
+
+@end
+
+@protocol MPInterstitialViewControllerDelegate <MPInterstitialViewControllerAppearanceDelegate>
 
 - (NSString *)adUnitId;
-- (void)interstitialDidLoadAd:(MPInterstitialViewController *)interstitial;
-- (void)interstitialDidFailToLoadAd:(MPInterstitialViewController *)interstitial;
-- (void)interstitialWillAppear:(MPInterstitialViewController *)interstitial;
-- (void)interstitialDidAppear:(MPInterstitialViewController *)interstitial;
-- (void)interstitialWillDisappear:(MPInterstitialViewController *)interstitial;
-- (void)interstitialDidDisappear:(MPInterstitialViewController *)interstitial;
-- (void)interstitialDidReceiveTapEvent:(MPInterstitialViewController *)interstitial;
-- (void)interstitialWillLeaveApplication:(MPInterstitialViewController *)interstitial;
+- (void)interstitialDidLoadAd:(id<MPInterstitialViewController>)interstitial;
+- (void)interstitialDidFailToLoadAd:(id<MPInterstitialViewController>)interstitial;
+- (void)interstitialDidReceiveTapEvent:(id<MPInterstitialViewController>)interstitial;
+- (void)interstitialWillLeaveApplication:(id<MPInterstitialViewController>)interstitial;
 
 @optional
 - (CLLocation *)location;

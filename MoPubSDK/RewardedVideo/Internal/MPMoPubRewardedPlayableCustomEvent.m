@@ -13,14 +13,20 @@
 #import "MPLogging.h"
 #import "MPRewardedVideoError.h"
 #import "MPCountdownTimerView.h"
+#import "UIView+MPAdditions.h"
 
 const NSTimeInterval kDefaultCountdownTimerIntervalInSeconds = 30;
 
-@interface MPMoPubRewardedPlayableCustomEvent() <MPInterstitialViewControllerDelegate>
+@interface MPMoPubRewardedPlayableCustomEvent()
+
 @property (nonatomic, assign) BOOL adAvailable;
 @property (nonatomic, strong) MPMRAIDInterstitialViewController *interstitial;
 @property (nonatomic, strong) MPCountdownTimerView *timerView;
 @property (nonatomic, assign) BOOL userRewarded;
+
+@end
+
+@interface MPMoPubRewardedPlayableCustomEvent (MPInterstitialViewControllerDelegate) <MPInterstitialViewControllerDelegate>
 @end
 
 @implementation MPMoPubRewardedPlayableCustomEvent
@@ -121,20 +127,14 @@ const NSTimeInterval kDefaultCountdownTimerIntervalInSeconds = 30;
     self.timerView = [[MPCountdownTimerView alloc] initWithDuration:self.countdownDuration timerCompletion:^(BOOL hasElapsed) {
         __typeof__(self) strongSelf = weakSelf;
         if (strongSelf != nil) {
-            [strongSelf rewardUserWithConfiguration:strongSelf.configuration timerHasElapsed:hasElapsed];
+            [strongSelf rewardUserWithConfiguration:strongSelf.delegate.configuration timerHasElapsed:hasElapsed];
             [strongSelf showCloseButton];
         }
     }];
     [self.interstitial.view addSubview:self.timerView];
 
-    NSArray * constraints;
-    if (@available(iOS 11, *)) { // consider safe area
-        constraints = @[[self.timerView.topAnchor constraintEqualToAnchor:self.interstitial.view.safeAreaLayoutGuide.topAnchor],
-                        [self.timerView.rightAnchor constraintEqualToAnchor:self.interstitial.view.safeAreaLayoutGuide.rightAnchor]];
-    } else {
-        constraints = @[[self.timerView.topAnchor constraintEqualToAnchor:self.interstitial.view.topAnchor],
-                        [self.timerView.rightAnchor constraintEqualToAnchor:self.interstitial.view.rightAnchor]];
-    }
+    NSArray *constraints = @[[self.timerView.topAnchor constraintEqualToAnchor:self.interstitial.view.mp_safeTopAnchor],
+                             [self.timerView.rightAnchor constraintEqualToAnchor:self.interstitial.view.mp_safeRightAnchor]];
     [NSLayoutConstraint activateConstraints:constraints];
     self.timerView.translatesAutoresizingMaskIntoConstraints = NO;
 
@@ -150,24 +150,32 @@ const NSTimeInterval kDefaultCountdownTimerIntervalInSeconds = 30;
     }];
 }
 
+@end
+
 #pragma mark - MPInterstitialViewControllerDelegate
 
-- (void)interstitialDidLoadAd:(MPInterstitialViewController *)interstitial {
+@implementation MPMoPubRewardedPlayableCustomEvent (MPInterstitialViewControllerDelegate)
+
+- (NSString *)adUnitId {
+    return [self.delegate adUnitId];
+}
+
+- (void)interstitialDidLoadAd:(id<MPInterstitialViewController>)interstitial {
     MPLogAdEvent([MPLogEvent adLoadSuccessForAdapter:NSStringFromClass(self.class)], self.adUnitId);
 
     self.adAvailable = YES;
     [self.delegate rewardedVideoDidLoadAdForCustomEvent:self];
 }
 
-- (void)interstitialDidAppear:(MPInterstitialViewController *)interstitial {
+- (void)interstitialDidAppear:(id<MPInterstitialViewController>)interstitial {
     [self.delegate rewardedVideoDidAppearForCustomEvent:self];
 }
 
-- (void)interstitialWillAppear:(MPInterstitialViewController *)interstitial {
+- (void)interstitialWillAppear:(id<MPInterstitialViewController>)interstitial {
     [self.delegate rewardedVideoWillAppearForCustomEvent:self];
 }
 
-- (void)interstitialDidFailToLoadAd:(MPInterstitialViewController *)interstitial {
+- (void)interstitialDidFailToLoadAd:(id<MPInterstitialViewController>)interstitial {
     NSString * message = [NSString stringWithFormat:@"Failed to load creative:\n%@", self.delegate.configuration.adResponseHTMLString];
     NSError * error = [NSError errorWithCode:MOPUBErrorAdapterFailedToLoadAd localizedDescription:message];
     MPLogAdEvent([MPLogEvent adLoadFailedForAdapter:NSStringFromClass(self.class) error:error], self.adUnitId);
@@ -176,11 +184,11 @@ const NSTimeInterval kDefaultCountdownTimerIntervalInSeconds = 30;
     [self.delegate rewardedVideoDidFailToLoadAdForCustomEvent:self error:nil];
 }
 
-- (void)interstitialWillDisappear:(MPInterstitialViewController *)interstitial {
+- (void)interstitialWillDisappear:(id<MPInterstitialViewController>)interstitial {
     [self.delegate rewardedVideoWillDisappearForCustomEvent:self];
 }
 
-- (void)interstitialDidDisappear:(MPInterstitialViewController *)interstitial {
+- (void)interstitialDidDisappear:(id<MPInterstitialViewController>)interstitial {
     self.adAvailable = NO;
     [self.timerView stopAndSignalCompletion:NO];
     [self.delegate rewardedVideoDidDisappearForCustomEvent:self];
@@ -189,23 +197,13 @@ const NSTimeInterval kDefaultCountdownTimerIntervalInSeconds = 30;
     self.interstitial = nil;
 }
 
-- (void)interstitialDidReceiveTapEvent:(MPInterstitialViewController *)interstitial {
-    [self rewardUserWithConfiguration:self.configuration timerHasElapsed:NO];
+- (void)interstitialDidReceiveTapEvent:(id<MPInterstitialViewController>)interstitial {
+    [self rewardUserWithConfiguration:self.delegate.configuration timerHasElapsed:NO];
     [self.delegate rewardedVideoDidReceiveTapEventForCustomEvent:self];
 }
 
-- (void)interstitialWillLeaveApplication:(MPInterstitialViewController *)interstitial {
+- (void)interstitialWillLeaveApplication:(id<MPInterstitialViewController>)interstitial {
     [self.delegate rewardedVideoWillLeaveApplicationForCustomEvent:self];
-}
-
-#pragma mark - MPPrivateRewardedVideoCustomEventDelegate
-
-- (NSString *)adUnitId {
-    return [self.delegate adUnitId];
-}
-
-- (MPAdConfiguration *)configuration {
-    return [self.delegate configuration];
 }
 
 @end

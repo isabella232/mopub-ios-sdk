@@ -135,9 +135,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) BOOL frequencyCappingIdUsageEnabled;
 
 /**
- * Forces the usage of WKWebView (if able).
+ * Forces the usage of @c WKWebView.
+ *
+ * Deprecated: @c WKWebView is always used. No need to force it any more. Calling this method will have no effect.
  */
-@property (nonatomic, assign) BOOL forceWKWebView;
+@property (nonatomic, assign) BOOL forceWKWebView __attribute((deprecated("WKWebView is always used. No need to force it any more.")));
 
 /**
  * SDK log level. The default value is `MPBLogLevelNone`.

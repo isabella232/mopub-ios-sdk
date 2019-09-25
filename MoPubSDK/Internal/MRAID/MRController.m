@@ -21,7 +21,6 @@
 #import "MPTimer.h"
 #import "NSHTTPURLResponse+MPAdditions.h"
 #import "NSURL+MPAdditions.h"
-#import "UIWebView+MPAdditions.h"
 #import "MPForceableOrientationProtocol.h"
 #import "MPAPIEndPoints.h"
 #import "MoPub.h"
@@ -53,7 +52,6 @@ static NSString *const kMRAIDCommandResize = @"resize";
 @property (nonatomic, assign) NSUInteger modalViewCount;
 @property (nonatomic, assign) BOOL isAppSuspended;
 @property (nonatomic, assign) MRAdViewState currentState;
-@property (nonatomic, assign) BOOL shouldUseUIWebView;
 // Track the original super view for when we move the ad view to the key window for a 1-part expand.
 @property (nonatomic, weak) UIView *originalSuperview;
 @property (nonatomic, assign) BOOL isViewable;
@@ -165,10 +163,8 @@ static NSString *const kMRAIDCommandResize = @"resize";
     self.isAdLoading = YES;
     self.adRequiresPrecaching = configuration.precacheRequired;
     self.isAdVastVideoPlayer = configuration.isVastVideoPlayer;
-    self.shouldUseUIWebView = self.isAdVastVideoPlayer;
 
-    self.mraidWebView = [self buildMRAIDWebViewWithFrame:self.mraidDefaultAdFrame
-                                          forceUIWebView:self.shouldUseUIWebView];
+    self.mraidWebView = [self buildMRAIDWebViewWithFrame:self.mraidDefaultAdFrame];
     self.mraidWebView.shouldConformToSafeArea = [self isInterstitialAd];
 
     self.mraidBridge = [[MRBridge alloc] initWithWebView:self.mraidWebView delegate:self];
@@ -346,9 +342,9 @@ static NSString *const kMRAIDCommandResize = @"resize";
     return bridge;
 }
 
-- (MPWebView *)buildMRAIDWebViewWithFrame:(CGRect)frame forceUIWebView:(BOOL)forceUIWebView
+- (MPWebView *)buildMRAIDWebViewWithFrame:(CGRect)frame
 {
-    MPWebView *webView = [[MPWebView alloc] initWithFrame:frame forceUIWebView:forceUIWebView];
+    MPWebView *webView = [[MPWebView alloc] initWithFrame:frame];
     webView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     webView.backgroundColor = [UIColor clearColor];
     webView.clipsToBounds = YES;
@@ -900,7 +896,7 @@ static NSString *const kMRAIDCommandResize = @"resize";
         // It doesn't matter what frame we use for the two-part expand. We'll overwrite it with a new frame when presenting the modal.
         CGRect twoPartFrame = self.mraidAdView.frame;
 
-        MPWebView *twoPartWebView = [self buildMRAIDWebViewWithFrame:twoPartFrame forceUIWebView:self.shouldUseUIWebView];
+        MPWebView *twoPartWebView = [self buildMRAIDWebViewWithFrame:twoPartFrame];
         self.mraidBridgeTwoPart = [[MRBridge alloc] initWithWebView:twoPartWebView delegate:self];
         self.mraidAdViewTwoPart = [[MPClosableView alloc] initWithFrame:twoPartFrame
                                                                 webView:twoPartWebView

@@ -10,13 +10,11 @@
 #import "MPActivityViewControllerHelper+TweetShare.h"
 #import "MPURLResolver.h"
 #import "MPProgressOverlayView.h"
-#import "MPStoreKitProvider.h"
 #import "MOPUBDisplayAgentType.h"
 
 @protocol MPAdDestinationDisplayAgentDelegate;
 
 @interface MPAdDestinationDisplayAgent : NSObject <MPProgressOverlayViewDelegate,
-                                                   MPSKStoreProductViewControllerDelegate,
                                                    MPActivityViewControllerHelperDelegate>
 
 @property (nonatomic, weak) id<MPAdDestinationDisplayAgentDelegate> delegate;

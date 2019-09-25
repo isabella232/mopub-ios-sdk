@@ -82,6 +82,11 @@
 }
 
 - (void)willEnterForeground {
+    // skip resetting the timer if it's already set (i.e., in the iOS 13 new-window case)
+    if ([self.timer isValid]) {
+        return;
+    }
+
     // check if date has passed and fire if needed
     NSComparisonResult result = [[NSDate date] compare:self.fireDate];
     if (result == NSOrderedSame || result == NSOrderedDescending) {

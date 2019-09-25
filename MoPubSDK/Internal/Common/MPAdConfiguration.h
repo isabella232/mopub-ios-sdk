@@ -113,6 +113,7 @@ extern NSString * const kBannerImpressionMinPixelMetadataKey;
 @property (nonatomic, assign) BOOL rewardedPlayableShouldRewardOnClick;
 @property (nonatomic, copy) NSString *advancedBidPayload;
 @property (nonatomic, strong) MPImpressionData *impressionData;
+@property (nonatomic, assign) BOOL isVASTClickabilityExperimentEnabled;
 
 /**
  Unified ad unit format in its raw string representation.

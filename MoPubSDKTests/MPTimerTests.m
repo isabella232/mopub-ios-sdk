@@ -14,7 +14,8 @@ static const NSTimeInterval kTimerRepeatIntervalInSeconds = 0.05;
 
 // `NSTimer` is not totally accurate and it might be slower on build machines, thus we need some
 // extra tolerance while waiting for the expections to be fulfilled.
-static const NSTimeInterval kWaitTimeTolerance = 2;
+// ADF-4255: 2 is good enough in most cases, but sometimes it still fails... So, try 5 and see.
+static const NSTimeInterval kWaitTimeTolerance = 5;
 
 /**
  * This test make use of `MPTimer.associatedTitle` to identifier the timers in each test.

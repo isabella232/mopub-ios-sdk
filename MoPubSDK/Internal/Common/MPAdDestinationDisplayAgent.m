@@ -15,13 +15,14 @@
 #import "MPAnalyticsTracker.h"
 #import "MOPUBExperimentProvider.h"
 #import "MoPub+Utility.h"
+#import "SKStoreProductViewController+MPAdditions.h"
 #import <SafariServices/SafariServices.h>
 
 static NSString * const kDisplayAgentErrorDomain = @"com.mopub.displayagent";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@interface MPAdDestinationDisplayAgent () <SFSafariViewControllerDelegate>
+@interface MPAdDestinationDisplayAgent () <SFSafariViewControllerDelegate, SKStoreProductViewControllerDelegate>
 
 @property (nonatomic, strong) MPURLResolver *resolver;
 @property (nonatomic, strong) MPURLResolver *enhancedDeeplinkFallbackResolver;
@@ -31,7 +32,6 @@ static NSString * const kDisplayAgentErrorDomain = @"com.mopub.displayagent";
 @property (nonatomic, strong) SKStoreProductViewController *storeKitController;
 @property (nonatomic, strong) SFSafariViewController *safariController;
 
-@property (nonatomic, strong) MPTelephoneConfirmationController *telephoneConfirmationController;
 @property (nonatomic, strong) MPActivityViewControllerHelper *activityViewControllerHelper;
 
 @end
@@ -46,7 +46,7 @@ static NSString * const kDisplayAgentErrorDomain = @"com.mopub.displayagent";
     agent.delegate = delegate;
     agent.overlayView = [[MPProgressOverlayView alloc] initWithDelegate:agent];
     agent.activityViewControllerHelper = [[MPActivityViewControllerHelper alloc] initWithDelegate:agent];
-    agent.displayAgentType = [MOPUBExperimentProvider displayAgentType];
+    agent.displayAgentType = MOPUBExperimentProvider.sharedInstance.displayAgentType;
     return agent;
 }
 
@@ -70,7 +70,7 @@ static NSString * const kDisplayAgentErrorDomain = @"com.mopub.displayagent";
 
 + (BOOL)shouldDisplayContentInApp
 {
-    switch ([MOPUBExperimentProvider displayAgentType]) {
+    switch (MOPUBExperimentProvider.sharedInstance.displayAgentType) {
         case MOPUBDisplayAgentTypeInApp:
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -233,27 +233,24 @@ static NSString * const kDisplayAgentErrorDomain = @"com.mopub.displayagent";
 
 - (void)showStoreKitProductWithParameters:(NSDictionary *)parameters fallbackURL:(NSURL *)URL
 {
-    if ([MPStoreKitProvider deviceHasStoreKit]) {
-        [self presentStoreKitControllerWithProductParameters:parameters fallbackURL:URL];
-    } else {
+    if (!SKStoreProductViewController.canUseStoreProductViewController) {
         [self openURLInApplication:URL];
+        return;
     }
+
+    [self presentStoreKitControllerWithProductParameters:parameters fallbackURL:URL];
 }
 
 - (void)openURLInApplication:(NSURL *)URL
 {
     [self hideOverlay];
 
-    if ([URL mp_hasTelephoneScheme] || [URL mp_hasTelephonePromptScheme]) {
-        [self interceptTelephoneURL:URL];
-    } else {
-        [MoPub openURL:URL options:@{} completion:^(BOOL didOpenURLSuccessfully) {
-            if (didOpenURLSuccessfully) {
-                [self.delegate displayAgentWillLeaveApplication];
-            }
-            [self completeDestinationLoading];
-        }];
-    }
+    [MoPub openURL:URL options:@{} completion:^(BOOL didOpenURLSuccessfully) {
+        if (didOpenURLSuccessfully) {
+            [self.delegate displayAgentWillLeaveApplication];
+        }
+        [self completeDestinationLoading];
+    }];
 }
 
 - (BOOL)openShareURL:(NSURL *)URL
@@ -267,23 +264,6 @@ static NSString * const kDisplayAgentErrorDomain = @"com.mopub.displayagent";
             MPLogInfo(@"MPAdDestinationDisplayAgent - unsupported Share URL: %@", [URL absoluteString]);
             return NO;
     }
-}
-
-- (void)interceptTelephoneURL:(NSURL *)URL
-{
-    __weak MPAdDestinationDisplayAgent *weakSelf = self;
-    self.telephoneConfirmationController = [[MPTelephoneConfirmationController alloc] initWithURL:URL clickHandler:^(NSURL *targetTelephoneURL, BOOL confirmed) {
-        MPAdDestinationDisplayAgent *strongSelf = weakSelf;
-        if (strongSelf) {
-            if (confirmed) {
-                [strongSelf.delegate displayAgentWillLeaveApplication];
-                [MoPub openURL:targetTelephoneURL];
-            }
-            [strongSelf completeDestinationLoading];
-        }
-    }];
-
-    [self.telephoneConfirmationController show];
 }
 
 - (void)failedToResolveURLWithError:(NSError *)error
@@ -300,7 +280,7 @@ static NSString * const kDisplayAgentErrorDomain = @"com.mopub.displayagent";
 
 - (void)presentStoreKitControllerWithProductParameters:(NSDictionary *)parameters fallbackURL:(NSURL *)URL
 {
-    self.storeKitController = [MPStoreKitProvider buildController];
+    self.storeKitController = [[SKStoreProductViewController alloc] init];
     self.storeKitController.modalPresentationStyle = UIModalPresentationFullScreen;
     self.storeKitController.delegate = self;
     [self.storeKitController loadProductWithParameters:parameters completionBlock:nil];
@@ -309,7 +289,7 @@ static NSString * const kDisplayAgentErrorDomain = @"com.mopub.displayagent";
     [[self.delegate viewControllerForPresentingModalView] presentViewController:self.storeKitController animated:MP_ANIMATED completion:nil];
 }
 
-#pragma mark - <MPSKStoreProductViewControllerDelegate>
+#pragma mark - <SKStoreProductViewControllerDelegate>
 
 - (void)productViewControllerDidFinish:(SKStoreProductViewController *)viewController
 {

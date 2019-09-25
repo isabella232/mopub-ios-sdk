@@ -32,6 +32,8 @@ static NSString * const kPublisherEnteredAdUnitIdStorageKey = @"com.mopub.mopub-
 
 @property (nonatomic, assign, readwrite) BOOL isSdkInitialized;
 
+@property (nonatomic, strong) MOPUBExperimentProvider *experimentProvider;
+
 @end
 
 @implementation MoPub
@@ -49,10 +51,19 @@ static NSString * const kPublisherEnteredAdUnitIdStorageKey = @"com.mopub.mopub-
 - (instancetype)init
 {
     if (self = [super init]) {
-        // Processing personal data if a user is in GDPR region.
-        [self handlePersonalData];
+        [self commonInitWithExperimentProvider:MOPUBExperimentProvider.sharedInstance];
     }
     return self;
+}
+
+/**
+ This common init enables unit testing with an `MOPUBExperimentProvider` instance that is not a singleton.
+ */
+- (void)commonInitWithExperimentProvider:(MOPUBExperimentProvider *)experimentProvider
+{
+    // Processing personal data if a user is in GDPR region.
+    [self handlePersonalData];
+    _experimentProvider = experimentProvider;
 }
 
 - (void)setLocationUpdatesEnabled:(BOOL)locationUpdatesEnabled
@@ -70,16 +81,6 @@ static NSString * const kPublisherEnteredAdUnitIdStorageKey = @"com.mopub.mopub-
     [MPIdentityProvider setFrequencyCappingIdUsageEnabled:frequencyCappingIdUsageEnabled];
 }
 
-- (void)setForceWKWebView:(BOOL)forceWKWebView
-{
-    [MPWebView forceWKWebView:forceWKWebView];
-}
-
-- (BOOL)forceWKWebView
-{
-    return [MPWebView isForceWKWebView];
-}
-
 - (void)setLogLevel:(MPBLogLevel)level
 {
     MPLogging.consoleLogLevel = level;
@@ -92,7 +93,7 @@ static NSString * const kPublisherEnteredAdUnitIdStorageKey = @"com.mopub.mopub-
 
 - (void)setClickthroughDisplayAgentType:(MOPUBDisplayAgentType)displayAgentType
 {
-    [MOPUBExperimentProvider setDisplayAgentType:displayAgentType];
+    self.experimentProvider.displayAgentType = displayAgentType;
 }
 
 - (BOOL)frequencyCappingIdUsageEnabled

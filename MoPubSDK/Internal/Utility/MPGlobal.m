@@ -98,8 +98,7 @@ NSDictionary *MPDictionaryFromQueryString(NSString *query) {
         NSArray *keyVal = [element componentsSeparatedByString:@"="];
         NSString *key = [keyVal objectAtIndex:0];
         NSString *value = [keyVal lastObject];
-        [queryDict setObject:[value stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]
-                      forKey:key];
+        [queryDict setObject:[value stringByRemovingPercentEncoding] forKey:key];
     }
     return queryDict;
 }
@@ -303,78 +302,3 @@ UIInterfaceOrientationMask MPInterstitialOrientationTypeToUIInterfaceOrientation
 }
 
 @end
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-@interface MPTelephoneConfirmationController ()
-
-@property (nonatomic, strong) UIAlertView *alertView;
-@property (nonatomic, strong) NSURL *telephoneURL;
-@property (nonatomic, copy) MPTelephoneConfirmationControllerClickHandler clickHandler;
-
-@end
-
-@implementation MPTelephoneConfirmationController
-
-- (id)initWithURL:(NSURL *)url clickHandler:(MPTelephoneConfirmationControllerClickHandler)clickHandler
-{
-    if (![url mp_hasTelephoneScheme] && ![url mp_hasTelephonePromptScheme]) {
-        // Shouldn't be here as the url must have a tel or telPrompt scheme.
-        MPLogInfo(@"Processing URL as a telephone URL when %@ doesn't follow the tel:// or telprompt:// schemes", url.absoluteString);
-        return nil;
-    }
-
-    if (self = [super init]) {
-        // If using tel://xxxxxxx, the host will be the number.  If using tel:xxxxxxx, we will try the resourceIdentifier.
-        NSString *phoneNumber = [url host];
-
-        if (!phoneNumber) {
-            phoneNumber = [url resourceSpecifier];
-            if ([phoneNumber length] == 0) {
-                MPLogInfo(@"Invalid telelphone URL: %@.", url.absoluteString);
-                return nil;
-            }
-        }
-
-        _alertView = [[UIAlertView alloc] initWithTitle: @"Are you sure you want to call?"
-                                                message:phoneNumber
-                                               delegate:self
-                                      cancelButtonTitle:@"Cancel"
-                                      otherButtonTitles:@"Call", nil];
-        self.clickHandler = clickHandler;
-
-        // We want to manually handle telPrompt scheme alerts.  So we'll convert telPrompt schemes to tel schemes.
-        if ([url mp_hasTelephonePromptScheme]) {
-            self.telephoneURL = [NSURL URLWithString:[NSString stringWithFormat:@"tel://%@", phoneNumber]];
-        } else {
-            self.telephoneURL = url;
-        }
-    }
-
-    return self;
-}
-
-- (void)dealloc
-{
-    self.alertView.delegate = nil;
-    [self.alertView dismissWithClickedButtonIndex:0 animated:YES];
-}
-
-- (void)show
-{
-    [self.alertView show];
-}
-
-#pragma mark - UIAlertViewDelegate
-
-- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
-{
-    BOOL confirmed = (buttonIndex == 1);
-
-    if (self.clickHandler) {
-        self.clickHandler(self.telephoneURL, confirmed);
-    }
-
-}
-
-@end
-

@@ -97,7 +97,7 @@ static NSTimeInterval const kCloseButtonFadeInAfterSeconds = 10.0;
 }
 
 - (void)setUpWebView {
-    self.webView = [[MPWebView alloc] initWithFrame:CGRectZero forceUIWebView:NO];
+    self.webView = [[MPWebView alloc] initWithFrame:CGRectZero];
     self.webView.delegate = self;
     self.webView.scrollView.bounces = NO;
     self.webView.backgroundColor = [UIColor whiteColor];
@@ -202,7 +202,7 @@ static NSTimeInterval const kCloseButtonFadeInAfterSeconds = 10.0;
     }
 }
 
-- (BOOL)webView:(MPWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType {
+- (BOOL)webView:(MPWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(WKNavigationType)navigationType {
     BOOL requestIsMoPubScheme = [request.URL.scheme isEqualToString:kMoPubScheme];
     BOOL requestIsMoPubHost = [request.URL.host isEqualToString:MPAPIEndpoints.baseHostname];
 

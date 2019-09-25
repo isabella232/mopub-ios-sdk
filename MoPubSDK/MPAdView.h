@@ -47,9 +47,6 @@ IB_DESIGNABLE
 
 /**
  * The delegate (`MPAdViewDelegate`) of the ad view.
- *
- * @warning **Important**: Before releasing an instance of `MPAdView`, you must set its delegate
- * property to `nil`.
  */
 @property (nonatomic, weak) id<MPAdViewDelegate> delegate;
 

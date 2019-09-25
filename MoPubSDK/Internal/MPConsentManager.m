@@ -439,6 +439,24 @@ static NSString * const kMacroReplaceLanguageCode = @"%%LANGUAGE%%";
     // If IDFA changed, status will be set to MPConsentStatusUnknown.
     [self checkForIfaChange];
 
+    /*
+     ADF-4318: This early return is to avoid a `NSAssert` crash in iPadOS 13+ debug build.
+
+     `ApplicationWillEnterForegroundNotification` is posted right after the first fresh
+     install app launch for iPadOS 13 multi-scene, while it's not posted after the first fresh
+     install app launch for the single-scene case (pre iOS 13).
+
+     The consent manager shared instance is called during `applicationDidFinishLaunching` and thus
+     starts observing `ApplicationWillEnterForegroundNotification` before MoPub SDK and this consent
+     manager is initialized with an ad unit ID. Consequently, the `NSAssert` in
+     `synchronizeConsentWithCompletion` is always triggered and crash debug build of this app. So,
+     to avoid such crash in debug build, we should avoid `synchronizeConsentWithCompletion` before
+     `adUnitIdUsedForConsent` is assigned.
+     */
+    if (self.adUnitIdUsedForConsent.length == 0) {
+        return;
+    }
+
     MPLogDebug(@"Consent synchronization triggered by application foreground.");
     [self synchronizeConsentWithCompletion:^(NSError * _Nullable error) {
         // Consent synchronization success/fail logging is already handled

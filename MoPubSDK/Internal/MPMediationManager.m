@@ -264,15 +264,10 @@ static NSString const * kTokenKey             = @"token";
         return nil;
     }
 
-    NSDictionary * networkParameters = nil;
     @synchronized (self) {
-        NSDictionary * cachedParameters = [[NSUserDefaults standardUserDefaults] objectForKey:kNetworkSDKInitializationParametersKey];
-        if (cachedParameters != nil) {
-            networkParameters = [cachedParameters objectForKey:network];
-        }
+        NSDictionary *cachedParameters = [[NSUserDefaults standardUserDefaults] objectForKey:kNetworkSDKInitializationParametersKey];
+        return [cachedParameters objectForKey:network];
     }
-
-    return networkParameters;
 }
 
 - (void)clearCache {

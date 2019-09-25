@@ -385,7 +385,8 @@ static MPEngineInfo * _engineInfo = nil;
 }
 
 + (NSDictionary *)locationInformationDictionary:(CLLocation *)location {
-    if (![MPConsentManager.sharedManager canCollectPersonalInfo] || !location) {
+    // Not allowed to collect location because it is PII
+    if (![MPConsentManager.sharedManager canCollectPersonalInfo]) {
         return @{};
     }
 
@@ -394,6 +395,7 @@ static MPEngineInfo * _engineInfo = nil;
     CLLocation *bestLocation = location;
     CLLocation *locationFromProvider = [[[MPCoreInstanceProvider sharedProvider] sharedMPGeolocationProvider] lastKnownLocation];
 
+    // Location determined by CoreLocation is given priority over the Publisher-specified location.
     if (locationFromProvider) {
         bestLocation = locationFromProvider;
     }

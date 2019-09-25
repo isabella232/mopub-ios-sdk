@@ -6,6 +6,7 @@
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
 
+#import <StoreKit/StoreKit.h>
 #import <WebKit/WebKit.h>
 #import "MPURLResolver.h"
 #import "MPHTTPNetworkSession.h"
@@ -241,7 +242,7 @@ static NSString * const kRedirectURLQueryStringKey = @"r";
 /**
  Attempt to parse an Apple store URL into a dictionary of @c SKStoreProductParameter items. This will fast fail
  if the URL is not a valid Apple store URL scheme.
- @param URL: Apple store URL to attempt to parse.
+ @param URL Apple store URL to attempt to parse.
  @return A dictionary with at least the required @c SKStoreProductParameterITunesItemIdentifier as an entry; otherwise @c nil
  */
 - (NSDictionary *)appStoreProductParametersForURL:(NSURL *)URL
