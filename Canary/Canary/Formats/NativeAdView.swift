@@ -1,7 +1,7 @@
 //
 //  NativeAdView.swift
 //
-//  Copyright 2018-2019 Twitter, Inc.
+//  Copyright 2018-2020 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
@@ -20,6 +20,7 @@ class NativeAdView: UIView {
     @IBOutlet weak var callToActionLabel: UILabel!
     @IBOutlet weak var iconImageView: UIImageView!
     @IBOutlet weak var mainImageView: UIImageView!
+    @IBOutlet weak var sponsoredByLabel: UILabel!
     @IBOutlet weak var privacyInformationIconImageView: UIImageView!
     @IBOutlet weak var videoView: UIView!
     
@@ -44,6 +45,21 @@ class NativeAdView: UIView {
     override func awakeFromNib() {
         super.awakeFromNib()
         setupNib()
+    }
+    
+    /**
+     The function is essential for supporting flexible width. The native view content might be
+     stretched, cut, or have undesired padding if the height is not estimated properly.
+     */
+    static func estimatedViewHeightForWidth(_ width: CGFloat) -> CGFloat {
+        // The numbers are obtained from the constraint defined in the xib file
+        let padding: CGFloat = 8
+        let iconImageViewWidth: CGFloat = 50
+        let estimatedNonMainContentCombinedHeight: CGFloat = 72 // [title, main text, call to action] labels
+        
+        let mainContentWidth = width - padding * 3 - iconImageViewWidth
+        let mainContentHeight = mainContentWidth / 2 // the xib has a 2:1 width:height ratio constraint
+        return floor(mainContentHeight + estimatedNonMainContentCombinedHeight + padding * 2)
     }
     
     func setupNib() -> Void {
@@ -100,11 +116,19 @@ extension NativeAdView: MPNativeAdRendering {
         return mainImageView
     }
     
+    func nativeSponsoredByCompanyTextLabel() -> UILabel! {
+        return sponsoredByLabel
+    }
+    
     func nativePrivacyInformationIconImageView() -> UIImageView! {
         return privacyInformationIconImageView
     }
     
     func nativeVideoView() -> UIView! {
         return videoView
+    }
+    
+    static func localizedSponsoredByText(withSponsorName sponsorName: String!) -> String! {
+        return "Brought to you by \(sponsorName!)"
     }
 }

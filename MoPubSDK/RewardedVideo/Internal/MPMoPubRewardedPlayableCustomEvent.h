@@ -1,7 +1,7 @@
 //
 //  MPMoPubRewardedPlayableCustomEvent.h
 //
-//  Copyright 2018-2019 Twitter, Inc.
+//  Copyright 2018-2020 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
@@ -10,7 +10,6 @@
 #import "MPPrivateRewardedVideoCustomEventDelegate.h"
 
 @interface MPMoPubRewardedPlayableCustomEvent : MPRewardedVideoCustomEvent
-@property (nonatomic, readonly) NSTimeInterval countdownDuration;
 
 @property (nonatomic, weak) id<MPPrivateRewardedVideoCustomEventDelegate> delegate;
 @end

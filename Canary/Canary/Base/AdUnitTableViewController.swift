@@ -1,7 +1,7 @@
 //
 //  AdUnitTableViewController.swift
 //
-//  Copyright 2018-2019 Twitter, Inc.
+//  Copyright 2018-2020 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
@@ -20,7 +20,7 @@ class AdUnitTableViewController: UIViewController {
     @IBOutlet var addButton: UIBarButtonItem?
     
     // Table data source.
-    fileprivate var dataSource: AdUnitDataSource? = nil
+    internal var dataSource: AdUnitDataSource? = nil
     
     // MARK: - Initialization
     
@@ -48,6 +48,7 @@ class AdUnitTableViewController: UIViewController {
         if #available(iOS 13.0, *) {
             tableView.dragDelegate = self
             view.backgroundColor = .systemBackground
+            tableView.backgroundColor = .systemBackground
         }
     }
     
@@ -165,6 +166,10 @@ extension AdUnitTableViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         return UITableView.automaticDimension
+    }
+    
+    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+        return 8 // leave some space between section headers if a section is below an empty section
     }
 }
 

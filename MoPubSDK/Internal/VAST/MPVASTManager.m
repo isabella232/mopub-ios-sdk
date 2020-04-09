@@ -1,13 +1,14 @@
 //
 //  MPVASTManager.m
 //
-//  Copyright 2018-2019 Twitter, Inc.
+//  Copyright 2018-2020 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
 
 #import "MPVASTManager.h"
 #import "MPVASTAd.h"
+#import "MPVASTError.h"
 #import "MPVASTWrapper.h"
 #import "MPXMLParser.h"
 #import "MPHTTPNetworkSession.h"
@@ -63,7 +64,9 @@ static NSString * const kMPVASTManagerErrorDomain = @"com.mopub.MPVASTManager";
             completion(VASTResponse, nil);
             return;
         } else {
-            completion(nil, [NSError errorWithDomain:kMPVASTManagerErrorDomain code:MPVASTErrorNoAdsFound userInfo:nil]);
+            completion(nil, [NSError errorWithDomain:kMPVASTManagerErrorDomain
+                                                code:MPVASTErrorFailedToDisplayAdFromInlineResponse
+                                            userInfo:nil]);
             return;
         }
     }
@@ -92,7 +95,9 @@ static NSString * const kMPVASTManagerErrorDomain = @"com.mopub.MPVASTManager";
                             completion(VASTResponse, nil);
                             return;
                         } else {
-                            completion(nil, [NSError errorWithDomain:kMPVASTManagerErrorDomain code:MPVASTErrorNoAdsFound userInfo:nil]);
+                            completion(nil, [NSError errorWithDomain:kMPVASTManagerErrorDomain
+                                                                code:MPVASTErrorNoVASTResponseAfterOneOrMoreWrappers
+                                                            userInfo:nil]);
                             return;
                         }
                     }

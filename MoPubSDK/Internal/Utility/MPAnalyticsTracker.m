@@ -1,7 +1,7 @@
 //
 //  MPAnalyticsTracker.m
 //
-//  Copyright 2018-2019 Twitter, Inc.
+//  Copyright 2018-2020 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
@@ -12,7 +12,6 @@
 #import "MPHTTPNetworkSession.h"
 #import "MPLogging.h"
 #import "MPURLRequest.h"
-#import "MPVASTTrackingEvent.h"
 
 @implementation MPAnalyticsTracker
 

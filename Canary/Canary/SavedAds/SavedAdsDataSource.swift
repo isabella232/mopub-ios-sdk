@@ -1,7 +1,7 @@
 //
 //  SavedAdsDataSource.swift
 //
-//  Copyright 2018-2019 Twitter, Inc.
+//  Copyright 2018-2020 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
@@ -12,7 +12,19 @@ import Foundation
  Saved ad units data source
  */
 final class SavedAdsDataSource: AdUnitDataSource {
-    private let savedAdSectionTitle = "Saved Ads"
+    private enum Section: Int {
+        case savedAds
+        case loadedAds
+        
+        var title: String {
+            switch self {
+            case .savedAds:
+                return "Saved Ads"
+            case .loadedAds:
+                return "Loaded Ads"
+            }
+        }
+    }
     
     // MARK: - Overrides
     
@@ -24,20 +36,50 @@ final class SavedAdsDataSource: AdUnitDataSource {
      */
     required init(plistName: String = "", bundle: Bundle = Bundle.main) {
         super.init(plistName: plistName, bundle: bundle)
-        self.adUnits = [savedAdSectionTitle: SavedAdsManager.sharedInstance.savedAds]
+        reloadData()
     }
     
     /**
      Reloads the data source.
      */
     override func reloadData() {
-        self.adUnits = [savedAdSectionTitle: SavedAdsManager.sharedInstance.savedAds]
+        self.adUnits = [Section.savedAds.title: SavedAdsManager.sharedInstance.savedAds,
+                        Section.loadedAds.title: SavedAdsManager.sharedInstance.loadedAds]
     }
     
     /**
      Data source sections as human readable text meant for display as section headings to the user.
      */
     override var sections: [String] {
-        return [savedAdSectionTitle]
+        return [Section.savedAds.title, Section.loadedAds.title]
+    }
+    
+    /**
+     Removes an item if supported.
+     */
+    override func removeItem(at indexPath: IndexPath) -> AdUnit? {
+        guard let section = Section(rawValue: indexPath.section) else {
+            assertionFailure("Unexpected section index: \(indexPath.section)")
+            return nil
+        }
+        
+        guard let adUnit: AdUnit = adUnits[section.title]?[indexPath.row] else {
+            assertionFailure("Ad unit not found in index path [\(indexPath.section), \(indexPath.row)]")
+            return nil
+        }
+        
+        switch section {
+        case .savedAds:
+            // Remove the ad unit entry
+            SavedAdsManager.sharedInstance.removeSavedAd(adUnit: adUnit)
+        case .loadedAds:
+            // Remove the ad unit entry
+            SavedAdsManager.sharedInstance.removeLoadedAds(adUnit: adUnit)
+        }
+        
+        // Reload the internal state
+        reloadData()
+        
+        return adUnit
     }
 }

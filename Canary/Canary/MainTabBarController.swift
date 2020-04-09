@@ -1,7 +1,7 @@
 //
 //  MainTabBarController.swift
 //
-//  Copyright 2018-2019 Twitter, Inc.
+//  Copyright 2018-2020 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
@@ -20,6 +20,18 @@ class MainTabBarController: UITabBarController {
      Button used for displaying status notifications.
      */
     private var notificationButton: UIButton = UIButton(type: .custom)
+    
+    /**
+     The view controller of the second tab "Saved Ads", which is a `UISplitViewController`.
+     */
+    var savedAdSplitViewController: UISplitViewController {
+        guard let savedAdSplitViewController = viewControllers?.first(where: {
+            $0.tabBarItem.title == "Saved Ads"
+        }) as? UISplitViewController else {
+            fatalError()
+        }
+        return savedAdSplitViewController
+    }
     
     // MARK: - View Lifecycle
     

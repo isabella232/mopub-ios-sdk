@@ -1,7 +1,7 @@
 //
 //  MPRewardedVideoCustomEvent.m
 //
-//  Copyright 2018-2019 Twitter, Inc.
+//  Copyright 2018-2020 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
@@ -11,17 +11,10 @@
 
 @implementation MPRewardedVideoCustomEvent
 
-- (void)requestRewardedVideoWithCustomEventInfo:(NSDictionary *)info
+- (void)requestRewardedVideoWithCustomEventInfo:(NSDictionary *)info adMarkup:(NSString *)adMarkup
 {
     // The default implementation of this method does nothing. Subclasses must override this method
     // and implement code to load a rewarded video here.
-}
-
-- (void)requestRewardedVideoWithCustomEventInfo:(NSDictionary *)info adMarkup:(NSString *)adMarkup
-{
-    // By default, the original requestRewardedVideoWithCustomEventInfo: method will be called.
-    // Otherwise subclasses must override this method and implement code to load a banner here.
-    [self requestRewardedVideoWithCustomEventInfo:info];
 }
 
 - (BOOL)hasAdAvailable

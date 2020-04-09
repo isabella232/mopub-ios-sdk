@@ -1,7 +1,7 @@
 //
 //  BannerAdDataSource.swift
 //
-//  Copyright 2018-2019 Twitter, Inc.
+//  Copyright 2018-2020 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
@@ -39,12 +39,12 @@ class BannerAdDataSource: NSObject, AdDataSource {
      */
     lazy var title: [AdEvent: String] = {
         var titleStrings: [AdEvent: String] = [:]
-        titleStrings[.didLoad] = "adViewDidLoadAd(_:, adSize _:)"
-        titleStrings[.didFailToLoad] = "adView(_:, didFailToLoadAdWithError _:)"
-        titleStrings[.willPresentModal] = "willPresentModalViewForAd(_:)"
-        titleStrings[.didDismissModal] = "didDismissModalViewForAd(_:)"
-        titleStrings[.clicked] = "willLeaveApplicationFromAd(_:)"
-        titleStrings[.didTrackImpression] = "mopubAd(_:, didTrackImpressionWith _:)"
+        titleStrings[.didLoad] = CallbackFunctionNames.adViewDidLoadAd
+        titleStrings[.didFailToLoad] = CallbackFunctionNames.adViewDidFailToLoadAd
+        titleStrings[.willPresentModal] = CallbackFunctionNames.willPresentModalViewForAd
+        titleStrings[.didDismissModal] = CallbackFunctionNames.didDismissModalViewForAd
+        titleStrings[.clicked] = CallbackFunctionNames.willLeaveApplicationFromAd
+        titleStrings[.didTrackImpression] = CallbackFunctionNames.didTrackImpression
         
         return titleStrings
     }()
@@ -162,6 +162,8 @@ class BannerAdDataSource: NSObject, AdDataSource {
         adView.keywords = adUnit.keywords
         adView.userDataKeywords = adUnit.userDataKeywords
         adView.loadAd(withMaxAdSize: maxDesiredAdSize)
+        
+        SavedAdsManager.sharedInstance.addLoadedAds(adUnit: adUnit)
     }
 }
 

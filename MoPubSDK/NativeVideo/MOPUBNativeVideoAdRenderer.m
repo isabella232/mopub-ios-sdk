@@ -1,18 +1,20 @@
 //
 //  MOPUBNativeVideoAdRenderer.m
 //
-//  Copyright 2018-2019 Twitter, Inc.
+//  Copyright 2018-2020 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
 
 #import "MOPUBNativeVideoAdRenderer.h"
+#import "MPBaseNativeAdRenderer+Internal.h"
 #import "MPNativeAdRendererConfiguration.h"
 #import "MPNativeAdRenderer.h"
 #import "MPNativeAdRendering.h"
 #import "MPNativeAdAdapter.h"
 #import "MPNativeAdConstants.h"
 #import "MPNativeAdError.h"
+#import "MPNativeAdError+VAST.h"
 #import "MPNativeAdRendererImageHandler.h"
 #import "MPTimer.h"
 #import "MPGlobal.h"
@@ -34,10 +36,8 @@ static const CGFloat kAutoPlayTimerInterval = 0.25f;
 
 @interface MOPUBNativeVideoAdRenderer () <MPNativeAdRenderer, MOPUBPlayerViewControllerDelegate, MOPUBFullscreenPlayerViewControllerDelegate, MPNativeAdRendererImageHandlerDelegate>
 
-@property (nonatomic) UIView<MPNativeAdRendering> *adView;
 @property (nonatomic) MOPUBNativeVideoAdAdapter<MPNativeAdAdapter> *adapter;
 @property (nonatomic) BOOL adViewInViewHierarchy;
-@property (nonatomic) Class renderingViewClass;
 @property (nonatomic) MPNativeAdRendererImageHandler *rendererImageHandler;
 
 @property (nonatomic, weak) MOPUBPlayerViewController *videoController;
@@ -65,7 +65,7 @@ static const CGFloat kAutoPlayTimerInterval = 0.25f;
 {
     if (self = [super init]) {
         MOPUBNativeVideoAdRendererSettings *settings = (MOPUBNativeVideoAdRendererSettings *)rendererSettings;
-        _renderingViewClass = settings.renderingViewClass;
+        self.renderingViewClass = settings.renderingViewClass;
         _viewSizeHandler = [settings.viewSizeHandler copy];
         _rendererImageHandler = [MPNativeAdRendererImageHandler new];
         _rendererImageHandler.delegate = self;
@@ -92,6 +92,7 @@ static const CGFloat kAutoPlayTimerInterval = 0.25f;
     if (!adapter) {
         if (error) {
             *error = MPNativeAdNSErrorForRenderValueTypeError();
+            [self.vastTracking handleVASTError:VASTErrorCodeFromNativeAdErrorCode((*error).code) videoTimeOffset:0];
         }
 
         return nil;
@@ -118,6 +119,8 @@ static const CGFloat kAutoPlayTimerInterval = 0.25f;
     if ([self.adView respondsToSelector:@selector(nativeCallToActionTextLabel)] && self.adView.nativeCallToActionTextLabel) {
         self.adView.nativeCallToActionTextLabel.text = [adapter.properties objectForKey:kAdCTATextKey];
     }
+
+    [self renderSponsoredByTextWithAdapter:adapter];
 
     if ([self.adView respondsToSelector:@selector(nativePrivacyInformationIconImageView)]) {
         UIImage *privacyIconImage = [adapter.properties objectForKey:kAdPrivacyIconUIImageKey];
@@ -156,6 +159,7 @@ static const CGFloat kAutoPlayTimerInterval = 0.25f;
                 [imageView addGestureRecognizer:tapRecognizer];
             } errorHandler:^(NSError * _Nonnull error) {
                 MPLogInfo(@"Failed to retrieve privacy icon from %@", privacyIconImageUrl);
+                [self.vastTracking handleVASTError:MPVASTErrorUndefined videoTimeOffset:0];
             }];
         }
         // The ad network may provide its own view for its privacy information icon.

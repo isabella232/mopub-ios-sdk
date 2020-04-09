@@ -1,7 +1,7 @@
 //
 //  MPConsoleLogger.m
 //
-//  Copyright 2018-2019 Twitter, Inc.
+//  Copyright 2018-2020 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
@@ -12,9 +12,9 @@
 
 - (instancetype)init {
     if (self = [super init]) {
-        // The console logging level is set to info by default in the event
-        // that an error needs to be logged to the console prior to SDK
-        // initialization.
+        // The console logging level is set to `MPBLogLevelInfo` by default in the event that an
+        // error needs to be logged to the console prior to SDK initialization. `MPMoPubConfiguration`
+        // will set the log level to `MPBLogLevelInfo` during initialization.
         _logLevel = MPBLogLevelInfo;
     }
 

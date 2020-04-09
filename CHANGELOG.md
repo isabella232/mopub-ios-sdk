@@ -1,3 +1,36 @@
+## Version 5.12.0 (April 6, 2020)
+- **Features**
+  - Location setters for all formats are marked deprecated and will be removed in a future release.
+  - Added Mintegral as a supported network.
+  - A new field `appVersion` has been added to `MPImpressionData`.
+  - Update the Sample app to 64-bit architectures only.
+  - Added ad load history to the Saved Ads section in the Sample app.
+
+- **Bug Fixes**
+  - Fixed potential multithreading crash in `MPAdServerURLBuilder`.
+
+## Version 5.11.0 (February 4, 2020)
+- **Features**
+  - Update GDPR logic to allow MoPub to reacquire consent for new vendors.
+  - Update our support for OpenRTB Native Ads to version 1.2 and add an optional `sponsored` text field for native ads.
+  - Removed deprecated custom event method `requestAdWithSize:customEventInfo:` in `MPBannerCustomEvent`, `requestInterstitialWithCustomEventInfo:` in `MPInterstitialCustomEvent`, `requestRewardedVideoWithCustomEventInfo:` in `MPRewardedVideoCustomEvent`, and `requestAdWithCustomEventInfo:` in `MPNativeCustomEvent`.
+
+- **Bug Fixes**
+  - Fixed non-native SDK target compilation error.
+  - Fixed potential deadlock in `MPConsentManager` when scheduling `MPTimer`. 
+  - Fixed potential crash in `MPTableViewAdPlacer` and `MPCollectionViewAdPlacer`.
+
+## Version 5.10.0 (October 30, 2019)
+- **Features**
+  - Added support for the Verizon native ad renderer.
+  - Deprecated base custom event `requestAd` calls without the `adMarkup` parameter.
+
+- **Bug Fixes**
+  - Fixed non-native SDK target compilation error.
+  - Fixed potential crash in `MPTableViewAdPlacer` and `MPCollectionViewAdPlacer`.
+  - Removed extraneous `NSLog` statements for Release build configuration.
+  - Fixed VAST error code macro replacement in tracking URLs.
+
 ## Version 5.9.0 (September 16, 2019)
 - **Features**
   - Add iOS 13 support to both SDK and MoPub Sample app. 
@@ -46,6 +79,7 @@
 - **Features**
   - Impression Level Revenue Data: A data object that includes revenue information associated with each impression
   - Verizon Ads SDK now supported as a mediated network
+  - Native ad renderer registration for FacebookNativeCustomEvent and MillennialNativeCustomEvent is removed from the SDK. Pubishers must register renderers in their app.
 
 - **Bug Fixes**
   - Fixed bug where native video fires an impression when main image asset is missing

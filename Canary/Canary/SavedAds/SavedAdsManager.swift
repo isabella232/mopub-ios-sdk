@@ -1,7 +1,7 @@
 //
 //  SavedAdsManager.swift
 //
-//  Copyright 2018-2019 Twitter, Inc.
+//  Copyright 2018-2020 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
@@ -26,11 +26,18 @@ final class SavedAdsManager {
      */
     private(set) var savedAds: [AdUnit]
     
+    /**
+     An sorted array `AdUnit` with the most recently loaded ad comes first.
+     */
+    private(set) var loadedAds: [AdUnit]
+    
+    private let maxHistoryRecords = 30
     private let userDefaults: UserDefaults
     
     init(userDefaults: UserDefaults = .standard) {
         self.userDefaults = userDefaults
         savedAds = userDefaults.persistentAdUnits
+        loadedAds = userDefaults.loadedAds
     }
 
     /**
@@ -50,6 +57,31 @@ final class SavedAdsManager {
      */
     func removeSavedAd(adUnit: AdUnit) {
         savedAds.removeAll(where: { adUnit.id == $0.id })
+        userDefaults.persistentAdUnits = savedAds
+        DataUpdatedNotification().post()
+    }
+
+    /**
+     Add the ad unit to history and remove duplicate if there is any.
+     Note: A `DataUpdatedNotification` is posted before returning.
+     */
+    func addLoadedAds(adUnit: AdUnit) {
+        loadedAds.removeAll(where: { adUnit.id == $0.id }) // avoid duplicate
+        if loadedAds.count > maxHistoryRecords {
+            loadedAds = Array(loadedAds.dropLast())
+        }
+        loadedAds.insert(adUnit, at: 0) // latest first
+        userDefaults.loadedAds = loadedAds
+        DataUpdatedNotification().post()
+    }
+    
+    /**
+     Remove the provided ad unti from history.
+     Note: A `DataUpdatedNotification` is posted before returning.
+     */
+    func removeLoadedAds(adUnit: AdUnit) {
+        loadedAds.removeAll(where: { adUnit.id == $0.id })
+        userDefaults.loadedAds = savedAds
         DataUpdatedNotification().post()
     }
 }

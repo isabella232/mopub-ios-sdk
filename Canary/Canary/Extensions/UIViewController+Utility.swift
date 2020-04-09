@@ -1,7 +1,7 @@
 //
 //  UIViewController+Utility.swift
 //
-//  Copyright 2018-2019 Twitter, Inc.
+//  Copyright 2018-2020 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
@@ -28,26 +28,6 @@ extension UIViewController {
             }
         } else {
             return AppDelegate.shared.containerViewController
-        }
-    }
-    
-    /**
-     Saved ads split view controller.
-     */
-    var savedAdSplitViewController: UISplitViewController? {
-        if #available(iOS 13.0, *) {
-            guard let sceneDelegate = view.window?.windowScene?.delegate as? SceneDelegate else {
-                fatalError()
-            }
-            switch sceneDelegate.mode {
-            case .adViewScene, .unknown:
-                print("`savedAdSplitViewController` is only available for the main scene")
-                return nil
-            case .mainScene(let mainSceneState):
-                return mainSceneState.savedAdSplitViewController
-            }
-        } else {
-            return AppDelegate.shared.savedAdSplitViewController
         }
     }
     

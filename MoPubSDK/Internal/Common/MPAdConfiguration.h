@@ -1,7 +1,7 @@
 //
 //  MPAdConfiguration.h
 //
-//  Copyright 2018-2019 Twitter, Inc.
+//  Copyright 2018-2020 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
@@ -9,13 +9,10 @@
 #import <Foundation/Foundation.h>
 #import "MPGlobal.h"
 #import "MPImpressionData.h"
+#import "MPVideoEvent.h"
 
 @class MPRewardedVideoReward;
-
-typedef NS_ENUM(NSUInteger, MPAdType) {
-    MPAdTypeInline,
-    MPAdTypeFullscreen
-};
+@class MPVASTTrackingEvent;
 
 typedef NS_ENUM(NSUInteger, MPAfterLoadResult) {
     MPAfterLoadResultMissingAdapter,
@@ -54,8 +51,9 @@ extern NSString * const kRewardedCurrenciesMetadataKey;
 extern NSString * const kRewardedPlayableDurationMetadataKey;
 extern NSString * const kRewardedPlayableRewardOnClickMetadataKey;
 extern NSString * const kImpressionDataMetadataKey;
+extern NSString * const kVASTVideoTrackersMetadataKey;
 
-extern NSString * const kInterstitialAdTypeMetadataKey;
+extern NSString * const kFullAdTypeMetadataKey;
 extern NSString * const kOrientationTypeMetadataKey;
 
 extern NSString * const kAdTypeHtml;
@@ -64,6 +62,8 @@ extern NSString * const kAdTypeMraid;
 extern NSString * const kAdTypeClear;
 extern NSString * const kAdTypeNative;
 extern NSString * const kAdTypeNativeVideo;
+extern NSString * const kAdTypeRewardedVideo;
+extern NSString * const kAdTypeRewardedPlayable;
 
 extern NSString * const kClickthroughExperimentBrowserAgent;
 
@@ -74,10 +74,10 @@ extern NSString * const kBannerImpressionMinPixelMetadataKey;
 
 @interface MPAdConfiguration : NSObject
 
-@property (nonatomic, assign) MPAdType adType;
+@property (nonatomic, readonly) BOOL isFullscreenAd;
 @property (nonatomic, assign) BOOL adUnitWarmingUp;
 @property (nonatomic, readonly) BOOL isMraidAd;
-@property (nonatomic, copy) NSString *networkType;
+@property (nonatomic, copy) NSString *adType; // the value is a `kAdType` constant from "x-adtype"
 // If this flag is YES, it implies that we've reached the end of the waterfall for the request
 // and there is no need to hit ad server again.
 @property (nonatomic) BOOL isEndOfWaterfall;
@@ -105,27 +105,38 @@ extern NSString * const kBannerImpressionMinPixelMetadataKey;
 @property (nonatomic, assign) NSInteger nativeImpressionMinVisiblePercent; // The pixels Metadata takes priority over percentage, but percentage is left for backwards compatibility
 @property (nonatomic, assign) NSTimeInterval nativeImpressionMinVisibleTimeInterval;
 @property (nonatomic, assign) NSTimeInterval nativeVideoMaxBufferingTime;
-@property (nonatomic) NSDictionary *nativeVideoTrackers;
-@property (nonatomic, readonly) NSArray *availableRewards;
+@property (nonatomic) NSDictionary<MPVideoEvent, NSArray<MPVASTTrackingEvent *> *> *vastVideoTrackers;
+@property (nonatomic, readonly) NSArray<MPRewardedVideoReward *> *availableRewards;
 @property (nonatomic, strong) MPRewardedVideoReward *selectedReward;
 @property (nonatomic, copy) NSString *rewardedVideoCompletionUrl;
 @property (nonatomic, assign) NSTimeInterval rewardedPlayableDuration;
 @property (nonatomic, assign) BOOL rewardedPlayableShouldRewardOnClick;
 @property (nonatomic, copy) NSString *advancedBidPayload;
 @property (nonatomic, strong) MPImpressionData *impressionData;
-@property (nonatomic, assign) BOOL isVASTClickabilityExperimentEnabled;
+@property (nonatomic, assign) BOOL enableEarlyClickthroughForNonRewardedVideo;
+@property (nonatomic, readonly) BOOL isMoVideo;
+/**
+ MRAID `useCustomClose()` functionality is available for use.
+ */
+@property (nonatomic, readonly) BOOL mraidAllowCustomClose;
 
 /**
  Unified ad unit format in its raw string representation.
  */
 @property (nonatomic, copy) NSString *format;
 
-// viewable impression tracking experiment
+// viewable impression tracking
 @property (nonatomic) NSTimeInterval impressionMinVisibleTimeInSec;
 @property (nonatomic) CGFloat impressionMinVisiblePixels;
-@property (nonatomic) BOOL visibleImpressionTrackingEnabled;
 
-- (instancetype)initWithMetadata:(NSDictionary *)metadata data:(NSData *)data adType:(MPAdType)adType;
+/**
+ When there is no actual reward, `availableRewards` contains a default reward with the type
+ `kMPRewardedVideoRewardCurrencyTypeUnspecified`, thus we cannot simply count the array size
+ of `availableRewards` to tell whether there is a valid reward.
+ */
+@property (nonatomic, readonly) BOOL hasValidReward;
+
+- (instancetype)initWithMetadata:(NSDictionary *)metadata data:(NSData *)data isFullscreenAd:(BOOL)isFullscreenAd;
 
 // Default @c init is unavailable
 - (instancetype)init NS_UNAVAILABLE;

@@ -25,6 +25,12 @@ end
 # Pods available to all targets in Canary.xcworkspace
 pod 'LoremIpsum'
 
+# Firebase must be available to all targets to avoid CocoaPods pulling in two
+# different revisions of the implicit dependency GoogleUtilities.framework
+# since 'MoPub-AdMob-Adapters' has a hard version dependency.
+pod 'Firebase'
+pod 'Firebase/Analytics'
+
 # CocoaPods does not support the ability to include the same pod
 # in different targets using different pathing. To support the
 # varied needs of CI and local development, the pathing to the
@@ -50,6 +56,7 @@ if Dir.exists?(mediation_path) && !use_production_mediation
     pod 'MoPub-FacebookAudienceNetwork-Adapters', :path => mediation_path
     pod 'MoPub-Flurry-Adapters', :path => mediation_path
     pod 'MoPub-IronSource-Adapters', :path => mediation_path
+    pod 'MoPub-Mintegral-Adapters', :path => mediation_path
     pod 'MoPub-TapJoy-Adapters', :path => mediation_path
     pod 'MoPub-UnityAds-Adapters', :path => mediation_path
     pod 'MoPub-Verizon-Adapters', :path => mediation_path
@@ -62,6 +69,7 @@ else
     pod 'MoPub-FacebookAudienceNetwork-Adapters'
     pod 'MoPub-Flurry-Adapters'
     pod 'MoPub-IronSource-Adapters'
+    pod 'MoPub-Mintegral-Adapters'
     pod 'MoPub-TapJoy-Adapters'
     pod 'MoPub-UnityAds-Adapters'
     pod 'MoPub-Verizon-Adapters'

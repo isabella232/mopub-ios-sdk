@@ -1,7 +1,7 @@
 //
 //  QRCodeCameraInterfaceViewController.swift
 //
-//  Copyright 2018-2019 Twitter, Inc.
+//  Copyright 2018-2020 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
@@ -170,7 +170,7 @@ extension QRCodeCameraInterfaceViewController: AVCaptureMetadataOutputObjectsDel
     func metadataOutput(_ output: AVCaptureMetadataOutput,
                         didOutput metadataObjects: [AVMetadataObject],
                         from connection: AVCaptureConnection) {
-        guard let savedAdSplitViewController = savedAdSplitViewController else {
+        guard let containerViewController = containerViewController else {
             return
         }
         
@@ -190,7 +190,7 @@ extension QRCodeCameraInterfaceViewController: AVCaptureMetadataOutputObjectsDel
                 self.dismissCamera {
                     // Open `adUnit` via the same path that deep linking uses
                     SceneDelegate.openMoPubAdUnit(adUnit: adUnit,
-                                                  onto: savedAdSplitViewController,
+                                                  onto: containerViewController,
                                                   shouldSave: true)
                 }
             }

@@ -1,7 +1,7 @@
 //
 //  UserDefaults+Subscript.swift
 //
-//  Copyright 2018-2019 Twitter, Inc.
+//  Copyright 2018-2020 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
@@ -80,6 +80,32 @@ extension UserDefaults {
         }
         set {
             self[cachedAdUnitIdKey] = newValue
+        }
+    }
+
+    /**
+     The private `UserDefaults.Key` for accessing `loadedAds`.
+     */
+    private var loadedAdsKey: Key<Data> {
+        return Key<Data>("loadedAdsKey", defaultValue: Data())
+    }
+    
+    /**
+     Ad unit ID's that have been loaded in history.
+     */
+    var loadedAds: [AdUnit] {
+        get {
+            guard let history = try? JSONDecoder().decode([AdUnit].self, from: self[loadedAdsKey]) else {
+                return []
+            }
+            return history
+        }
+        set {
+            guard let data = try? JSONEncoder().encode(newValue) else {
+                assertionFailure()
+                return
+            }
+            self[loadedAdsKey] = data
         }
     }
 }

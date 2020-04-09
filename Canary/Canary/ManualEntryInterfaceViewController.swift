@@ -1,7 +1,7 @@
 //
 //  ManualEntryInterfaceViewController.swift
 //
-//  Copyright 2018-2019 Twitter, Inc.
+//  Copyright 2018-2020 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
@@ -29,7 +29,7 @@ class ManualEntryInterfaceViewController: UIViewController {
     }
     
     fileprivate func dismissAndShowAd(shouldSave: Bool) {
-        guard let savedAdSplitViewController = savedAdSplitViewController else {
+        guard let containerViewController = containerViewController else {
             return
         }
         
@@ -59,7 +59,7 @@ class ManualEntryInterfaceViewController: UIViewController {
         // If everything is formed correctly, dismiss and show ad.
         dismiss(animated: true) {
             SceneDelegate.openMoPubAdUnit(adUnit: adUnit,
-                                          onto: savedAdSplitViewController,
+                                          onto: containerViewController,
                                           shouldSave: shouldSave)
         }
     }

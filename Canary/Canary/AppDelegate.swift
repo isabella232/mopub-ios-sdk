@@ -1,7 +1,7 @@
 //
 //  AppDelegate.swift
 //
-//  Copyright 2018-2019 Twitter, Inc.
+//  Copyright 2018-2020 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
@@ -66,23 +66,6 @@ class AppDelegate: UIResponder {
                 return nil
             case .mainScene(let mainSceneState):
                 return mainSceneState.containerViewController
-            }
-        }
-    }
-    
-    /**
-     Saved ads split view controller.
-     */
-    var savedAdSplitViewController: UISplitViewController? {
-        if #available(iOS 13, *) {
-            fatalError("Handle multi-scene in `SceneDelegate` for iOS 13+")
-        } else {
-            switch sceneDelegate.mode {
-            case .adViewScene, .unknown:
-                print("`savedAdSplitViewController` is only available for the main scene")
-                return nil
-            case .mainScene(let mainSceneState):
-                return mainSceneState.savedAdSplitViewController
             }
         }
     }

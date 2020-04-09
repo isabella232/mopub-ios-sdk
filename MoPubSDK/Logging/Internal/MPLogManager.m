@@ -1,7 +1,7 @@
 //
 //  MPLogManager.m
 //
-//  Copyright 2018-2019 Twitter, Inc.
+//  Copyright 2018-2020 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
@@ -84,6 +84,10 @@ static NSString * sObfuscatedIdentifier;
 #pragma mark - Logging
 
 - (void)logMessage:(NSString *)message atLogLevel:(MPBLogLevel)level {
+    if (level == MPBLogLevelNone) {
+        return;
+    }
+
     // Lazily retrieve the IDFA
     if (sIdentifier == nil) {
         sIdentifier = [[MPIdentityProvider identifier] copy];

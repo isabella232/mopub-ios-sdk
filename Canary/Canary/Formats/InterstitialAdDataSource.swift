@@ -1,7 +1,7 @@
 //
 //  InterstitialAdDataSource.swift
 //
-//  Copyright 2018-2019 Twitter, Inc.
+//  Copyright 2018-2020 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
@@ -34,15 +34,15 @@ class InterstitialAdDataSource: NSObject, AdDataSource {
      */
     lazy var title: [AdEvent: String] = {
         var titleStrings: [AdEvent: String] = [:]
-        titleStrings[.didLoad]            = "interstitialDidLoadAd(_:)"
-        titleStrings[.didFailToLoad]      = "interstitialDidFailToLoadAd(_:)"
-        titleStrings[.willAppear]         = "interstitialWillAppear(_:)"
-        titleStrings[.didAppear]          = "interstitialDidAppear(_:)"
-        titleStrings[.willDisappear]      = "interstitialWillDisappear(_:)"
-        titleStrings[.didDisappear]       = "interstitialDidDisappear(_:)"
-        titleStrings[.didExpire]          = "interstitialDidExpire(_:)"
-        titleStrings[.clicked]            = "interstitialDidReceiveTapEvent(_:)"
-        titleStrings[.didTrackImpression] = "mopubAd(_:, didTrackImpressionWith _:)"
+        titleStrings[.didLoad]            = CallbackFunctionNames.interstitialDidLoadAd
+        titleStrings[.didFailToLoad]      = CallbackFunctionNames.interstitialDidFailToLoadAd
+        titleStrings[.willAppear]         = CallbackFunctionNames.interstitialWillAppear
+        titleStrings[.didAppear]          = CallbackFunctionNames.interstitialDidAppear
+        titleStrings[.willDisappear]      = CallbackFunctionNames.interstitialWillDisappear
+        titleStrings[.didDisappear]       = CallbackFunctionNames.interstitialDidDisappear
+        titleStrings[.didExpire]          = CallbackFunctionNames.interstitialDidExpire
+        titleStrings[.clicked]            = CallbackFunctionNames.interstitialDidReceiveTapEvent
+        titleStrings[.didTrackImpression] = CallbackFunctionNames.didTrackImpression
         
         return titleStrings
     }()
@@ -139,6 +139,8 @@ class InterstitialAdDataSource: NSObject, AdDataSource {
         interstitialAd.keywords = adUnit.keywords
         interstitialAd.userDataKeywords = adUnit.userDataKeywords
         interstitialAd.loadAd()
+        
+        SavedAdsManager.sharedInstance.addLoadedAds(adUnit: adUnit)
     }
     
     private func showAd() {

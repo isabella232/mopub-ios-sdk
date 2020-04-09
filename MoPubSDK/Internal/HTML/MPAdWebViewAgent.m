@@ -1,7 +1,7 @@
 //
 //  MPAdWebViewAgent.m
 //
-//  Copyright 2018-2019 Twitter, Inc.
+//  Copyright 2018-2020 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
@@ -30,9 +30,8 @@
 @interface MPAdWebViewAgent () <UIGestureRecognizerDelegate>
 
 @property (nonatomic, strong) MPAdConfiguration *configuration;
-@property (nonatomic, strong) MPAdDestinationDisplayAgent *destinationDisplayAgent;
+@property (nonatomic, strong) id<MPAdDestinationDisplayAgent> destinationDisplayAgent;
 @property (nonatomic, assign) BOOL shouldHandleRequests;
-@property (nonatomic, strong) id<MPAdAlertManagerProtocol> adAlertManager;
 @property (nonatomic, assign) BOOL userInteractedWithWebView;
 @property (nonatomic, strong) MPUserInteractionGestureRecognizer *userInteractionRecognizer;
 @property (nonatomic, assign) CGRect frame;
@@ -57,7 +56,6 @@
         self.delegate = delegate;
         self.shouldHandleRequests = YES;
         self.didFireClickImpression = NO;
-        self.adAlertManager = [[MPCoreInstanceProvider sharedProvider] buildMPAdAlertManagerWithDelegate:self];
 
         self.userInteractionRecognizer = [[MPUserInteractionGestureRecognizer alloc] initWithTarget:self action:@selector(handleInteraction:)];
         self.userInteractionRecognizer.cancelsTouchesInView = NO;
@@ -90,18 +88,6 @@
     return YES;
 }
 
-#pragma mark - <MPAdAlertManagerDelegate>
-
-- (UIViewController *)viewControllerForPresentingMailVC
-{
-    return [self.delegate viewControllerForPresentingModalView];
-}
-
-- (void)adAlertManagerDidTriggerAlert:(MPAdAlertManager *)manager
-{
-    [self.adAlertManager processAdAlertOnce];
-}
-
 #pragma mark - Public
 
 - (void)loadConfiguration:(MPAdConfiguration *)configuration
@@ -122,7 +108,7 @@
     // Ignore server configuration size for interstitials. At this point our web view
     // is sized correctly for the device's screen. Currently the server sends down values for a 3.5in
     // screen, and they do not size correctly on a 4in screen.
-    if (configuration.adType != MPAdTypeFullscreen) {
+    if (configuration.isFullscreenAd == false) {
         if ([configuration hasPreferredSize]) {
             CGRect frame = self.view.frame;
             frame.size.width = configuration.preferredSize.width;
@@ -139,17 +125,15 @@
     [self.view loadHTMLString:[configuration adResponseHTMLString]
                       baseURL:[NSURL URLWithString:[MPAPIEndpoints baseURL]]
      ];
-
-    [self initAdAlertManager];
 }
 
 - (void)invokeJavaScriptForEvent:(MPAdWebViewEvent)event
 {
     switch (event) {
         case MPAdWebViewEventAdDidAppear:
-            // For banner, viewability tracker is handled right after adView is initialized (not here).
+            // For banner, viewability tracker is handled in @c MPBannerCustomEventAdapter (not here).
             // For interstitial (handled here), we start tracking viewability if it's not started during adView initialization.
-            if (![self shouldStartViewabilityDuringInitialization]) {
+            if ([self isInterstitialAd]) {
                 [self startViewabilityTracker];
             }
 
@@ -293,32 +277,15 @@ shouldStartLoadWithRequest:(NSURLRequest *)request
 
 - (void)init3rdPartyViewabilityTrackers
 {
-    self.viewabilityTracker = [[MPViewabilityTracker alloc] initWithAdView:self.view isVideo:self.configuration.isVastVideoPlayer startTrackingImmediately:[self shouldStartViewabilityDuringInitialization]];
-}
-
-- (BOOL)shouldStartViewabilityDuringInitialization
-{
-    // If viewabile impression tracking experiment is enabled, we defer viewability trackers until
-    // ad view is at least x pixels on screen for y seconds, where x and y are configurable values defined in server.
-    if (self.adConfiguration.visibleImpressionTrackingEnabled) {
-        return NO;
-    }
-
-    return ![self isInterstitialAd];
+    self.viewabilityTracker = [[MPViewabilityTracker alloc]
+                               initWithWebView:self.view
+                               isVideo:self.configuration.isVastVideoPlayer
+                               startTrackingImmediately:NO];
 }
 
 - (BOOL)isInterstitialAd
 {
-    return (self.configuration.adType == MPAdTypeFullscreen);
-}
-
-- (void)initAdAlertManager
-{
-    self.adAlertManager.adConfiguration = self.configuration;
-    self.adAlertManager.adUnitId = [self.delegate adUnitId];
-    self.adAlertManager.targetAdView = self.view;
-    self.adAlertManager.location = [self.delegate location];
-    [self.adAlertManager beginMonitoringAlerts];
+    return self.configuration.isFullscreenAd;
 }
 
 @end

@@ -1,7 +1,7 @@
 //
 //  MPRewardedVideoAdManager.h
 //
-//  Copyright 2018-2019 Twitter, Inc.
+//  Copyright 2018-2020 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
@@ -20,7 +20,7 @@
 @interface MPRewardedVideoAdManager : NSObject
 
 @property (nonatomic, weak) id<MPRewardedVideoAdManagerDelegate> delegate;
-@property (nonatomic, readonly) NSString *adUnitID;
+@property (nonatomic, readonly) NSString *adUnitId;
 @property (nonatomic, strong) NSArray *mediationSettings;
 @property (nonatomic, copy) NSString *customerId;
 @property (nonatomic, strong) MPAdTargeting *targeting;

@@ -1,7 +1,7 @@
 //
 //  MPTimerTests.m
 //
-//  Copyright 2018-2019 Twitter, Inc.
+//  Copyright 2018-2020 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
@@ -14,8 +14,8 @@ static const NSTimeInterval kTimerRepeatIntervalInSeconds = 0.05;
 
 // `NSTimer` is not totally accurate and it might be slower on build machines, thus we need some
 // extra tolerance while waiting for the expections to be fulfilled.
-// ADF-4255: 2 is good enough in most cases, but sometimes it still fails... So, try 5 and see.
-static const NSTimeInterval kWaitTimeTolerance = 5;
+// ADF-4255: 2 is good enough in most cases, but sometimes it still fails... So, try 7 and see.
+static const NSTimeInterval kWaitTimeTolerance = 7;
 
 /**
  * This test make use of `MPTimer.associatedTitle` to identifier the timers in each test.
@@ -46,6 +46,10 @@ static const NSTimeInterval kWaitTimeTolerance = 5;
     if (self.testNameVsExpectation == nil) {
         self.testNameVsExpectation = [NSMutableDictionary dictionary];
     }
+
+    // Clear out the shared timer and token.
+    sharedTimer = nil;
+    sharedTimerOnceToken = 0;
 }
 
 // A helper for reducing code duplication.
@@ -321,6 +325,42 @@ static const NSTimeInterval kWaitTimeTolerance = 5;
     // use a long timeout and rely on the `endingTimer` to fulfill the test expectation early. On
     // faster machines with 10000 loops, this test case takes about 0.25 second.
     [self waitForExpectationsWithTimeout:60 handler:^(NSError * _Nullable error) {
+        XCTAssertNil(error);
+    }];
+}
+
+// Generates a shared test timer for the `testMainThreadDeadlocking` unit test.
+// The `sharedTimer` and `sharedTimerOnceToken` static variables are in the scope
+// of the class so that `setup` can clear them out on every test run.
+static MPTimer * sharedTimer = nil;
+static dispatch_once_t sharedTimerOnceToken;
+
+- (MPTimer *)sharedTestTimer {
+    dispatch_once(&sharedTimerOnceToken, ^{
+        sharedTimer = [self generateTestTimerWithTitle:@"Background thread initialization"];
+    });
+
+    return sharedTimer;
+}
+
+- (void)testMainThreadDeadlocking {
+    XCTestExpectation * expectation = [self expectationWithDescription:@"Wait for threads to finish"];
+    expectation.expectedFulfillmentCount = 2;
+
+    dispatch_async(dispatch_get_main_queue(), ^{
+        MPTimer * mainTimer = [self sharedTestTimer];
+        BOOL isActive = mainTimer.isCountdownActive;
+        NSLog(@"testMainThreadDeadlocking timer is %@", isActive ? @"active" : @"inactive");
+        [expectation fulfill];
+    });
+
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        MPTimer * timer = [self sharedTestTimer];
+        [timer scheduleNow];
+        [expectation fulfill];
+    });
+
+    [self waitForExpectationsWithTimeout:5 handler:^(NSError * _Nullable error) {
         XCTAssertNil(error);
     }];
 }

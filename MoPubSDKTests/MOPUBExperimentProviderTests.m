@@ -1,7 +1,7 @@
 //
 //  MOPUBExperimentProviderTests.m
 //
-//  Copyright 2018-2019 Twitter, Inc.
+//  Copyright 2018-2020 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
@@ -24,7 +24,7 @@
     testSubject.isDisplayAgentOverriddenByClient = NO;
     MPAdConfiguration * config = [[MPAdConfiguration alloc] initWithMetadata:nil
                                                                         data:nil
-                                                                      adType:MPAdTypeFullscreen
+                                                              isFullscreenAd:YES
                                                           experimentProvider:testSubject];
 
     XCTAssertEqual(config.clickthroughExperimentBrowserAgent, MOPUBDisplayAgentTypeInApp);
@@ -39,7 +39,7 @@
     testSubject.isDisplayAgentOverriddenByClient = NO;
     MPAdConfiguration * config = [[MPAdConfiguration alloc] initWithMetadata:headers
                                                                         data:nil
-                                                                      adType:MPAdTypeFullscreen
+                                                              isFullscreenAd:YES
                                                           experimentProvider:testSubject];
 
     XCTAssertEqual(config.clickthroughExperimentBrowserAgent, MOPUBDisplayAgentTypeInApp);
@@ -55,7 +55,7 @@
     testSubject.isDisplayAgentOverriddenByClient = NO;
     MPAdConfiguration * config = [[MPAdConfiguration alloc] initWithMetadata:headers
                                                                         data:nil
-                                                                      adType:MPAdTypeFullscreen
+                                                              isFullscreenAd:YES
                                                           experimentProvider:testSubject];
 
     XCTAssertEqual(config.clickthroughExperimentBrowserAgent, MOPUBDisplayAgentTypeNativeSafari);

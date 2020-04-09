@@ -1,38 +1,51 @@
 //
 //  MPAdConfiguration.m
 //
-//  Copyright 2018-2019 Twitter, Inc.
+//  Copyright 2018-2020 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
 
 #import "MOPUBExperimentProvider.h"
-#import "MOPUBNativeVideoCustomEvent.h"
 #import "MPAdConfiguration.h"
 #import "MPAdServerKeys.h"
 #import "MPConstants.h"
 #import "MPHTMLBannerCustomEvent.h"
 #import "MPHTMLInterstitialCustomEvent.h"
 #import "MPLogging.h"
-#import "MPMoPubNativeCustomEvent.h"
 #import "MPMoPubRewardedPlayableCustomEvent.h"
 #import "MPMoPubRewardedVideoCustomEvent.h"
 #import "MPMRAIDBannerCustomEvent.h"
 #import "MPMRAIDInterstitialCustomEvent.h"
 #import "MPRewardedVideoReward.h"
+#import "MPVASTInterstitialCustomEvent.h"
 #import "MPVASTTracking.h"
 #import "MPViewabilityTracker.h"
 #import "NSDictionary+MPAdditions.h"
 #import "NSJSONSerialization+MPAdditions.h"
 #import "NSString+MPAdditions.h"
 
-#if MP_HAS_NATIVE_PACKAGE
+#if __has_include("MOPUBNativeVideoCustomEvent.h")
+#import "MOPUBNativeVideoCustomEvent.h"
+#endif
+
+#if __has_include("MPMoPubNativeCustomEvent.h")
+#import "MPMoPubNativeCustomEvent.h"
+#endif
+
+#if __has_include("MPVASTTrackingEvent.h")
 #import "MPVASTTrackingEvent.h"
 #endif
 
 // MACROS
 #define AFTER_LOAD_DURATION_MACRO   @"%%LOAD_DURATION_MS%%"
 #define AFTER_LOAD_RESULT_MACRO   @"%%LOAD_RESULT%%"
+
+typedef NS_ENUM(NSUInteger, MPVASTPlayerVersion) {
+    MPVASTPlayerVersionUndetermined = 0, // default value, should be treated as web view player
+    MPVASTPlayerVersionWebViewPlayer = 1,
+    MPVASTPlayerVersionNativePlayer = 2
+};
 
 NSString * const kAdTypeMetadataKey = @"x-adtype";
 NSString * const kAdUnitWarmingUpMetadataKey = @"x-warmup";
@@ -59,7 +72,7 @@ NSString * const kPrecacheRequiredKey = @"x-precacherequired";
 NSString * const kIsVastVideoPlayerKey = @"x-vastvideoplayer";
 NSString * const kImpressionDataMetadataKey = @"impdata";
 
-NSString * const kInterstitialAdTypeMetadataKey = @"x-fulladtype";
+NSString * const kFullAdTypeMetadataKey = @"x-fulladtype";
 NSString * const kOrientationTypeMetadataKey = @"x-orientation";
 
 NSString * const kNativeImpressionMinVisiblePixelsMetadataKey = @"x-native-impression-min-px"; // The pixels Metadata takes priority over percentage, but percentage is left for backwards compatibility
@@ -68,7 +81,7 @@ NSString * const kNativeImpressionVisibleMsMetadataKey = @"x-impression-visible-
 NSString * const kNativeVideoPlayVisiblePercentMetadataKey = @"x-play-visible-percent";
 NSString * const kNativeVideoPauseVisiblePercentMetadataKey = @"x-pause-visible-percent";
 NSString * const kNativeVideoMaxBufferingTimeMsMetadataKey = @"x-max-buffer-ms";
-NSString * const kNativeVideoTrackersMetadataKey = @"x-video-trackers";
+NSString * const kVASTVideoTrackersMetadataKey = @"x-video-trackers";
 
 NSString * const kBannerImpressionVisableMsMetadataKey = @"x-banner-impression-min-ms";
 NSString * const kBannerImpressionMinPixelMetadataKey = @"x-banner-impression-min-pixels";
@@ -79,6 +92,9 @@ NSString * const kAdTypeMraid = @"mraid";
 NSString * const kAdTypeClear = @"clear";
 NSString * const kAdTypeNative = @"json";
 NSString * const kAdTypeNativeVideo = @"json_video";
+NSString * const kAdTypeRewardedVideo = @"rewarded_video";
+NSString * const kAdTypeRewardedPlayable = @"rewarded_playable";
+NSString * const kAdTypeVAST = @"vast"; // a possible value of "x-fulladtype"
 
 // rewarded video
 NSString * const kRewardedVideoCurrencyNameMetadataKey = @"x-rewarded-video-currency-name";
@@ -90,12 +106,12 @@ NSString * const kRewardedCurrenciesMetadataKey = @"x-rewarded-currencies";
 NSString * const kRewardedPlayableDurationMetadataKey = @"x-rewarded-duration";
 NSString * const kRewardedPlayableRewardOnClickMetadataKey = @"x-should-reward-on-click";
 
-// native video
-NSString * const kNativeVideoTrackerUrlMacro = @"%%VIDEO_EVENT%%";
-NSString * const kNativeVideoTrackerEventsMetadataKey = @"events";
-NSString * const kNativeVideoTrackerUrlsMetadataKey = @"urls";
-NSString * const kNativeVideoTrackerEventDictionaryKey = @"event";
-NSString * const kNativeVideoTrackerTextDictionaryKey = @"text";
+// vast video trackers
+NSString * const kVASTVideoTrackerUrlMacro = @"%%VIDEO_EVENT%%";
+NSString * const kVASTVideoTrackerEventsMetadataKey = @"events";
+NSString * const kVASTVideoTrackerUrlsMetadataKey = @"urls";
+NSString * const kVASTVideoTrackerEventDictionaryKey = @"event";
+NSString * const kVASTVideoTrackerTextDictionaryKey = @"text";
 
 // clickthrough experiment
 NSString * const kClickthroughExperimentBrowserAgent = @"x-browser-agent";
@@ -107,13 +123,24 @@ NSString * const kViewabilityDisableMetadataKey = @"x-disable-viewability";
 // advanced bidding
 NSString * const kAdvancedBiddingMarkupMetadataKey = @"adm";
 
-// clickability experiment
+// Correspond to a numeric value: 2 means native player, 1 or 0 means MoVideo web view player
+NSString * const kVASTPlayerVersionKey = @"vast-player-version";
+
+// MRAID
+NSString * const kMRAIDAllowCustomCloseKey = @"allow-custom-close";
+
+/**
+ Format Unification Phase 2 item 1.1 - clickability experiment
+ When the experiment is enabled, users are able to click a fullscreen non-rewarded VAST video ad
+ immediately, so that they can consume additional content about the advertiser. Clicking on this
+ video should launch the CTA.
+ */
 NSString * const kVASTClickabilityExperimentKey = @"vast-click-enabled";
 
 @interface MPAdConfiguration ()
 
 @property (nonatomic, copy) NSString *adResponseHTMLString;
-@property (nonatomic, strong, readwrite) NSArray *availableRewards;
+@property (nonatomic, strong, readwrite) NSArray<MPRewardedVideoReward *> *availableRewards;
 @property (nonatomic) MOPUBDisplayAgentType clickthroughExperimentBrowserAgent;
 @property (nonatomic, strong) MOPUBExperimentProvider *experimentProvider;
 
@@ -127,13 +154,13 @@ NSString * const kVASTClickabilityExperimentKey = @"vast-click-enabled";
 
 @implementation MPAdConfiguration
 
-- (instancetype)initWithMetadata:(NSDictionary *)metadata data:(NSData *)data adType:(MPAdType)adType
+- (instancetype)initWithMetadata:(NSDictionary *)metadata data:(NSData *)data isFullscreenAd:(BOOL)isFullscreenAd
 {
     self = [super init];
     if (self) {
         [self commonInitWithMetadata:metadata
                                 data:data
-                              adType:adType
+                      isFullscreenAd:isFullscreenAd
                   experimentProvider:MOPUBExperimentProvider.sharedInstance];
     }
     return self;
@@ -144,16 +171,15 @@ NSString * const kVASTClickabilityExperimentKey = @"vast-click-enabled";
  */
 - (void)commonInitWithMetadata:(NSDictionary *)metadata
                           data:(NSData *)data
-                        adType:(MPAdType)adType
+                isFullscreenAd:(BOOL)isFullscreenAd
             experimentProvider:(MOPUBExperimentProvider *)experimentProvider
 {
     self.adResponseData = data;
 
-    self.adType = adType;
+    _isFullscreenAd = isFullscreenAd;
     self.adUnitWarmingUp = [metadata mp_boolForKey:kAdUnitWarmingUpMetadataKey];
 
-    self.networkType = [self networkTypeFromMetadata:metadata];
-    self.networkType = self.networkType ? self.networkType : @"";
+    self.adType = [self adTypeFromMetadata:metadata];
 
     self.preferredSize = CGSizeMake([metadata mp_floatForKey:kWidthMetadataKey],
                                     [metadata mp_floatForKey:kHeightMetadataKey]);
@@ -176,7 +202,16 @@ NSString * const kVASTClickabilityExperimentKey = @"vast-click-enabled";
 
     self.orientationType = [self orientationTypeFromMetadata:metadata];
 
-    self.customEventClass = [self setUpCustomEventClassFromMetadata:metadata];
+    switch ([metadata mp_unsignedIntegerForKey:kVASTPlayerVersionKey]) {
+        case MPVASTPlayerVersionNativePlayer:
+            self.customEventClass = [self setUpCustomEventClassFromMetadata:metadata
+                                                          vastPlayerVersion:MPVASTPlayerVersionNativePlayer];
+            break;
+        default:
+            self.customEventClass = [self setUpCustomEventClassFromMetadata:metadata
+                                                          vastPlayerVersion:MPVASTPlayerVersionWebViewPlayer];
+            break;
+    }
 
     self.customEventClassData = [self customEventClassDataFromMetadata:metadata];
 
@@ -203,15 +238,15 @@ NSString * const kVASTClickabilityExperimentKey = @"vast-click-enabled";
     self.nativeImpressionMinVisibleTimeInterval = [self timeIntervalFromMsmetadata:metadata forKey:kNativeImpressionVisibleMsMetadataKey];
 
     self.nativeVideoMaxBufferingTime = [self timeIntervalFromMsmetadata:metadata forKey:kNativeVideoMaxBufferingTimeMsMetadataKey];
-#if MP_HAS_NATIVE_PACKAGE
-    self.nativeVideoTrackers = [self nativeVideoTrackersFromMetadata:metadata key:kNativeVideoTrackersMetadataKey];
-#endif
+
+    // VAST video trackers
+    self.vastVideoTrackers = [self vastVideoTrackersFromMetadata:metadata key:kVASTVideoTrackersMetadataKey];
 
     self.impressionMinVisibleTimeInSec = [self timeIntervalFromMsmetadata:metadata forKey:kBannerImpressionVisableMsMetadataKey];
     self.impressionMinVisiblePixels = [[self adAmountFromMetadata:metadata key:kBannerImpressionMinPixelMetadataKey] floatValue];
 
     self.impressionData = [self impressionDataFromMetadata:metadata];
-    self.isVASTClickabilityExperimentEnabled = [metadata mp_boolForKey:kVASTClickabilityExperimentKey defaultValue:NO];
+    self.enableEarlyClickthroughForNonRewardedVideo = [metadata mp_boolForKey:kVASTClickabilityExperimentKey defaultValue:NO];
 
     // Organize impression tracking URLs
     NSArray <NSURL *> * URLs = [self URLsFromMetadata:metadata forKey:kImpressionTrackersMetadataKey];
@@ -280,36 +315,46 @@ NSString * const kVASTClickabilityExperimentKey = @"vast-click-enabled";
 
     // advanced bidding
     self.advancedBidPayload = [metadata objectForKey:kAdvancedBiddingMarkupMetadataKey];
+
+    // MRAID
+    _mraidAllowCustomClose = [metadata mp_boolForKey:kMRAIDAllowCustomCloseKey defaultValue:NO];
 }
 
 /**
  Provided the metadata of an ad, return the class of corresponding custome event.
  */
 - (Class)setUpCustomEventClassFromMetadata:(NSDictionary *)metadata
+                         vastPlayerVersion:(MPVASTPlayerVersion)vastPlayerVersion
 {
     NSDictionary *customEventTable;
-    switch (self.adType) {
-        case MPAdTypeInline: {
-            customEventTable = @{@"admob_native": @"MPGoogleAdMobBannerCustomEvent", // optional class
-                                 @"html": NSStringFromClass([MPHTMLBannerCustomEvent class]),
-                                 @"mraid": NSStringFromClass([MPMRAIDBannerCustomEvent class]),
-                                 @"json_video": NSStringFromClass([MOPUBNativeVideoCustomEvent class]),
-                                 @"json": NSStringFromClass([MPMoPubNativeCustomEvent class])};
-            break;
+    if (self.isFullscreenAd) {
+        Class rewardedVideoClass;
+        switch (vastPlayerVersion) {
+            case MPVASTPlayerVersionNativePlayer:
+                rewardedVideoClass = [MPVASTInterstitialCustomEvent class];
+                break;
+            default: // web view player
+                rewardedVideoClass = [MPMoPubRewardedVideoCustomEvent class];
+                break;
         }
-        case MPAdTypeFullscreen: {
-            customEventTable = @{@"admob_full": @"MPGoogleAdMobInterstitialCustomEvent", // optional class
-                                 @"html": NSStringFromClass([MPHTMLInterstitialCustomEvent class]),
-                                 @"mraid": NSStringFromClass([MPMRAIDInterstitialCustomEvent class]),
-                                 @"rewarded_video": NSStringFromClass([MPMoPubRewardedVideoCustomEvent class]),
-                                 @"rewarded_playable": NSStringFromClass([MPMoPubRewardedPlayableCustomEvent class])};
-            break;
-        }
+
+        customEventTable = @{@"admob_full": @"MPGoogleAdMobInterstitialCustomEvent", // optional class
+        kAdTypeHtml: NSStringFromClass([MPHTMLInterstitialCustomEvent class]),
+        kAdTypeMraid: NSStringFromClass([MPMRAIDInterstitialCustomEvent class]),
+        kAdTypeRewardedVideo: NSStringFromClass(rewardedVideoClass),
+        kAdTypeRewardedPlayable: NSStringFromClass([MPMoPubRewardedPlayableCustomEvent class]),
+        kAdTypeVAST: NSStringFromClass([MPVASTInterstitialCustomEvent class])};
+    } else {
+        customEventTable = @{@"admob_native": @"MPGoogleAdMobBannerCustomEvent", // optional class
+        kAdTypeHtml: NSStringFromClass([MPHTMLBannerCustomEvent class]),
+        kAdTypeMraid: NSStringFromClass([MPMRAIDBannerCustomEvent class]),
+        kAdTypeNativeVideo: @"MOPUBNativeVideoCustomEvent", // optional native class
+        kAdTypeNative: @"MPMoPubNativeCustomEvent"};        // optional native class
     }
 
     NSString *customEventClassName = metadata[kCustomEventClassNameMetadataKey];
-    if (customEventTable[self.networkType]) {
-        customEventClassName = customEventTable[self.networkType];
+    if (customEventTable[self.adType]) {
+        customEventClassName = customEventTable[self.adType];
     }
 
     Class customEventClass = NSClassFromString(customEventClassName);
@@ -348,6 +393,12 @@ NSString * const kVASTClickabilityExperimentKey = @"vast-click-enabled";
 - (BOOL)hasPreferredSize
 {
     return (self.preferredSize.width > 0 && self.preferredSize.height > 0);
+}
+
+- (BOOL)hasValidReward
+{
+    return (self.availableRewards.firstObject != nil
+            && [self.availableRewards.firstObject.currencyType isEqualToString:kMPRewardedVideoRewardCurrencyTypeUnspecified] == NO);
 }
 
 - (NSString *)adResponseHTMLString
@@ -411,6 +462,16 @@ NSString * const kVASTClickabilityExperimentKey = @"vast-click-enabled";
     return [self.metadataAdType isEqualToString:kAdTypeMraid];
 }
 
+- (BOOL)isMoVideo
+{
+    // Comparing using class name strings instead of `isKindOfClass:`. The isKindOfClass:`
+    // check fails because `self.customEventClass` was instantiated using reflection.
+    NSString *className = NSStringFromClass(self.customEventClass);
+    BOOL isMoVideoRewardedVideo = [className isEqualToString:@"MPMoPubRewardedVideoCustomEvent"];
+    BOOL isMoVideoRewardedPlayable = [className isEqualToString:@"MPMoPubRewardedPlayableCustomEvent"];
+    return isMoVideoRewardedVideo || isMoVideoRewardedPlayable;
+}
+
 #pragma mark - Private
 
 - (NSArray *)concatenateBaseUrlArray:(NSArray *)baseArray withConditionalArray:(NSArray *)conditionalArray {
@@ -429,14 +490,30 @@ NSString * const kVASTClickabilityExperimentKey = @"vast-click-enabled";
     return [baseArray arrayByAddingObjectsFromArray:conditionalArray];
 }
 
-- (NSString *)networkTypeFromMetadata:(NSDictionary *)metadata
+/**
+ Read the ad type from the "x-adtype" and "x-fulladtype" of the provided @c metadata. The return
+ value is non-null because ad type might be used as a dictionary key, and a nil key causes crash.
+ @param metadata the dictionary that contains ad type information
+ @return A non-null @c NSString. If @c metadata does not contain valid ad type value, then return
+ an empty string.
+*/
+- (NSString * _Nonnull)adTypeFromMetadata:(NSDictionary *)metadata
 {
     NSString *adTypeString = [metadata objectForKey:kAdTypeMetadataKey];
-    if ([adTypeString isEqualToString:@"interstitial"]) {
-        return [metadata objectForKey:kInterstitialAdTypeMetadataKey];
-    } else {
-        return adTypeString;
+
+    // override ad type if full ad type is provided
+    if ([adTypeString isEqualToString:kAdTypeInterstitial]
+        && [[metadata objectForKey:kFullAdTypeMetadataKey] isKindOfClass:[NSString class]]
+        && ((NSString *)[metadata objectForKey:kFullAdTypeMetadataKey]).length > 0) {
+        adTypeString = [metadata objectForKey:kFullAdTypeMetadataKey];
     }
+
+    // make sure the return value is non-null
+    if (adTypeString.length == 0) {
+        adTypeString = @"";
+    }
+
+    return adTypeString;
 }
 
 - (NSURL *)URLFromMetadata:(NSDictionary *)metadata forKey:(NSString *)key
@@ -571,25 +648,20 @@ NSString * const kVASTClickabilityExperimentKey = @"vast-click-enabled";
     }
 }
 
-#if MP_HAS_NATIVE_PACKAGE
-- (NSDictionary *)nativeVideoTrackersFromMetadata:(NSDictionary *)metadata key:(NSString *)key
+- (NSDictionary<MPVideoEvent, NSArray<MPVASTTrackingEvent *> *> *)vastVideoTrackersFromMetadata:(NSDictionary *)metadata
+                                                                                            key:(NSString *)key
 {
     NSDictionary *dictFromMetadata = [self dictionaryFromMetadata:metadata forKey:key];
     if (!dictFromMetadata) {
         return nil;
     }
-    NSMutableDictionary *videoTrackerDict = [NSMutableDictionary new];
-    NSArray *events = dictFromMetadata[kNativeVideoTrackerEventsMetadataKey];
-    NSArray *urls = dictFromMetadata[kNativeVideoTrackerUrlsMetadataKey];
-    NSSet<MPVideoEvent> *supportedEvents = [NSSet setWithObjects:
-                                            MPVideoEventStart,
-                                            MPVideoEventFirstQuartile,
-                                            MPVideoEventMidpoint,
-                                            MPVideoEventThirdQuartile,
-                                            MPVideoEventComplete,
-                                            nil];
+
+    NSMutableDictionary<MPVideoEvent, NSArray<MPVASTTrackingEvent *> *> *videoTrackerDict = [NSMutableDictionary new];
+    NSArray<NSString *> *events = dictFromMetadata[kVASTVideoTrackerEventsMetadataKey];
+    NSArray<NSString *> *urls = dictFromMetadata[kVASTVideoTrackerUrlsMetadataKey];
+
     for (MPVideoEvent event in events) {
-        if (![supportedEvents containsObject:event]) {
+        if (![MPVideoEvents isSupportedEvent:event]) {
             continue;
         }
         [self setVideoTrackers:videoTrackerDict event:event urls:urls];
@@ -600,24 +672,27 @@ NSString * const kVASTClickabilityExperimentKey = @"vast-click-enabled";
     return videoTrackerDict;
 }
 
-- (void)setVideoTrackers:(NSMutableDictionary *)videoTrackerDict event:(MPVideoEvent)event urls:(NSArray *)urls {
-    NSMutableArray *trackers = [NSMutableArray new];
-    for (NSString *url in urls) {
-        if ([url rangeOfString:kNativeVideoTrackerUrlMacro].location != NSNotFound) {
-            NSString *trackerUrl = [url stringByReplacingOccurrencesOfString:kNativeVideoTrackerUrlMacro withString:event];
-            NSDictionary *dict = @{kNativeVideoTrackerEventDictionaryKey:event, kNativeVideoTrackerTextDictionaryKey:trackerUrl};
+- (void)setVideoTrackers:(NSMutableDictionary<MPVideoEvent, NSArray<MPVASTTrackingEvent *> *> *)videoTrackerDict
+                   event:(MPVideoEvent)event
+                    urls:(NSArray<NSString *> *)urls {
+    NSMutableArray<MPVASTTrackingEvent *> *trackers = [NSMutableArray new];
+    [urls enumerateObjectsUsingBlock:^(NSString * _Nonnull urlString, NSUInteger idx, BOOL * _Nonnull stop) {
+        // Perform macro replacement
+        if ([urlString rangeOfString:kVASTVideoTrackerUrlMacro].location != NSNotFound) {
+            NSString *trackerUrl = [urlString stringByReplacingOccurrencesOfString:kVASTVideoTrackerUrlMacro withString:event];
+            NSDictionary *dict = @{kVASTVideoTrackerEventDictionaryKey:event, kVASTVideoTrackerTextDictionaryKey:trackerUrl};
             MPVASTTrackingEvent *tracker = [[MPVASTTrackingEvent alloc] initWithDictionary:dict];
             [trackers addObject:tracker];
         }
-    }
+    }];
+
+    // Add to events dictionary if there are trackers available
     if (trackers.count > 0) {
         videoTrackerDict[event] = trackers;
     }
 }
 
-#endif
-
-- (NSArray *)parseAvailableRewardsFromMetadata:(NSDictionary *)metadata {
+- (NSArray<MPRewardedVideoReward *> *)parseAvailableRewardsFromMetadata:(NSDictionary *)metadata {
     // The X-Rewarded-Currencies Metadata key doesn't exist. This is probably
     // not a rewarded ad.
     NSDictionary * currencies = [metadata objectForKey:kRewardedCurrenciesMetadataKey];
@@ -654,14 +729,6 @@ NSString * const kVASTClickabilityExperimentKey = @"vast-click-enabled";
     }
 
     return variant;
-}
-
-- (BOOL)visibleImpressionTrackingEnabled
-{
-    if (self.impressionMinVisibleTimeInSec < 0 || self.impressionMinVisiblePixels <= 0) {
-        return NO;
-    }
-    return YES;
 }
 
 - (MPImpressionData *)impressionDataFromMetadata:(NSDictionary *)metadata

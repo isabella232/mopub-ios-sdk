@@ -1,7 +1,7 @@
 //
 //  NativeAdRendererManager.swift
 //
-//  Copyright 2018-2019 Twitter, Inc.
+//  Copyright 2018-2020 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
@@ -11,6 +11,8 @@ import MoPub
 import MoPub_AdMob_Adapters
 import MoPub_FacebookAudienceNetwork_Adapters
 import MoPub_Flurry_Adapters
+import MoPub_Mintegral_Adapters
+import MoPub_Verizon_Adapters
 
 final class NativeAdRendererManager {
     static let shared = NativeAdRendererManager()
@@ -96,7 +98,7 @@ private extension NativeAdRendererManager {
         let mopubSettings: MPStaticNativeAdRendererSettings = MPStaticNativeAdRendererSettings()
         mopubSettings.renderingViewClass = NativeAdView.self
         mopubSettings.viewSizeHandler = { (width) -> CGSize in
-            return CGSize(width: width, height: 275)
+            return CGSize(width: width, height: NativeAdView.estimatedViewHeightForWidth(width))
         }
         
         return mopubSettings
@@ -110,7 +112,7 @@ private extension NativeAdRendererManager {
         let mopubVideoSettings: MOPUBNativeVideoAdRendererSettings = MOPUBNativeVideoAdRendererSettings()
         mopubVideoSettings.renderingViewClass = NativeAdView.self
         mopubVideoSettings.viewSizeHandler = { (width) -> CGSize in
-            return CGSize(width: width, height: 275)
+            return CGSize(width: width, height: NativeAdView.estimatedViewHeightForWidth(width))
         }
         
         return mopubVideoSettings
@@ -134,6 +136,14 @@ private extension NativeAdRendererManager {
             renderers.append(flurryConfig)
         }
         
+        // OPTIONAL: Verizon native video renderer
+        if let verizonConfig = MPVerizonNativeAdRenderer.rendererConfiguration(with: mopubVideoRendererSettings) {
+            renderers.append(verizonConfig)
+        }
+        
+        // OPTIONAL: Mintegral native video renderer
+        renderers.append(MintegralNativeAdRenderer.rendererConfiguration(with: mopubVideoRendererSettings))
+
         return renderers
     }
 }

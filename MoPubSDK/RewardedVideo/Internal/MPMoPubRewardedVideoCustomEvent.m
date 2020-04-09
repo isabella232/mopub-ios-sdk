@@ -1,7 +1,7 @@
 //
 //  MPMoPubRewardedVideoCustomEvent.m
 //
-//  Copyright 2018-2019 Twitter, Inc.
+//  Copyright 2018-2020 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
@@ -30,7 +30,12 @@
 
 @dynamic delegate;
 
-- (void)requestRewardedVideoWithCustomEventInfo:(NSDictionary *)info
+- (NSString *)adUnitId
+{
+    return [self.delegate adUnitId];
+}
+
+- (void)requestRewardedVideoWithCustomEventInfo:(NSDictionary *)info adMarkup:(NSString *)adMarkup
 {
     MPAdConfiguration * configuration = self.delegate.configuration;
     MPLogAdEvent([MPLogEvent adLoadAttemptForAdapter:NSStringFromClass(configuration.customEventClass) dspCreativeId:configuration.dspCreativeId dspName:nil], self.adUnitId);
@@ -94,11 +99,6 @@
 #pragma mark - MPInterstitialViewControllerDelegate
 
 @implementation MPMoPubRewardedVideoCustomEvent (MPInterstitialViewControllerDelegate)
-
-- (NSString *)adUnitId
-{
-    return [self.delegate adUnitId];
-}
 
 - (void)interstitialDidLoadAd:(id<MPInterstitialViewController>)interstitial
 {

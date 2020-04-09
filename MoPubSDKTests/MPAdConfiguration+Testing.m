@@ -1,7 +1,7 @@
 //
 //  MPAdConfiguration+Testing.m
 //
-//  Copyright 2018-2019 Twitter, Inc.
+//  Copyright 2018-2020 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
@@ -17,13 +17,13 @@
 
 - (instancetype)initWithMetadata:(NSDictionary *)metadata
                             data:(NSData *)data
-                          adType:(MPAdType)adType
+                  isFullscreenAd:(BOOL)isFullscreenAd
               experimentProvider:(MOPUBExperimentProvider *)experimentProvider {
     self = [super init];
     if (self) {
         [self commonInitWithMetadata:metadata
                                 data:data
-                              adType:adType
+                      isFullscreenAd:isFullscreenAd
                   experimentProvider:experimentProvider];
     }
     return self;

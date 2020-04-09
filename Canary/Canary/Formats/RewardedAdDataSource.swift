@@ -1,7 +1,7 @@
 //
 //  RewardedAdDataSource.swift
 //
-//  Copyright 2018-2019 Twitter, Inc.
+//  Copyright 2018-2020 Twitter, Inc.
 //  Licensed under the MoPub SDK License Agreement
 //  http://www.mopub.com/legal/sdk-license-agreement/
 //
@@ -34,18 +34,18 @@ class RewardedAdDataSource: NSObject, AdDataSource {
      */
     lazy var title: [AdEvent: String] = {
         var titleStrings: [AdEvent: String] = [:]
-        titleStrings[.didLoad]          = "rewardedVideoAdDidLoad(_:)"
-        titleStrings[.didFailToLoad]    = "rewardedVideoAdDidFailToLoad(_:_:)"
-        titleStrings[.didFailToPlay]    = "rewardedVideoAdDidFailToPlay(_:_:)"
-        titleStrings[.willAppear]       = "rewardedVideoAdWillAppear(_:)"
-        titleStrings[.didAppear]        = "rewardedVideoAdDidAppear(_:)"
-        titleStrings[.willDisappear]    = "rewardedVideoAdWillDisappear(_:)"
-        titleStrings[.didDisappear]     = "rewardedVideoAdDidDisappear(_:)"
-        titleStrings[.didExpire]        = "rewardedVideoAdDidExpire(_:)"
-        titleStrings[.clicked]          = "rewardedVideoAdDidReceiveTapEvent(_:)"
-        titleStrings[.willLeaveApp]     = "rewardedVideoAdWillLeaveApplication(_:)"
-        titleStrings[.shouldRewardUser] = "rewardedVideoAdShouldReward(_:_:)"
-        titleStrings[.didTrackImpression] = "mopubAd(_:, didTrackImpressionWith _:)"
+        titleStrings[.didLoad]          = CallbackFunctionNames.rewardedVideoAdDidLoad
+        titleStrings[.didFailToLoad]    = CallbackFunctionNames.rewardedVideoAdDidFailToLoad
+        titleStrings[.didFailToPlay]    = CallbackFunctionNames.rewardedVideoAdDidFailToPlay
+        titleStrings[.willAppear]       = CallbackFunctionNames.rewardedVideoAdWillAppear
+        titleStrings[.didAppear]        = CallbackFunctionNames.rewardedVideoAdDidAppear
+        titleStrings[.willDisappear]    = CallbackFunctionNames.rewardedVideoAdWillDisappear
+        titleStrings[.didDisappear]     = CallbackFunctionNames.rewardedVideoAdDidDisappear
+        titleStrings[.didExpire]        = CallbackFunctionNames.rewardedVideoAdDidExpire
+        titleStrings[.clicked]          = CallbackFunctionNames.rewardedVideoAdDidReceiveTapEvent
+        titleStrings[.willLeaveApp]     = CallbackFunctionNames.rewardedVideoAdWillLeaveApplication
+        titleStrings[.shouldRewardUser] = CallbackFunctionNames.rewardedVideoAdShouldReward
+        titleStrings[.didTrackImpression] = CallbackFunctionNames.didTrackImpression
         
         return titleStrings
     }()
@@ -177,7 +177,9 @@ class RewardedAdDataSource: NSObject, AdDataSource {
         selectedReward = nil
         
         // Load the rewarded ad.
-        MPRewardedVideo.loadAd(withAdUnitID: adUnit.id, keywords: adUnit.keywords, userDataKeywords: adUnit.userDataKeywords, location: nil, mediationSettings: nil)
+        MPRewardedVideo.loadAd(withAdUnitID: adUnit.id, keywords: adUnit.keywords, userDataKeywords: adUnit.userDataKeywords, mediationSettings: nil)
+        
+        SavedAdsManager.sharedInstance.addLoadedAds(adUnit: adUnit)
     }
     
     private func showAd(sender: Any) {
