@@ -7,13 +7,16 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "MPAnalyticsTracker.h"
 #import "MPBannerCustomEventAdapter.h"
 
 @interface MPBannerCustomEventAdapter (Testing)
 
 @property (nonatomic, strong) MPBannerCustomEvent *bannerCustomEvent;
 @property (nonatomic, strong) MPAdConfiguration *configuration;
+@property (nonatomic, assign) BOOL hasTrackedClick;
 @property (nonatomic, assign) BOOL hasTrackedImpression;
+@property (nonatomic, strong) id<MPAnalyticsTracker> analyticsTracker;
 
 - (void)loadAdWithConfiguration:(MPAdConfiguration *)configuration customEvent:(MPBannerCustomEvent *)customEvent;
 - (void)setHasTrackedImpression:(BOOL)hasTrackedImpression;

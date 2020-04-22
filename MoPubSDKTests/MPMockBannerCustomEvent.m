@@ -16,6 +16,7 @@
 
 - (instancetype)init {
     if (self = [super init]) {
+        _enableAutomaticImpressionAndClickTracking = YES;
         _isLocalExtrasAvailableAtRequest = NO;
     }
 

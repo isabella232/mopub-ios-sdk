@@ -97,9 +97,6 @@
 // Called just after the ad has closed.
 - (void)adDidClose:(UIView *)adView;
 
-// Called when click-throught happens.
-- (void)adDidReceiveClickthrough:(NSURL *)url;
-
 // Called after the rewarded video finishes playing
 - (void)rewardedVideoEnded;
 

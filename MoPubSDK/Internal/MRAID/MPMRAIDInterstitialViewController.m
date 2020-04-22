@@ -130,19 +130,14 @@
     // TODO:
 }
 
-- (void)adDidReceiveClickthrough:(NSURL *)url
+- (void)appShouldSuspendForAd:(UIView *)adView
 {
     [self.delegate interstitialDidReceiveTapEvent:self];
 }
 
-- (void)appShouldSuspendForAd:(UIView *)adView
-{
-    // no op
-}
-
 - (void)appShouldResumeFromAd:(UIView *)adView
 {
-    // no op
+
 }
 
 - (void)setSupportedOrientationMask:(UIInterfaceOrientationMask)supportedOrientationMask

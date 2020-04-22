@@ -72,11 +72,6 @@
     [self.delegate bannerCustomEvent:self didFailToLoadAdWithError:error];
 }
 
-- (void)adDidReceiveClickthrough:(NSURL *)url
-{
-    [self.delegate trackClick];
-}
-
 - (void)closeButtonPressed
 {
     //don't care

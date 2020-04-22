@@ -29,6 +29,8 @@ static NSTimeInterval const kDefaultRequiredSecondsInViewForImpression = 0.0;
 @property (nonatomic) MPAdImpressionTimer *impressionTimer;
 @property (nonatomic) UIView *adView;
 
+- (void)trackClickOnce;
+
 @end
 
 @implementation MPBannerCustomEventAdapter
@@ -153,6 +155,7 @@ static NSTimeInterval const kDefaultRequiredSecondsInViewForImpression = 0.0;
 
 - (void)bannerCustomEventWillBeginAction:(MPBannerCustomEvent *)event
 {
+    [self trackClickOnce];
     [self.delegate userActionWillBeginForAdapter:self];
 }
 
@@ -163,15 +166,15 @@ static NSTimeInterval const kDefaultRequiredSecondsInViewForImpression = 0.0;
 
 - (void)bannerCustomEventWillLeaveApplication:(MPBannerCustomEvent *)event
 {
+    [self trackClickOnce];
     [self.delegate userWillLeaveApplicationFromAdapter:self];
 }
 
-- (void)trackClick
+- (void)trackClickOnce
 {
-    // unlike `[super trackClick]`, this `trackClick` ensures the click is tracked only once
     if ([self.bannerCustomEvent enableAutomaticImpressionAndClickTracking] && !self.hasTrackedClick) {
         self.hasTrackedClick = YES;
-        [super trackClick];
+        [self trackClick];
     }
 }
 

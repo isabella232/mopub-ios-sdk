@@ -15,6 +15,8 @@
 #import "MPConstants.h"
 #import "MPError.h"
 #import "MPHTMLBannerCustomEvent.h"
+#import "MPMockAnalyticsTracker.h"
+#import "MPMockBannerCustomEvent.h"
 #import "MPMRAIDBannerCustomEvent.h"
 
 @interface MPBannerCustomEventAdapterTests : XCTestCase
@@ -61,6 +63,73 @@
     [adapter didDisplayAd];
 
     XCTAssertFalse(adapter.hasTrackedImpression);
+}
+
+/// Test with `enableAutomaticImpressionAndClickTracking` being YES and then NO.
+- (void)testClickTracking {
+    MPMockAnalyticsTracker *trackerMock = [MPMockAnalyticsTracker new];
+    MPMockBannerCustomEvent *customEventMock = [MPMockBannerCustomEvent new];
+    MPBannerCustomEventAdapter *adapter = [MPBannerCustomEventAdapter new];
+    adapter.configuration = [MPAdConfiguration new];
+    adapter.bannerCustomEvent = customEventMock;
+    adapter.analyticsTracker = trackerMock;
+    customEventMock.delegate = adapter;
+
+    // Test with `enableAutomaticImpressionAndClickTracking = YES`
+    customEventMock.enableAutomaticImpressionAndClickTracking = YES;
+
+    // It's caller's responsibility to call `trackClick` only once. If called twice, then it happens twice.
+    [adapter trackClick];
+    XCTAssertEqual(1, [trackerMock countOfSelectorCalls:@selector(trackClickForConfiguration:)]);
+    [adapter trackClick];
+    XCTAssertEqual(2, [trackerMock countOfSelectorCalls:@selector(trackClickForConfiguration:)]);
+    adapter.hasTrackedClick = NO;
+
+    // `WillBeginAction` implies the user click on a banner to open a web view. `trackClick` dedup is expected.
+    [customEventMock.delegate bannerCustomEventWillBeginAction:customEventMock];
+    XCTAssertEqual(3, [trackerMock countOfSelectorCalls:@selector(trackClickForConfiguration:)]);
+    [customEventMock.delegate bannerCustomEventWillBeginAction:customEventMock];
+    XCTAssertEqual(3, [trackerMock countOfSelectorCalls:@selector(trackClickForConfiguration:)]);
+    adapter.hasTrackedClick = NO;
+
+    // `WillExpandAd` is not considered as click for historical reasons.
+    [customEventMock.delegate bannerCustomEventWillExpandAd:customEventMock];
+    XCTAssertEqual(3, [trackerMock countOfSelectorCalls:@selector(trackClickForConfiguration:)]);
+    [customEventMock.delegate bannerCustomEventWillExpandAd:customEventMock];
+    XCTAssertEqual(3, [trackerMock countOfSelectorCalls:@selector(trackClickForConfiguration:)]);
+    adapter.hasTrackedClick = NO;
+
+    // `WillLeaveApplication` implies the user click on a banner to open a web view. `trackClick` dedup is expected.
+    [customEventMock.delegate bannerCustomEventWillLeaveApplication:customEventMock];
+    XCTAssertEqual(4, [trackerMock countOfSelectorCalls:@selector(trackClickForConfiguration:)]);
+    [customEventMock.delegate bannerCustomEventWillLeaveApplication:customEventMock];
+    XCTAssertEqual(4, [trackerMock countOfSelectorCalls:@selector(trackClickForConfiguration:)]);
+    adapter.hasTrackedClick = NO;
+
+    // Repeat the tests above with `enableAutomaticImpressionAndClickTracking = NO`
+    [trackerMock reset];
+    customEventMock.enableAutomaticImpressionAndClickTracking = NO;
+
+    // It's caller's responsibility to call `trackClick` only once. If called twice, then it happens twice.
+    [adapter trackClick];
+    XCTAssertEqual(1, [trackerMock countOfSelectorCalls:@selector(trackClickForConfiguration:)]);
+    [adapter trackClick];
+    XCTAssertEqual(2, [trackerMock countOfSelectorCalls:@selector(trackClickForConfiguration:)]);
+    adapter.hasTrackedClick = NO;
+
+    // `WillBeginAction` has no effect since `trackClick` is expected to be called manually.
+    [customEventMock.delegate bannerCustomEventWillBeginAction:customEventMock];
+    XCTAssertEqual(2, [trackerMock countOfSelectorCalls:@selector(trackClickForConfiguration:)]);
+    adapter.hasTrackedClick = NO;
+
+    // `WillExpandAd`  has no effect since `trackClick` is expected to be called manually.
+    [customEventMock.delegate bannerCustomEventWillExpandAd:customEventMock];
+    XCTAssertEqual(2, [trackerMock countOfSelectorCalls:@selector(trackClickForConfiguration:)]);
+    adapter.hasTrackedClick = NO;
+
+    // `WillLeaveApplication`  has no effect since `trackClick` is expected to be called manually.
+    [customEventMock.delegate bannerCustomEventWillLeaveApplication:customEventMock];
+    XCTAssertEqual(2, [trackerMock countOfSelectorCalls:@selector(trackClickForConfiguration:)]);
 }
 
 #pragma mark - Timeout

@@ -807,10 +807,6 @@ static NSString *const kMRAIDCommandResize = @"resize";
 {
     if ([self hasUserInteractedWithWebViewForBridge:bridge]) {
         [self.destinationDisplayAgent displayDestinationForURL:URL];
-
-        if ([self.delegate respondsToSelector:@selector(adDidReceiveClickthrough:)]) {
-            [self.delegate adDidReceiveClickthrough:URL];
-        }
     }
 }
 

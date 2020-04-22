@@ -10,6 +10,8 @@
 #import "MPBannerCustomEvent.h"
 
 @interface MPMockBannerCustomEvent : MPBannerCustomEvent
+
+@property (nonatomic, assign) BOOL enableAutomaticImpressionAndClickTracking;
 @property (nonatomic, readonly) BOOL isLocalExtrasAvailableAtRequest;
 
 - (void)requestAdWithSize:(CGSize)size customEventInfo:(NSDictionary *)info adMarkup:(NSString *)adMarkup;

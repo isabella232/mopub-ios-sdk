@@ -13,8 +13,10 @@
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 @implementation MPBannerCustomEventAdapter (Testing)
 
+@dynamic analyticsTracker;
 @dynamic configuration;
 @dynamic bannerCustomEvent;
+@dynamic hasTrackedClick;
 @dynamic hasTrackedImpression;
 
 - (void)loadAdWithConfiguration:(MPAdConfiguration *)configuration customEvent:(MPBannerCustomEvent *)customEvent {

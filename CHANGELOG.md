@@ -1,3 +1,7 @@
+## Version 5.12.1 (April 16, 2020)
+- **Bug Fixes**
+  - Fixed banner click trackers not firing for mediated networks that do not use MoPub's auto click tracking.
+
 ## Version 5.12.0 (April 6, 2020)
 - **Features**
   - Location setters for all formats are marked deprecated and will be removed in a future release.
