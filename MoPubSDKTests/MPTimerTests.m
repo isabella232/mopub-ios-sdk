@@ -10,29 +10,14 @@
 #import "MPTimer+Testing.h"
 #import "MPTimer.h"
 
-static const NSTimeInterval kTimerRepeatIntervalInSeconds = 0.05;
-
-// `NSTimer` is not totally accurate and it might be slower on build machines, thus we need some
-// extra tolerance while waiting for the expections to be fulfilled.
-// ADF-4255: 2 is good enough in most cases, but sometimes it still fails... So, try 7 and see.
-static const NSTimeInterval kWaitTimeTolerance = 7;
+static const NSTimeInterval kTimerRepeatIntervalInSeconds = 0.05; // seconds
+static const NSTimeInterval kTestDispatchTime = 0.5; // seconds
+static const NSTimeInterval kExpectationWaitTime = 1.0; // seconds
 
 /**
  * This test make use of `MPTimer.associatedTitle` to identifier the timers in each test.
  */
 @interface MPTimerTests : XCTestCase
-
-/**
- * Key: (NSString *) name of the test
- * Value: (NSNumber *) the number of times the timer is fired in the corresponding test
- */
-@property NSMutableDictionary * testNameVsFiringCount;
-
-/**
- * Key: (NSString *) name of the test
- * Value: (XCTestExpectation *) the expectation to be fulfill after the timer is fired in the corresponding test
- */
-@property NSMutableDictionary * testNameVsExpectation;
 
 @end
 
@@ -40,43 +25,21 @@ static const NSTimeInterval kWaitTimeTolerance = 7;
 
 // Create the dictionaries as needed
 - (void)setUp {
-    if (self.testNameVsFiringCount == nil) {
-        self.testNameVsFiringCount = [NSMutableDictionary dictionary];
-    }
-    if (self.testNameVsExpectation == nil) {
-        self.testNameVsExpectation = [NSMutableDictionary dictionary];
-    }
-
     // Clear out the shared timer and token.
     sharedTimer = nil;
     sharedTimerOnceToken = 0;
 }
 
 // A helper for reducing code duplication.
-- (MPTimer *)generateTestTimerWithTitle:(NSString *)title {
-    MPTimer * timer = [MPTimer timerWithTimeInterval:kTimerRepeatIntervalInSeconds
-                                              target:self
-                                            selector:@selector(timerHandler:)
-                                             repeats:YES];
-    timer.associatedTitle = title;
-    return timer;
-}
-
-// This is the method called by all the test timers.
-- (void)timerHandler:(MPTimer *)timer {
-    // increment the firing count
-    NSNumber * timerCount = self.testNameVsFiringCount[timer.associatedTitle];
-    self.testNameVsFiringCount[timer.associatedTitle] = [NSNumber numberWithInt:timerCount.intValue + 1];
-
-    // fulfill corresponding expection, if any
-    [((XCTestExpectation *)self.testNameVsExpectation[timer.associatedTitle]) fulfill];
-    self.testNameVsExpectation[timer.associatedTitle] = nil;
+- (MPTimer *)generateTestTimerWithBlock:(void(^)(MPTimer * _Nonnull timer))block {
+    return [MPTimer timerWithTimeInterval:kTimerRepeatIntervalInSeconds repeats:YES block:block];
 }
 
 // Test invalidating the timer before firing.
 - (void)testInvalidateAfterInstantiation {
-    NSString * testName = NSStringFromSelector(_cmd);
-    MPTimer * timer = [self generateTestTimerWithTitle:testName];
+    MPTimer *timer = [self generateTestTimerWithBlock:^(MPTimer * _Nonnull timer) {
+        // No op
+    }];
 
     XCTAssertFalse(timer.isCountdownActive);
     XCTAssertTrue(timer.isValid);
@@ -87,10 +50,14 @@ static const NSTimeInterval kWaitTimeTolerance = 7;
 
 // Test invalidating the timer after firing.
 - (void)testInvalidateAfterStart {
-    NSString * testName = NSStringFromSelector(_cmd);
-    MPTimer * timer = [self generateTestTimerWithTitle:testName];
-    XCTestExpectation * expectation = [self expectationWithDescription:@"Wait for timer to fire"];
-    self.testNameVsExpectation[testName] = expectation;
+    // Create an expectation waiting for the expected number of expectation triggers to fire.
+    __weak XCTestExpectation *expectation = [self expectationWithDescription:@"Wait for timer to fire"];
+    expectation.expectedFulfillmentCount = 1;
+
+    // Test timer
+    MPTimer *timer = [self generateTestTimerWithBlock:^(MPTimer * _Nonnull timer) {
+        [expectation fulfill];
+    }];
 
     XCTAssertFalse(timer.isCountdownActive);
     XCTAssertTrue(timer.isValid);
@@ -98,25 +65,27 @@ static const NSTimeInterval kWaitTimeTolerance = 7;
     XCTAssertTrue(timer.isCountdownActive);
     XCTAssertTrue(timer.isValid);
 
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(kTimerRepeatIntervalInSeconds * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(kTestDispatchTime * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         XCTAssertTrue(timer.isCountdownActive);
         XCTAssertTrue(timer.isValid);
         [timer invalidate];
         XCTAssertFalse(timer.isCountdownActive);
         XCTAssertFalse(timer.isValid);
     });
-    [self waitForExpectationsWithTimeout:kTimerRepeatIntervalInSeconds * kWaitTimeTolerance handler:^(NSError * _Nullable error) {
-        XCTAssertEqual([(NSNumber *)self.testNameVsFiringCount[timer.associatedTitle] intValue], 1);
-        XCTAssertNil(error);
-    }];
+
+    [self waitForExpectations:@[expectation] timeout:kExpectationWaitTime];
 }
 
 // Test invalidating the timer after firing and then pause.
 - (void)testInvalidateAfterStartedAndPause {
-    NSString * testName = NSStringFromSelector(_cmd);
-    MPTimer * timer = [self generateTestTimerWithTitle:testName];
-    XCTestExpectation * expectation = [self expectationWithDescription:@"Wait for timer to fire"];
-    self.testNameVsExpectation[testName] = expectation;
+    // Create an expectation waiting for the expected number of expectation triggers to fire.
+    __weak XCTestExpectation *expectation = [self expectationWithDescription:@"Wait for timer to fire"];
+    expectation.expectedFulfillmentCount = 1;
+
+    // Test timer
+    MPTimer *timer = [self generateTestTimerWithBlock:^(MPTimer * _Nonnull timer) {
+        [expectation fulfill];
+    }];
 
     XCTAssertFalse(timer.isCountdownActive);
     XCTAssertTrue(timer.isValid);
@@ -124,7 +93,7 @@ static const NSTimeInterval kWaitTimeTolerance = 7;
     XCTAssertTrue(timer.isCountdownActive);
     XCTAssertTrue(timer.isValid);
 
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(kTimerRepeatIntervalInSeconds * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(kTestDispatchTime * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         XCTAssertTrue(timer.isCountdownActive);
         XCTAssertTrue(timer.isValid);
         [timer pause];
@@ -134,18 +103,20 @@ static const NSTimeInterval kWaitTimeTolerance = 7;
         XCTAssertFalse(timer.isCountdownActive);
         XCTAssertFalse(timer.isValid);
     });
-    [self waitForExpectationsWithTimeout:kTimerRepeatIntervalInSeconds * kWaitTimeTolerance handler:^(NSError * _Nullable error) {
-        XCTAssertEqual([(NSNumber *)self.testNameVsFiringCount[timer.associatedTitle] intValue], 1);
-        XCTAssertNil(error);
-    }];
+
+    [self waitForExpectations:@[expectation] timeout:kExpectationWaitTime];
 }
 
 // Test pausing and resuming the timer at different timings (before & after firing & invalidating).
 - (void)testPauseAndResume {
-    NSString * testName = NSStringFromSelector(_cmd);
-    MPTimer * timer = [self generateTestTimerWithTitle:testName];
-    XCTestExpectation * expectation = [self expectationWithDescription:@"Wait for timer to fire"];
-    self.testNameVsExpectation[testName] = expectation;
+    // Create an expectation waiting for the expected number of expectation triggers to fire.
+    __weak XCTestExpectation *expectation = [self expectationWithDescription:@"Wait for timer to fire"];
+    expectation.expectedFulfillmentCount = 1;
+
+    // Test timer
+    MPTimer *timer = [self generateTestTimerWithBlock:^(MPTimer * _Nonnull timer) {
+        [expectation fulfill];
+    }];
 
     XCTAssertFalse(timer.isCountdownActive);
     XCTAssertTrue(timer.isValid);
@@ -156,7 +127,7 @@ static const NSTimeInterval kWaitTimeTolerance = 7;
     XCTAssertTrue(timer.isCountdownActive);
     XCTAssertTrue(timer.isValid);
 
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(kTimerRepeatIntervalInSeconds * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(kTestDispatchTime * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         XCTAssertTrue(timer.isCountdownActive);
         XCTAssertTrue(timer.isValid);
         [timer pause];
@@ -175,18 +146,20 @@ static const NSTimeInterval kWaitTimeTolerance = 7;
         XCTAssertFalse(timer.isCountdownActive);
         XCTAssertFalse(timer.isValid);
     });
-    [self waitForExpectationsWithTimeout:kTimerRepeatIntervalInSeconds * kWaitTimeTolerance handler:^(NSError * _Nullable error) {
-        XCTAssertEqual([(NSNumber *)self.testNameVsFiringCount[timer.associatedTitle] intValue], 1);
-        XCTAssertNil(error);
-    }];
+
+    [self waitForExpectations:@[expectation] timeout:kExpectationWaitTime];
 }
 
 // Test whether the timer repeats firing as expected.
 - (void)testRepeatingTimer {
-    NSString * testName = NSStringFromSelector(_cmd);
-    MPTimer * timer = [self generateTestTimerWithTitle:testName];
-    XCTestExpectation * expectation = [self expectationWithDescription:@"Wait for timer to fire"];
-    int firingCount = 10;
+    // Create an expectation waiting for the expected number of expectation triggers to fire.
+    __weak XCTestExpectation *expectation = [self expectationWithDescription:@"Wait for timer to fire"];
+    expectation.expectedFulfillmentCount = 10;
+
+    // Test timer
+    MPTimer *timer = [self generateTestTimerWithBlock:^(MPTimer * _Nonnull timer) {
+        [expectation fulfill];
+    }];
 
     XCTAssertFalse(timer.isCountdownActive);
     XCTAssertTrue(timer.isValid);
@@ -194,14 +167,7 @@ static const NSTimeInterval kWaitTimeTolerance = 7;
     XCTAssertTrue(timer.isCountdownActive);
     XCTAssertTrue(timer.isValid);
 
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(kTimerRepeatIntervalInSeconds * firingCount * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        [expectation fulfill];
-    });
-
-    [self waitForExpectationsWithTimeout:kTimerRepeatIntervalInSeconds * firingCount * kWaitTimeTolerance handler:^(NSError * _Nullable error) {
-        XCTAssertEqual([(NSNumber *)self.testNameVsFiringCount[timer.associatedTitle] intValue], firingCount);
-        XCTAssertNil(error);
-    }];
+    [self waitForExpectations:@[expectation] timeout:kExpectationWaitTime];
 
     XCTAssertTrue(timer.isCountdownActive);
     XCTAssertTrue(timer.isValid);
@@ -212,10 +178,14 @@ static const NSTimeInterval kWaitTimeTolerance = 7;
 
 // Test whether redundant `scheduleNow` calls are safe.
 - (void)testRedundantSchedules {
-    NSString * testName = NSStringFromSelector(_cmd);
-    MPTimer * timer = [self generateTestTimerWithTitle:testName];
-    XCTestExpectation * expectation = [self expectationWithDescription:@"Wait for timer to fire"];
-    self.testNameVsExpectation[testName] = expectation;
+    // Create an expectation waiting for the expected number of expectation triggers to fire.
+    __weak XCTestExpectation *expectation = [self expectationWithDescription:@"Wait for timer to fire"];
+    expectation.expectedFulfillmentCount = 1;
+
+    // Test timer
+    MPTimer *timer = [self generateTestTimerWithBlock:^(MPTimer * _Nonnull timer) {
+        [expectation fulfill];
+    }];
 
     XCTAssertFalse(timer.isCountdownActive);
     XCTAssertTrue(timer.isValid);
@@ -226,7 +196,7 @@ static const NSTimeInterval kWaitTimeTolerance = 7;
     XCTAssertTrue(timer.isCountdownActive);
     XCTAssertTrue(timer.isValid);
 
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(kTimerRepeatIntervalInSeconds * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(kTestDispatchTime * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         XCTAssertTrue(timer.isCountdownActive);
         XCTAssertTrue(timer.isValid);
         [timer invalidate];
@@ -236,10 +206,8 @@ static const NSTimeInterval kWaitTimeTolerance = 7;
         XCTAssertFalse(timer.isCountdownActive);
         XCTAssertFalse(timer.isValid);
     });
-    [self waitForExpectationsWithTimeout:kTimerRepeatIntervalInSeconds * kWaitTimeTolerance handler:^(NSError * _Nullable error) {
-        XCTAssertEqual([(NSNumber *)self.testNameVsFiringCount[timer.associatedTitle] intValue], 1);
-        XCTAssertNil(error);
-    }];
+
+    [self waitForExpectations:@[expectation] timeout:kExpectationWaitTime];
 }
 
 // Test thread safety of `MPTimer`. `MPTimer` wasn't thread safe in the past, and `scheduleNow` might
@@ -250,8 +218,9 @@ static const NSTimeInterval kWaitTimeTolerance = 7;
     int numberOfTimers = 10000;
 
     for (int i = 0; i < numberOfTimers; i++) {
-        NSString * timerTitle = [NSString stringWithFormat:@"%@ [%d]", NSStringFromSelector(_cmd), i];
-        MPTimer * timer = [self generateTestTimerWithTitle:timerTitle];
+        MPTimer * timer = [self generateTestTimerWithBlock:^(MPTimer * _Nonnull timer) {
+            // No op
+        }];
 
         dispatch_queue_t randomScheduleQueue;
         switch (arc4random_uniform(randomNumberUpperBound) % 5) {
@@ -313,10 +282,15 @@ static const NSTimeInterval kWaitTimeTolerance = 7;
 
     // The last timer is for fulfilling the test expectation and finishing this test - previous timers
     // are randomly invalidated and we cannot rely on them for fulfilling the test expection.
-    NSString * timerTitle = [NSString stringWithFormat:@"%@ %@", NSStringFromSelector(_cmd), @"ending timer"];
-    XCTestExpectation * expectation = [self expectationWithDescription:timerTitle];
-    MPTimer * endingTimer = [self generateTestTimerWithTitle:timerTitle];
-    self.testNameVsExpectation[timerTitle] = expectation;
+    // Create an expectation waiting for the expected number of expectation triggers to fire.
+    __weak XCTestExpectation *expectation = [self expectationWithDescription:@"Wait for timer to fire"];
+    expectation.expectedFulfillmentCount = 1;
+
+    // Ending timer
+    MPTimer *endingTimer = [self generateTestTimerWithBlock:^(MPTimer * _Nonnull timer) {
+        [expectation fulfill];
+    }];
+
     dispatch_async(dispatch_get_main_queue(), ^{
         [endingTimer scheduleNow];
     });
@@ -337,7 +311,9 @@ static dispatch_once_t sharedTimerOnceToken;
 
 - (MPTimer *)sharedTestTimer {
     dispatch_once(&sharedTimerOnceToken, ^{
-        sharedTimer = [self generateTestTimerWithTitle:@"Background thread initialization"];
+        sharedTimer = [self generateTestTimerWithBlock:^(MPTimer * _Nonnull timer) {
+            // No op
+        }];
     });
 
     return sharedTimer;
@@ -361,6 +337,34 @@ static dispatch_once_t sharedTimerOnceToken;
     });
 
     [self waitForExpectationsWithTimeout:5 handler:^(NSError * _Nullable error) {
+        XCTAssertNil(error);
+    }];
+}
+
+// This test was added to track: https://github.com/mopub/mopub-ios-sdk/issues/318
+- (void)testBackgroundMultithreading {
+    int numberOfTimers = 10000;
+    dispatch_queue_t backgroundQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
+
+    __weak XCTestExpectation *expectation = [self expectationWithDescription:@"Wait for all timers to fire"];
+    expectation.expectedFulfillmentCount = numberOfTimers;
+
+    for (int i = 0; i < numberOfTimers; i++) {
+        NSTimeInterval randomInterval = arc4random_uniform(20);
+        MPTimer * timer = [MPTimer timerWithTimeInterval:randomInterval repeats:NO runLoopMode:NSRunLoopCommonModes block:^(MPTimer * _Nonnull timer) {
+            [expectation fulfill];
+            [timer invalidate];
+        }];
+
+        dispatch_async(backgroundQueue, ^{
+            [timer scheduleNow];
+        });
+    } // End for
+
+    // The `for` loop might take a while if there are a large number of loops on slow machines, so
+    // use a long timeout and rely on the `endingTimer` to fulfill the test expectation early. On
+    // faster machines with 10000 loops, this test case takes about 0.25 second.
+    [self waitForExpectationsWithTimeout:60 handler:^(NSError * _Nullable error) {
         XCTAssertNil(error);
     }];
 }

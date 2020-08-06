@@ -38,6 +38,8 @@
 + (MPAdConfiguration *)defaultFakeInterstitialConfiguration;
 + (MPAdConfiguration *)defaultInterstitialConfigurationWithNetworkType:(NSString *)type;
 + (MPAdConfiguration *)defaultChartboostInterstitialConfigurationWithLocation:(NSString *)location;
++ (MPAdConfiguration *)defaultFullscreenConfigWithAdapterClass:(Class)class;
++ (MPAdConfiguration *)defaultFullscreenConfigWithAdapterClass:(Class)class additionalMetadata:(NSDictionary *)additionalMetadata;
 + (MPAdConfiguration *)defaultInterstitialConfigurationWithCustomEventClassName:(NSString *)eventClassName;
 + (MPAdConfiguration *)defaultInterstitialConfigurationWithCustomEventClassName:(NSString *)eventClassName
                                                              additionalMetadata:(NSDictionary *)additionalMetadata;

@@ -73,7 +73,6 @@ static const CGFloat kMoPubRequiredViewVisibilityPercentage = 0.5;
             valid = NO;
         }
 
-        
         // Validate that the clickthrough URL is a string before attempting to parse into a URL
         id clickthroughUrl = [properties objectForKey:kDefaultActionURLKey];
         if ([clickthroughUrl isKindOfClass:[NSString class]]) {
@@ -167,7 +166,13 @@ static const CGFloat kMoPubRequiredViewVisibilityPercentage = 0.5;
 {
     NSURL *defaultPrivacyClickUrl = [NSURL URLWithString:kPrivacyIconTapDestinationURL];
     NSURL *overridePrivacyClickUrl = ({
-        NSString *url = self.properties[kAdPrivacyIconClickUrlKey];
+        // Make sure that `kAdPrivacyIconClickUrlKey` contains a string at least.
+        id privacyIconClickUrl = self.properties[kAdPrivacyIconClickUrlKey];
+        NSString *url = nil;
+        if ([privacyIconClickUrl isKindOfClass:[NSString class]]) {
+            url = (NSString *)privacyIconClickUrl;
+        }
+
         (url != nil ? [NSURL URLWithString:url] : nil);
     });
 

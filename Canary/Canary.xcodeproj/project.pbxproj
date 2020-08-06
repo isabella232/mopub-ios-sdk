@@ -1223,15 +1223,11 @@
 				"${PODS_ROOT}/Verizon-Ads-NativePlacement/VerizonAdsNativePlacement.framework",
 				"${PODS_ROOT}/Verizon-Ads-NativeVerizonNativeAdapter/VerizonAdsNativeVerizonNativeAdapter.framework",
 				"${PODS_ROOT}/Verizon-Ads-OMSDK/VerizonAdsOMSDK.framework",
-				"${PODS_ROOT}/Verizon-Ads-SideloadingWaterfallProvider/VerizonAdsSideloadingWaterfallProvider.framework",
 				"${PODS_ROOT}/Verizon-Ads-StandardEdition/VerizonAdsStandardEdition.framework",
 				"${PODS_ROOT}/Verizon-Ads-Support/VerizonAdsSupport.framework",
 				"${PODS_ROOT}/Verizon-Ads-URIExperience/VerizonAdsURIExperience.framework",
 				"${PODS_ROOT}/Verizon-Ads-VASTController/VerizonAdsVASTController.framework",
 				"${PODS_ROOT}/Verizon-Ads-VerizonNativeController/VerizonAdsVerizonNativeController.framework",
-				"${PODS_ROOT}/Verizon-Ads-VerizonSSPConfigProvider/VerizonAdsVerizonSSPConfigProvider.framework",
-				"${PODS_ROOT}/Verizon-Ads-VerizonSSPReporter/VerizonAdsVerizonSSPReporter.framework",
-				"${PODS_ROOT}/Verizon-Ads-VerizonSSPWaterfallProvider/VerizonAdsVerizonSSPWaterfallProvider.framework",
 				"${PODS_ROOT}/Verizon-Ads-VideoPlayer/VerizonAdsVideoPlayer.framework",
 				"${PODS_ROOT}/Verizon-Ads-WebController/VerizonAdsWebController.framework",
 				"${PODS_ROOT}/Verizon-Ads-WebView/VerizonAdsWebView.framework",
@@ -1254,15 +1250,11 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/VerizonAdsNativePlacement.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/VerizonAdsNativeVerizonNativeAdapter.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/VerizonAdsOMSDK.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/VerizonAdsSideloadingWaterfallProvider.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/VerizonAdsStandardEdition.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/VerizonAdsSupport.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/VerizonAdsURIExperience.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/VerizonAdsVASTController.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/VerizonAdsVerizonNativeController.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/VerizonAdsVerizonSSPConfigProvider.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/VerizonAdsVerizonSSPReporter.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/VerizonAdsVerizonSSPWaterfallProvider.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/VerizonAdsVideoPlayer.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/VerizonAdsWebController.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/VerizonAdsWebView.framework",
@@ -1295,15 +1287,11 @@
 				"${PODS_ROOT}/Verizon-Ads-NativePlacement/VerizonAdsNativePlacement.framework",
 				"${PODS_ROOT}/Verizon-Ads-NativeVerizonNativeAdapter/VerizonAdsNativeVerizonNativeAdapter.framework",
 				"${PODS_ROOT}/Verizon-Ads-OMSDK/VerizonAdsOMSDK.framework",
-				"${PODS_ROOT}/Verizon-Ads-SideloadingWaterfallProvider/VerizonAdsSideloadingWaterfallProvider.framework",
 				"${PODS_ROOT}/Verizon-Ads-StandardEdition/VerizonAdsStandardEdition.framework",
 				"${PODS_ROOT}/Verizon-Ads-Support/VerizonAdsSupport.framework",
 				"${PODS_ROOT}/Verizon-Ads-URIExperience/VerizonAdsURIExperience.framework",
 				"${PODS_ROOT}/Verizon-Ads-VASTController/VerizonAdsVASTController.framework",
 				"${PODS_ROOT}/Verizon-Ads-VerizonNativeController/VerizonAdsVerizonNativeController.framework",
-				"${PODS_ROOT}/Verizon-Ads-VerizonSSPConfigProvider/VerizonAdsVerizonSSPConfigProvider.framework",
-				"${PODS_ROOT}/Verizon-Ads-VerizonSSPReporter/VerizonAdsVerizonSSPReporter.framework",
-				"${PODS_ROOT}/Verizon-Ads-VerizonSSPWaterfallProvider/VerizonAdsVerizonSSPWaterfallProvider.framework",
 				"${PODS_ROOT}/Verizon-Ads-VideoPlayer/VerizonAdsVideoPlayer.framework",
 				"${PODS_ROOT}/Verizon-Ads-WebController/VerizonAdsWebController.framework",
 				"${PODS_ROOT}/Verizon-Ads-WebView/VerizonAdsWebView.framework",
@@ -1326,15 +1314,11 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/VerizonAdsNativePlacement.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/VerizonAdsNativeVerizonNativeAdapter.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/VerizonAdsOMSDK.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/VerizonAdsSideloadingWaterfallProvider.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/VerizonAdsStandardEdition.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/VerizonAdsSupport.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/VerizonAdsURIExperience.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/VerizonAdsVASTController.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/VerizonAdsVerizonNativeController.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/VerizonAdsVerizonSSPConfigProvider.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/VerizonAdsVerizonSSPReporter.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/VerizonAdsVerizonSSPWaterfallProvider.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/VerizonAdsVideoPlayer.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/VerizonAdsWebController.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/VerizonAdsWebView.framework",
@@ -1353,7 +1337,7 @@
 			);
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Internal Application/Pods-Internal Application-resources.sh",
-				"${PODS_ROOT}/AppLovinSDK/applovin-ios-sdk-6.11.4/AppLovinSDKResources.bundle",
+				"${PODS_ROOT}/AppLovinSDK/applovin-ios-sdk-6.11.6/AppLovinSDKResources.bundle",
 				"${PODS_ROOT}/TapjoySDK/TapjoySDK_iOS_v12.4.2/Libraries/Tapjoy.embeddedframework/Resources/TapjoyResources.bundle",
 				"${PODS_ROOT}/TapjoySDK/TapjoySDK_iOS_v12.4.2/Libraries/Tapjoy.embeddedframework/Tapjoy.framework/Versions/A/Resources/TapjoyResources.bundle",
 			);
@@ -1374,7 +1358,7 @@
 			);
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-AppStore Application/Pods-AppStore Application-resources.sh",
-				"${PODS_ROOT}/AppLovinSDK/applovin-ios-sdk-6.11.4/AppLovinSDKResources.bundle",
+				"${PODS_ROOT}/AppLovinSDK/applovin-ios-sdk-6.11.6/AppLovinSDKResources.bundle",
 				"${PODS_ROOT}/TapjoySDK/TapjoySDK_iOS_v12.4.2/Libraries/Tapjoy.embeddedframework/Resources/TapjoyResources.bundle",
 				"${PODS_ROOT}/TapjoySDK/TapjoySDK_iOS_v12.4.2/Libraries/Tapjoy.embeddedframework/Tapjoy.framework/Versions/A/Resources/TapjoyResources.bundle",
 			);
@@ -1767,7 +1751,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -1821,7 +1805,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
@@ -1835,10 +1819,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5.12.1;
+				CURRENT_PROJECT_VERSION = 5.13.1;
 				DEVELOPMENT_TEAM = 4S7XS533V3;
 				INFOPLIST_FILE = Canary/Configuration/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mopub.Canary;
 				SWIFT_VERSION = 5.0;
@@ -1853,10 +1836,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5.12.1;
+				CURRENT_PROJECT_VERSION = 5.13.1;
 				DEVELOPMENT_TEAM = 4S7XS533V3;
 				INFOPLIST_FILE = Canary/Configuration/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mopub.Canary;
 				SWIFT_VERSION = 5.0;
@@ -1871,10 +1853,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon.Internal;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5.12.1;
+				CURRENT_PROJECT_VERSION = 5.13.1;
 				DEVELOPMENT_TEAM = 4S7XS533V3;
 				INFOPLIST_FILE = "Canary/Internal/Internal-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_SWIFT_FLAGS = "-DINTERNAL";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mopub.Canary;
@@ -1890,10 +1871,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon.Internal;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5.12.1;
+				CURRENT_PROJECT_VERSION = 5.13.1;
 				DEVELOPMENT_TEAM = 4S7XS533V3;
 				INFOPLIST_FILE = "Canary/Internal/Internal-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_SWIFT_FLAGS = "-DINTERNAL";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mopub.Canary;
@@ -1951,7 +1931,6 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 4S7XS533V3;
 				INFOPLIST_FILE = CanaryUnitTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -1974,7 +1953,6 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 4S7XS533V3;
 				INFOPLIST_FILE = CanaryUnitTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MTL_FAST_MATH = YES;
 				OTHER_SWIFT_FLAGS = "";

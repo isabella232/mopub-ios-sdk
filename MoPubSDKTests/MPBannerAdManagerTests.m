@@ -12,10 +12,10 @@
 #import "MPBannerAdManager+Testing.h"
 #import "MPBannerAdManagerDelegateHandler.h"
 #import "MPAdTargeting.h"
-#import "MPBannerCustomEventAdapter.h"
-#import "MPBannerCustomEventAdapter+Testing.h"
+#import "MPInlineAdAdapter+Private.h"
 #import "MPMockAdServerCommunicator.h"
-#import "MPMockBannerCustomEvent.h"
+#import "MPInlineAdAdapter+Private.h"
+#import "MPInlineAdAdapterMock.h"
 #import "MPAdServerKeys.h"
 
 static const NSTimeInterval kDefaultTimeout = 10;
@@ -77,8 +77,8 @@ static const NSTimeInterval kDefaultTimeout = 10;
     };
 
     // Generate the ad configurations
-    MPAdConfiguration * bannerThatShouldLoad = [MPAdConfigurationFactory defaultBannerConfigurationWithCustomEventClassName:@"MPMockBannerCustomEvent"];
-    MPAdConfiguration * bannerLoadThatShouldNotLoad = [MPAdConfigurationFactory defaultBannerConfigurationWithCustomEventClassName:@"MPMockBannerCustomEvent"];
+    MPAdConfiguration * bannerThatShouldLoad = [MPAdConfigurationFactory defaultBannerConfigurationWithCustomEventClassName:@"MPInlineAdAdapterMock"];
+    MPAdConfiguration * bannerLoadThatShouldNotLoad = [MPAdConfigurationFactory defaultBannerConfigurationWithCustomEventClassName:@"MPInlineAdAdapterMock"];
     MPAdConfiguration * bannerLoadFail = [MPAdConfigurationFactory defaultBannerConfigurationWithCustomEventClassName:@"i_should_not_exist"];
     NSArray * configurations = @[bannerThatShouldLoad, bannerLoadThatShouldNotLoad, bannerLoadFail];
 
@@ -110,8 +110,8 @@ static const NSTimeInterval kDefaultTimeout = 10;
     };
 
     // Generate the ad configurations
-    MPAdConfiguration * bannerThatShouldLoad = [MPAdConfigurationFactory defaultBannerConfigurationWithCustomEventClassName:@"MPMockBannerCustomEvent"];
-    MPAdConfiguration * bannerLoadThatShouldNotLoad = [MPAdConfigurationFactory defaultBannerConfigurationWithCustomEventClassName:@"MPMockBannerCustomEvent"];
+    MPAdConfiguration * bannerThatShouldLoad = [MPAdConfigurationFactory defaultBannerConfigurationWithCustomEventClassName:@"MPInlineAdAdapterMock"];
+    MPAdConfiguration * bannerLoadThatShouldNotLoad = [MPAdConfigurationFactory defaultBannerConfigurationWithCustomEventClassName:@"MPInlineAdAdapterMock"];
     MPAdConfiguration * bannerLoadFail = [MPAdConfigurationFactory defaultBannerConfigurationWithCustomEventClassName:@"i_should_not_exist"];
     NSArray * configurations = @[bannerLoadFail, bannerThatShouldLoad, bannerLoadThatShouldNotLoad];
 
@@ -143,7 +143,7 @@ static const NSTimeInterval kDefaultTimeout = 10;
     };
 
     // Generate the ad configurations
-    MPAdConfiguration * bannerThatShouldLoad = [MPAdConfigurationFactory defaultBannerConfigurationWithCustomEventClassName:@"MPMockBannerCustomEvent"];
+    MPAdConfiguration * bannerThatShouldLoad = [MPAdConfigurationFactory defaultBannerConfigurationWithCustomEventClassName:@"MPInlineAdAdapterMock"];
     MPAdConfiguration * bannerLoadFail1 = [MPAdConfigurationFactory defaultBannerConfigurationWithCustomEventClassName:@"i_should_not_exist"];
     MPAdConfiguration * bannerLoadFail2 = [MPAdConfigurationFactory defaultBannerConfigurationWithCustomEventClassName:@"i_should_not_exist"];
     NSArray * configurations = @[bannerLoadFail1, bannerLoadFail2, bannerThatShouldLoad];
@@ -240,7 +240,7 @@ static const NSTimeInterval kDefaultTimeout = 10;
     };
 
     // Generate the ad configurations
-    MPAdConfiguration * bannerThatShouldLoad = [MPAdConfigurationFactory defaultBannerConfigurationWithCustomEventClassName:@"MPMockBannerCustomEvent"];
+    MPAdConfiguration * bannerThatShouldLoad = [MPAdConfigurationFactory defaultBannerConfigurationWithCustomEventClassName:@"MPInlineAdAdapterMock"];
     NSArray * configurations = @[bannerThatShouldLoad];
 
     MPBannerAdManager * manager = [[MPBannerAdManager alloc] initWithDelegate:handler];
@@ -258,14 +258,9 @@ static const NSTimeInterval kDefaultTimeout = 10;
         }
     }];
 
-    MPBannerCustomEventAdapter * adapter = (MPBannerCustomEventAdapter *)manager.onscreenAdapter;
-    MPMockBannerCustomEvent * customEvent = (MPMockBannerCustomEvent *)adapter.bannerCustomEvent;
-    XCTAssertNotNil(customEvent);
-
-    NSDictionary * localExtras = customEvent.localExtras;
+    NSDictionary *localExtras = manager.onscreenAdapter.localExtras;
     XCTAssertNotNil(localExtras);
     XCTAssert([localExtras[@"testing"] isEqualToString:@"YES"]);
-    XCTAssertTrue(customEvent.isLocalExtrasAvailableAtRequest);
 }
 
 #pragma mark - Impression Level Revenue Data
@@ -281,7 +276,7 @@ static const NSTimeInterval kDefaultTimeout = 10;
     };
 
     // Generate the ad configurations
-    MPAdConfiguration * bannerThatShouldLoad = [MPAdConfigurationFactory defaultBannerConfigurationWithCustomEventClassName:@"MPMockBannerCustomEvent"];
+    MPAdConfiguration * bannerThatShouldLoad = [MPAdConfigurationFactory defaultBannerConfigurationWithCustomEventClassName:@"MPInlineAdAdapterMock"];
     NSArray * configurations = @[bannerThatShouldLoad];
 
     MPBannerAdManager * manager = [[MPBannerAdManager alloc] initWithDelegate:handler];
@@ -315,7 +310,7 @@ static const NSTimeInterval kDefaultTimeout = 10;
     };
 
     // Generate the ad configurations
-    MPAdConfiguration * bannerThatShouldLoad = [MPAdConfigurationFactory defaultBannerConfigurationWithCustomEventClassName:@"MPMockBannerCustomEvent"];
+    MPAdConfiguration * bannerThatShouldLoad = [MPAdConfigurationFactory defaultBannerConfigurationWithCustomEventClassName:@"MPInlineAdAdapterMock"];
     bannerThatShouldLoad.impressionData = [[MPImpressionData alloc] initWithDictionary:@{
                                                                                          kImpressionDataAdUnitIDKey: adUnitIdSample
                                                                                          }];

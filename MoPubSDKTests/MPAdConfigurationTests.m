@@ -9,7 +9,7 @@
 #import <XCTest/XCTest.h>
 #import "MPAdConfiguration.h"
 #import "MPAdConfigurationFactory.h"
-#import "MPRewardedVideoReward.h"
+#import "MPReward.h"
 #import "MOPUBExperimentProvider.h"
 #import "MPAdConfiguration+Testing.h"
 #import "MPVASTTracking.h"
@@ -33,25 +33,25 @@ extern NSString * const kNativeImpressionMinVisiblePixelsMetadataKey;
 
 #pragma mark - Rewarded Ads
 
-- (void)testRewardedPlayableDurationParseStringInputSuccess {
-    NSDictionary * headers = @{ kRewardedPlayableDurationMetadataKey: @"30" };
+- (void)testRewardedDurationParseStringInputSuccess {
+    NSDictionary * headers = @{ kRewardedDurationMetadataKey: @"30" };
     MPAdConfiguration * config = [[MPAdConfiguration alloc] initWithMetadata:headers data:nil isFullscreenAd:YES];
 
-    XCTAssertEqual(config.rewardedPlayableDuration, 30);
+    XCTAssertEqual(config.rewardedDuration, 30);
 }
 
 - (void)testRewardedPlayableDurationParseNumberInputSuccess {
-    NSDictionary * headers = @{ kRewardedPlayableDurationMetadataKey: @(30) };
+    NSDictionary * headers = @{ kRewardedDurationMetadataKey: @(30) };
     MPAdConfiguration * config = [[MPAdConfiguration alloc] initWithMetadata:headers data:nil isFullscreenAd:YES];
 
-    XCTAssertEqual(config.rewardedPlayableDuration, 30);
+    XCTAssertEqual(config.rewardedDuration, 30);
 }
 
 - (void)testRewardedPlayableDurationParseNoHeader {
     NSDictionary * headers = @{ };
     MPAdConfiguration * config = [[MPAdConfiguration alloc] initWithMetadata:headers data:nil isFullscreenAd:YES];
 
-    XCTAssertEqual(config.rewardedPlayableDuration, -1);
+    XCTAssertEqual(config.rewardedDuration, -1);
 }
 
 - (void)testRewardedPlayableRewardOnClickParseSuccess {
@@ -112,8 +112,8 @@ extern NSString * const kNativeImpressionMinVisiblePixelsMetadataKey;
     XCTAssertNotNil(config.selectedReward);
     XCTAssertEqual(config.availableRewards.count, 1);
     XCTAssertEqual(config.availableRewards[0], config.selectedReward);
-    XCTAssert([config.selectedReward.currencyType isEqualToString:kMPRewardedVideoRewardCurrencyTypeUnspecified]);
-    XCTAssert(config.selectedReward.amount.integerValue == kMPRewardedVideoRewardCurrencyAmountUnspecified);
+    XCTAssert([config.selectedReward.currencyType isEqualToString:kMPRewardCurrencyTypeUnspecified]);
+    XCTAssert(config.selectedReward.amount.integerValue == kMPRewardCurrencyAmountUnspecified);
 }
 
 - (void)testRewardedMultiCurrencyParseFailureMalconfiguredReward {
@@ -127,8 +127,8 @@ extern NSString * const kNativeImpressionMinVisiblePixelsMetadataKey;
     XCTAssertNotNil(config.selectedReward);
     XCTAssertEqual(config.availableRewards.count, 1);
     XCTAssertEqual(config.availableRewards[0], config.selectedReward);
-    XCTAssert([config.selectedReward.currencyType isEqualToString:kMPRewardedVideoRewardCurrencyTypeUnspecified]);
-    XCTAssert(config.selectedReward.amount.integerValue == kMPRewardedVideoRewardCurrencyAmountUnspecified);
+    XCTAssert([config.selectedReward.currencyType isEqualToString:kMPRewardCurrencyTypeUnspecified]);
+    XCTAssert(config.selectedReward.amount.integerValue == kMPRewardCurrencyAmountUnspecified);
 }
 
 - (void)testRewardedMultiCurrencyParseFailoverToSingleCurrencySuccess {

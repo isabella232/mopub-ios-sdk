@@ -154,4 +154,164 @@
     XCTAssertEqual(320, ad3.height);
 }
 
+#pragma mark - Initialization
+
+- (void)testCompanionAdModelMap {
+    XCTAssertNotNil([MPVASTCompanionAd modelMap]);
+}
+
+- (void)testCompanionAdInitializeNoDictionary {
+    MPVASTCompanionAd *companionAd = [[MPVASTCompanionAd alloc] initWithDictionary:nil];
+    XCTAssertNil(companionAd);
+    XCTAssertNil(companionAd.creativeViewTrackers);
+}
+
+- (void)testCompanionAdInitializeEmptyDictionary {
+    MPVASTCompanionAd *companionAd = [[MPVASTCompanionAd alloc] initWithDictionary:@{}];
+    XCTAssertNotNil(companionAd);
+    XCTAssertNil(companionAd.creativeViewTrackers);
+
+    XCTAssertTrue(companionAd.height == 0);
+    XCTAssertTrue(companionAd.width == 0);
+    XCTAssertTrue(companionAd.assetHeight == 0);
+    XCTAssertTrue(companionAd.assetWidth == 0);
+
+    CGRect safeFrame = [companionAd safeAdViewBounds];
+    XCTAssertTrue(safeFrame.origin.x == 0);
+    XCTAssertTrue(safeFrame.origin.y == 0);
+    XCTAssertTrue(safeFrame.size.height == 1);
+    XCTAssertTrue(safeFrame.size.width == 1);
+}
+
+- (void)testCompanionAdInitializeNoTrackingEventsDictionary {
+    NSDictionary *modelDictionary = @{
+        @"TrackingEvents": @{}
+    };
+    MPVASTCompanionAd *companionAd = [[MPVASTCompanionAd alloc] initWithDictionary:modelDictionary];
+    XCTAssertNotNil(companionAd);
+    XCTAssertNil(companionAd.creativeViewTrackers);
+}
+
+- (void)testCompanionAdInitializeMalformedNoTrackingEventsDictionary {
+    NSDictionary *modelDictionary = @{
+        @"TrackingEvents": @[]
+    };
+    MPVASTCompanionAd *companionAd = [[MPVASTCompanionAd alloc] initWithDictionary:modelDictionary];
+    XCTAssertNotNil(companionAd);
+    XCTAssertNil(companionAd.creativeViewTrackers);
+}
+
+- (void)testCompanionAdInitializeNoTrackersDictionary {
+    NSDictionary *modelDictionary = @{
+        @"TrackingEvents": @{
+            @"Tracking": @{}
+        }
+    };
+    MPVASTCompanionAd *companionAd = [[MPVASTCompanionAd alloc] initWithDictionary:modelDictionary];
+    XCTAssertNotNil(companionAd);
+    XCTAssertNil(companionAd.creativeViewTrackers);
+}
+
+- (void)testCompanionAdInitializeEmptyTrackerArray {
+    NSDictionary *modelDictionary = @{
+        @"TrackingEvents": @{
+            @"Tracking": @[]
+        }
+    };
+    MPVASTCompanionAd *companionAd = [[MPVASTCompanionAd alloc] initWithDictionary:modelDictionary];
+    XCTAssertNotNil(companionAd);
+    XCTAssertNil(companionAd.creativeViewTrackers);
+}
+
+- (void)testCompanionAdInitializeMalformedTrackerArray {
+    NSDictionary *modelDictionary = @{
+        @"TrackingEvents": @{
+            @"Tracking": @"i am malformed woo"
+        }
+    };
+    MPVASTCompanionAd *companionAd = [[MPVASTCompanionAd alloc] initWithDictionary:modelDictionary];
+    XCTAssertNotNil(companionAd);
+    XCTAssertNil(companionAd.creativeViewTrackers);
+}
+
+- (void)testCompanionAdInitializeOneTrackerInArray {
+    NSDictionary *modelDictionary = @{
+        @"TrackingEvents": @{
+            @"Tracking": @[
+                @{
+                    @"event": MPVideoEventCreativeView,
+                    @"text": @"https://www.host.com"
+                }
+            ]
+        }
+    };
+    MPVASTCompanionAd *companionAd = [[MPVASTCompanionAd alloc] initWithDictionary:modelDictionary];
+    XCTAssertNotNil(companionAd);
+    XCTAssertNotNil(companionAd.creativeViewTrackers);
+    XCTAssertTrue(companionAd.creativeViewTrackers.count == 1);
+
+    MPVASTTrackingEvent *event = companionAd.creativeViewTrackers.firstObject;
+    XCTAssertNotNil(event);
+    XCTAssertTrue([event.eventType isEqualToString:MPVideoEventCreativeView]);
+    XCTAssertTrue([event.URL.absoluteString isEqualToString:@"https://www.host.com"]);
+    XCTAssertNil(event.progressOffset);
+}
+
+- (void)testCompanionAdInitializeOneTrackerInArrayNotCreativeView {
+    NSDictionary *modelDictionary = @{
+        @"TrackingEvents": @{
+            @"Tracking": @[
+                @{
+                    @"event": MPVideoEventStart,
+                    @"text": @"https://www.host.com"
+                }
+            ]
+        }
+    };
+    MPVASTCompanionAd *companionAd = [[MPVASTCompanionAd alloc] initWithDictionary:modelDictionary];
+    XCTAssertNotNil(companionAd);
+    XCTAssertNil(companionAd.creativeViewTrackers);
+}
+
+- (void)testCompanionAdInitializeOneMalformedTrackerInArray {
+    NSDictionary *modelDictionary = @{
+        @"TrackingEvents": @{
+            @"Tracking": @[
+                @{
+                    @"text": @"https://www.host.com"
+                }
+            ]
+        }
+    };
+    MPVASTCompanionAd *companionAd = [[MPVASTCompanionAd alloc] initWithDictionary:modelDictionary];
+    XCTAssertNotNil(companionAd);
+    XCTAssertNil(companionAd.creativeViewTrackers);
+}
+
+- (void)testCompanionAdInitializeOneGoodAndOneMalformedTrackerInArray {
+    NSDictionary *modelDictionary = @{
+        @"TrackingEvents": @{
+            @"Tracking": @[
+                @{
+                    @"text": @"https://www.host-bad.com"
+                },
+                @{
+                    @"event": MPVideoEventCreativeView,
+                    @"text": @"https://www.host.com"
+                }
+            ]
+        }
+    };
+    MPVASTCompanionAd *companionAd = [[MPVASTCompanionAd alloc] initWithDictionary:modelDictionary];
+    XCTAssertNotNil(companionAd);
+    XCTAssertNotNil(companionAd.creativeViewTrackers);
+    XCTAssertTrue(companionAd.creativeViewTrackers.count == 1);
+
+    MPVASTTrackingEvent *event = companionAd.creativeViewTrackers.firstObject;
+    XCTAssertNotNil(event);
+    XCTAssertTrue([event.eventType isEqualToString:MPVideoEventCreativeView]);
+    XCTAssertTrue([event.URL.absoluteString isEqualToString:@"https://www.host.com"]);
+    XCTAssertNil(event.progressOffset);
+}
+
 @end

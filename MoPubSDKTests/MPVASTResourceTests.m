@@ -25,14 +25,11 @@
         <title>Static Image Resource</title>\
         <meta name=\"viewport\" content=\"initial-scale=1.0, maximum-scale=1.0, user-scalable=no\">\
         <style type=\"text/css\">\
-            html, body { margin: 0; padding: 0; overflow: hidden; }\
-            #content { width: 400px; height: 300px; }\
+            html, body { margin: 0; padding: 0; }\
         </style>\
     </head>\
     <body scrolling=\"no\">\
-        <div id=\"content\">\
-            <img src=\"test://image.jpg\">\
-        </div>\
+        <img width=\"400px\" height=\"300px\" src=\"test://image.jpg\">\
     </body>\
 </html>";
     XCTAssertTrue([html isEqualToString:expecation]);

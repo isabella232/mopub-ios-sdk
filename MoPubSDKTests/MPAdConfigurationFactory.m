@@ -197,7 +197,7 @@
         data[@"location"] = location;
     }
 
-    configuration.customEventClassData = data;
+    configuration.adapterClassData = data;
     return configuration;
 }
 
@@ -210,6 +210,16 @@
 {
     return [self defaultInterstitialConfigurationWithHeaders:@{kFullAdTypeMetadataKey: type}
                                                   HTMLString:nil];
+}
+
++ (MPAdConfiguration *)defaultFullscreenConfigWithAdapterClass:(Class)class
+{
+    return [self defaultFullscreenConfigWithAdapterClass:class additionalMetadata:nil];
+}
+
++ (MPAdConfiguration *)defaultFullscreenConfigWithAdapterClass:(Class)class additionalMetadata:(NSDictionary *)additionalMetadata
+{
+    return [self defaultInterstitialConfigurationWithCustomEventClassName:NSStringFromClass(class) additionalMetadata:additionalMetadata];
 }
 
 + (MPAdConfiguration *)defaultInterstitialConfigurationWithCustomEventClassName:(NSString *)eventClassName
@@ -238,13 +248,14 @@
 
     return [[MPAdConfiguration alloc] initWithMetadata:headers
                                                   data:[HTMLString dataUsingEncoding:NSUTF8StringEncoding]
-                                        isFullscreenAd:NO];
+                                        isFullscreenAd:YES];
 }
 
 #pragma mark - Rewarded Video
 + (NSMutableDictionary *)defaultRewardedVideoHeaders
 {
     return [@{
+              kFormatMetadataKey: kAdTypeRewardedVideo,
               kAdTypeMetadataKey: @"custom",
               kClickthroughMetadataKey: @"http://ads.mopub.com/m/clickThroughTracker?a=1",
               kNextUrlMetadataKey: @"http://ads.mopub.com/m/failURL",
