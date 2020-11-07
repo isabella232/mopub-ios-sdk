@@ -7,23 +7,24 @@
 //
 
 #import "MRController.h"
+
+#import "MoPub.h"
+#import "MPAdDestinationDisplayAgent.h"
+#import "MPAPIEndPoints.h"
 #import "MRBridge.h"
 #import "MRCommand.h"
-#import "MRProperty.h"
-#import "MPAdDestinationDisplayAgent.h"
-#import "MRExpandModalViewController.h"
 #import "MPCoreInstanceProvider.h"
+#import "MRExpandModalViewController.h"
+#import "MPForceableOrientationProtocol.h"
 #import "MPGlobal.h"
+#import "MPHTTPNetworkSession.h"
 #import "MPLogging.h"
+#import "MRProperty.h"
+#import "MPSKAdNetworkClickthroughData.h"
 #import "MPTimer.h"
+#import "MPURLRequest.h"
 #import "NSHTTPURLResponse+MPAdditions.h"
 #import "NSURL+MPAdditions.h"
-#import "MPForceableOrientationProtocol.h"
-#import "MPAPIEndPoints.h"
-#import "MoPub.h"
-#import "MPViewabilityTracker.h"
-#import "MPHTTPNetworkSession.h"
-#import "MPURLRequest.h"
 
 static const NSTimeInterval kAdPropertyUpdateTimerInterval = 1.0;
 static const NSTimeInterval kMRAIDResizeAnimationTimeInterval = 0.3;
@@ -70,7 +71,6 @@ static NSString *const kMRAIDCommandResize = @"resize";
 
 @property (nonatomic, copy) void (^forceOrientationAfterAnimationBlock)(void);
 
-@property (nonatomic, strong) MPViewabilityTracker *viewabilityTracker;
 @property (nonatomic, strong) MPWebView *mraidWebView;
 
 // Networking
@@ -87,6 +87,9 @@ static NSString *const kMRAIDCommandResize = @"resize";
 
 // MRAID capability feature flags
 @property (nonatomic, assign) BOOL allowCustomClose;
+
+// Hold onto SKAdNetwork clickthrough data
+@property (nonatomic, strong) MPSKAdNetworkClickthroughData *skAdNetworkClickthroughData;
 
 @end
 
@@ -143,8 +146,6 @@ static NSString *const kMRAIDCommandResize = @"resize";
 
 - (void)dealloc
 {
-    [self.viewabilityTracker stopTracking];
-
     // Transfer delegation to the expand modal view controller in the event the modal is still being presented so it can dismiss itself.
     _expansionContentView.webAdDelegate = _expandModalViewController;
 
@@ -164,19 +165,24 @@ static NSString *const kMRAIDCommandResize = @"resize";
     self.adRequiresPrecaching = configuration.precacheRequired;
     self.isAdVastVideoPlayer = configuration.isVastVideoPlayer;
 
+    self.skAdNetworkClickthroughData = configuration.skAdNetworkClickthroughData;
+
     // Rewarded video and rewarded playable always allowed to use custom close since it utilizes JS
     // and MRAID to render the locked countdown experience and then show the close button.
     self.allowCustomClose = (configuration.mraidAllowCustomClose
                              || [configuration.adType isEqualToString:kAdTypeRewardedVideo]
                              || [configuration.adType isEqualToString:kAdTypeRewardedPlayable]);
 
-    [self commonSetupBeforeMRAIDBridgeLoadAd];
+    NSArray<WKUserScript *> *scripts = configuration.viewabilityContext.resourcesAsScripts;
+    [self commonSetupBeforeMRAIDBridgeLoadAdWithWebViewScripts:scripts];
+
+    // Notify the start of the web session now that the web view has been created.
+    [self.delegate mraidWebSessionStarted:self.mraidAdView];
 
     // This load is guaranteed to never be called for a two-part expand so we know we need to load the HTML into the default web view.
     NSString *HTML = [configuration adResponseHTMLString];
-    [self.mraidBridge loadHTMLString:HTML
-                             baseURL:[NSURL URLWithString:[MPAPIEndpoints baseURL]]
-     ];
+    NSString *customizedHTML = [self.delegate customizeHTML:HTML inWebView:self.mraidWebView forContainerView:self.mraidAdView];
+    [self.mraidBridge loadHTMLString:customizedHTML baseURL:MPAPIEndpoints.baseURL];
 }
 
 - (void)loadVASTCompanionAd:(NSString *)companionAdHTML
@@ -189,12 +195,10 @@ static NSString *const kMRAIDCommandResize = @"resize";
     self.adRequiresPrecaching = NO;
     self.isAdVastVideoPlayer = NO; // VAST companion ad cannot be a VAST video
 
-    [self commonSetupBeforeMRAIDBridgeLoadAd];
+    [self commonSetupBeforeMRAIDBridgeLoadAdWithWebViewScripts:nil];
 
     // This load is guaranteed to never be called for a two-part expand so we know we need to load the HTML into the default web view.
-    [self.mraidBridge loadHTMLString:companionAdHTML
-                             baseURL:[NSURL URLWithString:[MPAPIEndpoints baseURL]]
-     ];
+    [self.mraidBridge loadHTMLString:companionAdHTML baseURL:MPAPIEndpoints.baseURL];
 }
 
 - (void)loadVASTCompanionAdUrl:(NSURL *)companionAdUrl
@@ -207,7 +211,7 @@ static NSString *const kMRAIDCommandResize = @"resize";
     self.adRequiresPrecaching = NO;
     self.isAdVastVideoPlayer = NO; // VAST companion ad cannot be a VAST video
 
-    [self commonSetupBeforeMRAIDBridgeLoadAd];
+    [self commonSetupBeforeMRAIDBridgeLoadAdWithWebViewScripts:nil];
 
     // This load is guaranteed to never be called for a two-part expand so we know we need to load the HTML into the default web view.
     [self.mraidBridge loadHTMLUrl:companionAdUrl];
@@ -226,11 +230,6 @@ static NSString *const kMRAIDCommandResize = @"resize";
     [self didEndAnimatingAdSize];
     [self updateMRAIDProperties];
     [self updateOrientation];
-
-    // Start viewability tracking here for interstitals. For banners, this is handled by the adapter upon impression.
-    if ([self isInterstitialAd]) {
-        [self.viewabilityTracker startTracking];
-    }
 }
 
 - (void)enableRequestHandling
@@ -249,11 +248,6 @@ static NSString *const kMRAIDCommandResize = @"resize";
     self.mraidBridge.shouldHandleRequests = NO;
     self.mraidBridgeTwoPart.shouldHandleRequests = NO;
     [self.destinationDisplayAgent cancel];
-}
-
-- (void)startViewabilityTracking
-{
-    [self.viewabilityTracker startTracking];
 }
 
 - (void)disableClickthroughWebBrowser
@@ -307,17 +301,6 @@ static NSString *const kMRAIDCommandResize = @"resize";
 
 #pragma mark - Private
 
-- (void)init3rdPartyViewabilityTrackers
-{
-    self.viewabilityTracker = [[MPViewabilityTracker alloc]
-                               initWithWebView:self.mraidWebView
-                               isVideo:self.isAdVastVideoPlayer
-                               startTrackingImmediately:NO];
-    for (UIView *view in self.mraidAdView.viewabilityFriendlyObstructionViews) {
-        [self.viewabilityTracker registerFriendlyObstructionView:view];
-    }
-}
-
 - (BOOL)isInterstitialAd
 {
     return (self.placementType == MRAdViewPlacementTypeInterstitial);
@@ -356,9 +339,9 @@ static NSString *const kMRAIDCommandResize = @"resize";
     return bridge;
 }
 
-- (MPWebView *)buildMRAIDWebViewWithFrame:(CGRect)frame
+- (MPWebView *)buildMRAIDWebViewWithFrame:(CGRect)frame scripts:(NSArray<WKUserScript *> *)scripts
 {
-    MPWebView *webView = [[MPWebView alloc] initWithFrame:frame];
+    MPWebView *webView = [[MPWebView alloc] initWithFrame:frame scripts:scripts];
     webView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     webView.backgroundColor = [UIColor clearColor];
     webView.clipsToBounds = YES;
@@ -371,8 +354,8 @@ static NSString *const kMRAIDCommandResize = @"resize";
 /**
  Call this before calling `[self.mraidBridge loadHTMLString]`.
  */
-- (void)commonSetupBeforeMRAIDBridgeLoadAd {
-    self.mraidWebView = [self buildMRAIDWebViewWithFrame:self.mraidDefaultAdFrame];
+- (void)commonSetupBeforeMRAIDBridgeLoadAdWithWebViewScripts:(NSArray<WKUserScript *> *)scripts {
+    self.mraidWebView = [self buildMRAIDWebViewWithFrame:self.mraidDefaultAdFrame scripts:scripts];
     self.mraidWebView.shouldConformToSafeArea = [self isInterstitialAd];
 
     self.mraidBridge = [[MRBridge alloc] initWithWebView:self.mraidWebView delegate:self];
@@ -390,8 +373,6 @@ static NSString *const kMRAIDCommandResize = @"resize";
     } else if (self.placementType == MRAdViewPlacementTypeInterstitial) {
         self.mraidAdView.closeButtonType = MPAdViewCloseButtonTypeImageButton;
     }
-
-    [self init3rdPartyViewabilityTrackers];
 }
 
 #pragma mark - Orientation Notifications
@@ -752,6 +733,9 @@ static NSString *const kMRAIDCommandResize = @"resize";
 
         self.isAdLoading = NO;
 
+        // Notify that the initial HTML has been loaded, and the ad session should start now.
+        [self.delegate mraidWebSessionReady:self.mraidAdView];
+
         if (!self.adRequiresPrecaching) {
             // Only tell the delegate that the ad loaded when the view is the default ad view and not a two-part ad view.
             if (bridge == self.mraidBridge) {
@@ -816,7 +800,7 @@ static NSString *const kMRAIDCommandResize = @"resize";
 - (void)bridge:(MRBridge *)bridge handleDisplayForDestinationURL:(NSURL *)URL
 {
     if ([self hasUserInteractedWithWebViewForBridge:bridge]) {
-        [self.destinationDisplayAgent displayDestinationForURL:URL];
+        [self.destinationDisplayAgent displayDestinationForURL:URL skAdNetworkClickthroughData:self.skAdNetworkClickthroughData];
 
         if ([self.delegate respondsToSelector:@selector(mraidAdDidReceiveClickthrough:)]) {
             [self.delegate mraidAdDidReceiveClickthrough:URL];
@@ -948,7 +932,7 @@ static NSString *const kMRAIDCommandResize = @"resize";
         // It doesn't matter what frame we use for the two-part expand. We'll overwrite it with a new frame when presenting the modal.
         CGRect twoPartFrame = self.mraidAdView.frame;
 
-        MPWebView *twoPartWebView = [self buildMRAIDWebViewWithFrame:twoPartFrame];
+        MPWebView *twoPartWebView = [self buildMRAIDWebViewWithFrame:twoPartFrame scripts:nil];
         self.mraidBridgeTwoPart = [[MRBridge alloc] initWithWebView:twoPartWebView delegate:self];
         self.mraidAdViewTwoPart = [[MPAdContainerView alloc] initWithFrame:twoPartFrame
                                                             webContentView:twoPartWebView];

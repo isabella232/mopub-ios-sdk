@@ -12,13 +12,16 @@
 #import "MPAdConfigurationFactory.h"
 #import "MPInlineAdAdapter+MPAdAdapter.h"
 #import "MPInlineAdAdapter+Private.h"
+#import "MPInlineAdAdapter+Testing.h"
 #import "MPInlineAdAdapterMock.h"
 #import "MPConstants.h"
 #import "MPError.h"
 #import "MPHTMLBannerCustomEvent.h"
 #import "MPMockAnalyticsTracker.h"
-#import "MPMRAIDBannerCustomEvent.h"
 #import "MPProxy.h"
+#import "MPViewabilityManager+Testing.h"
+
+static const NSTimeInterval kTestTimeout   = 2; // seconds
 
 @interface MPInlineAdAdapterTests : XCTestCase
 
@@ -39,6 +42,12 @@
     self.adapter = [MPInlineAdAdapter new];
     self.adapter.adapterDelegate = self.adapterDelegateMock;
     // no need to mock `inlineDelegate` since `MPInlineAdAdapter` is a self delegate
+
+    // Reset Viewability Manager state
+    MPViewabilityManager.sharedManager.isEnabled = YES;
+    MPViewabilityManager.sharedManager.isInitialized = NO;
+    MPViewabilityManager.sharedManager.omidPartner = nil;
+    [MPViewabilityManager.sharedManager clearCachedOMIDLibrary];
 }
 
 - (void)tearDown {
@@ -317,6 +326,84 @@
     [mockedAdapter inlineAdAdapterDidTrackImpression:mockedAdapter];
     XCTAssert(didTrackImpression);
     XCTAssertEqual(trackedAdapter, mockedAdapter);
+}
+
+#pragma mark - Viewability
+
+- (void)testViewabilityTrackerCreationSuccess {
+    // Initialize Viewability Manager
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expect MPViewabilityManager initialization complete"];
+    [MPViewabilityManager.sharedManager initializeWithCompletion:^(BOOL initialized) {
+        [expectation fulfill];
+    }];
+
+    [self waitForExpectationsWithTimeout:kTestTimeout handler:^(NSError *error) {
+        XCTAssertNil(error);
+    }];
+
+    XCTAssertTrue(MPViewabilityManager.sharedManager.isEnabled);
+    XCTAssertTrue(MPViewabilityManager.sharedManager.isInitialized);
+
+    // View to be tracked
+    CGRect frame = CGRectMake(0, 0, 320, 50);
+    MPWebView * webView = [[MPWebView alloc] initWithFrame:frame];
+    MPAdContainerView * view = [[MPAdContainerView alloc] initWithFrame:frame webContentView:webView];
+    XCTAssertNotNil(view);
+
+    MPInlineAdAdapter * adapter = [[MPInlineAdAdapter alloc] init];
+    id<MPViewabilityTracker> tracker = [adapter viewabilityTrackerForWebContentInView:view];
+
+    XCTAssertNotNil(tracker);
+    XCTAssertFalse(tracker.isTracking);
+}
+
+- (void)testViewabilityTrackerCreationNoView {
+    // Initialize Viewability Manager
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expect MPViewabilityManager initialization complete"];
+    [MPViewabilityManager.sharedManager initializeWithCompletion:^(BOOL initialized) {
+        [expectation fulfill];
+    }];
+
+    [self waitForExpectationsWithTimeout:kTestTimeout handler:^(NSError *error) {
+        XCTAssertNil(error);
+    }];
+
+    XCTAssertTrue(MPViewabilityManager.sharedManager.isEnabled);
+    XCTAssertTrue(MPViewabilityManager.sharedManager.isInitialized);
+
+    // View to be tracked
+    MPAdContainerView * view = nil;
+
+    MPInlineAdAdapter * adapter = [[MPInlineAdAdapter alloc] init];
+    id<MPViewabilityTracker> tracker = [adapter viewabilityTrackerForWebContentInView:view];
+
+    XCTAssertNil(tracker);
+}
+
+- (void)testViewabilityTrackerCreationNoWebView {
+    // Initialize Viewability Manager
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expect MPViewabilityManager initialization complete"];
+    [MPViewabilityManager.sharedManager initializeWithCompletion:^(BOOL initialized) {
+        [expectation fulfill];
+    }];
+
+    [self waitForExpectationsWithTimeout:kTestTimeout handler:^(NSError *error) {
+        XCTAssertNil(error);
+    }];
+
+    XCTAssertTrue(MPViewabilityManager.sharedManager.isEnabled);
+    XCTAssertTrue(MPViewabilityManager.sharedManager.isInitialized);
+
+    // View to be tracked
+    CGRect frame = CGRectMake(0, 0, 320, 50);
+    MPWebView * webView = nil;
+    MPAdContainerView * view = [[MPAdContainerView alloc] initWithFrame:frame webContentView:webView];
+    XCTAssertNotNil(view);
+
+    MPInlineAdAdapter * adapter = [[MPInlineAdAdapter alloc] init];
+    id<MPViewabilityTracker> tracker = [adapter viewabilityTrackerForWebContentInView:view];
+
+    XCTAssertNil(tracker);
 }
 
 @end

@@ -10,18 +10,18 @@
 #import "MPAdServerURLBuilder.h"
 #import "MPConsentManager.h"
 #import "MPConstants.h"
-#import "MPGeolocationProvider.h"
+#import "MPDeviceInformation.h"
 #import "MPLogging.h"
 #import "MPMediationManager.h"
 #import "MPRewardedVideo.h"
 #import "MPIdentityProvider.h"
 #import "MPWebView.h"
 #import "MOPUBExperimentProvider.h"
-#import "MPViewabilityTracker.h"
 #import "MPAdConversionTracker.h"
 #import "MPConsentManager.h"
 #import "MPConsentChangedNotification.h"
 #import "MPSessionTracker.h"
+#import "MPViewabilityManager.h"
 
 static NSString * const kPublisherEnteredAdUnitIdStorageKey = @"com.mopub.mopub-ios-sdk.initialization.publisher.entered.ad.unit.id";
 
@@ -67,17 +67,12 @@ static NSString * const kPublisherEnteredAdUnitIdStorageKey = @"com.mopub.mopub-
 
 - (void)setLocationUpdatesEnabled:(BOOL)locationUpdatesEnabled
 {
-    [MPGeolocationProvider.sharedProvider setLocationUpdatesEnabled:locationUpdatesEnabled];
+    MPDeviceInformation.enableLocation = locationUpdatesEnabled;
 }
 
 - (BOOL)locationUpdatesEnabled
 {
-    return MPGeolocationProvider.sharedProvider.locationUpdatesEnabled;
-}
-
-- (void)setFrequencyCappingIdUsageEnabled:(BOOL)frequencyCappingIdUsageEnabled
-{
-    [MPIdentityProvider setFrequencyCappingIdUsageEnabled:frequencyCappingIdUsageEnabled];
+    return MPDeviceInformation.enableLocation;
 }
 
 - (void)setLogLevel:(MPBLogLevel)level
@@ -93,11 +88,6 @@ static NSString * const kPublisherEnteredAdUnitIdStorageKey = @"com.mopub.mopub-
 - (void)setClickthroughDisplayAgentType:(MOPUBDisplayAgentType)displayAgentType
 {
     self.experimentProvider.displayAgentType = displayAgentType;
-}
-
-- (BOOL)frequencyCappingIdUsageEnabled
-{
-    return [MPIdentityProvider frequencyCappingIdUsageEnabled];
 }
 
 // Keep -version and -bundleIdentifier methods around for Fabric backwards compatibility.
@@ -157,6 +147,12 @@ static NSString * const kPublisherEnteredAdUnitIdStorageKey = @"com.mopub.mopub-
         // Configure session tracker
         [MPSessionTracker initializeNotificationObservers];
 
+        // Configure Viewability
+        dispatch_group_enter(initializationGroup);
+        [MPViewabilityManager.sharedManager initializeWithCompletion:^(BOOL isInitialized) {
+            dispatch_group_leave(initializationGroup);
+        }];
+
         // Configure mediated network SDKs
         __block NSArray<id<MPAdapterConfiguration>> * initializedNetworks = nil;
         dispatch_group_enter(initializationGroup);
@@ -200,7 +196,12 @@ static NSString * const kPublisherEnteredAdUnitIdStorageKey = @"com.mopub.mopub-
 
 - (void)disableViewability:(MPViewabilityOption)vendors
 {
-    [MPViewabilityTracker disableViewability:vendors];
+    [MPViewabilityManager.sharedManager disableViewability];
+}
+
+- (void)disableViewability
+{
+    [MPViewabilityManager.sharedManager disableViewability];
 }
 
 - (void)setEngineInformation:(MPEngineInfo *)info

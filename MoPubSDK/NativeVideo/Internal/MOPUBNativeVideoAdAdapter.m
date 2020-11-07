@@ -163,7 +163,7 @@
         return;
     }
 
-    [self.destinationDisplayAgent displayDestinationForURL:URL];
+    [self.destinationDisplayAgent displayDestinationForURL:URL skAdNetworkClickthroughData:self.adConfiguration.skAdNetworkClickthroughData];
 }
 
 #pragma mark - Privacy Icon
@@ -176,7 +176,8 @@
         (url != nil ? [NSURL URLWithString:url] : nil);
     });
 
-    [self.destinationDisplayAgent displayDestinationForURL:(overridePrivacyClickUrl != nil ? overridePrivacyClickUrl : defaultPrivacyClickUrl)];
+    // Since this is the privacy icon, send @c nil for skAdNetworkClickthroughData
+    [self.destinationDisplayAgent displayDestinationForURL:(overridePrivacyClickUrl != nil ? overridePrivacyClickUrl : defaultPrivacyClickUrl) skAdNetworkClickthroughData:nil];
 }
 
 #pragma mark - Impression and click tracking. Renderer calls those two methods

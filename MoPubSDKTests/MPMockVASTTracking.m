@@ -27,6 +27,7 @@ The key is an `MPVideoEvent`, and the value is the call count.
 @end
 
 @implementation MPMockVASTTracking
+@synthesize viewabilityTracker;
 
 - (instancetype)init {
     self = [super init];

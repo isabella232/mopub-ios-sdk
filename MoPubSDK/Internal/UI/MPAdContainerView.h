@@ -9,9 +9,10 @@
 #import <UIKit/UIKit.h>
 #import "MPAdViewConstant.h"
 #import "MPCountdownTimerDelegate.h"
-#import "MPViewabilityInfoProvider.h"
 #import "MPVideoPlayer.h"
 #import "MPVideoPlayerDelegate.h"
+#import "MPVideoPlayerView.h"
+#import "MPViewableView.h"
 #import "MPWebView.h"
 
 NS_ASSUME_NONNULL_BEGIN
@@ -25,7 +26,7 @@ NS_ASSUME_NONNULL_BEGIN
  always on top of the content view, and is able to intercept all touch events before passing to the
  content view.
  */
-@interface MPAdContainerView : UIView
+@interface MPAdContainerView : MPViewableView
 
 @property (nonatomic, assign) NSTimeInterval skipOffset;
 @property (nonatomic, readonly) BOOL wasTapped;
@@ -39,7 +40,7 @@ NS_ASSUME_NONNULL_BEGIN
  Provided the ad size and Close button location, returns the frame of the Close button.
  Note: The provided ad size is assumed to be at least 50x50 (@c kMPAdViewCloseButtonSize), otherwise
  the return value is undefined.
- 
+
  @param adSize The size of the ad.
  @param location The location of the close button.
  */
@@ -65,11 +66,7 @@ NS_ASSUME_NONNULL_BEGIN
 #pragma mark -
 
 @interface MPAdContainerView (MPVideoPlayer) <MPVideoPlayer>
-@end
-
-#pragma mark -
-
-@interface MPAdContainerView (MPViewabilityInfoProvider) <MPViewabilityInfoProvider>
+@property (nonatomic, readonly) MPVideoPlayerView *videoPlayerView;
 @end
 
 #pragma mark -

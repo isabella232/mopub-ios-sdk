@@ -10,6 +10,7 @@
 #import "MPAdAdapterDelegateMock.h"
 #import "MPAdConfiguration.h"
 #import "MPAdConfigurationFactory.h"
+#import "MPFullscreenAdAdapter+Private.h"
 #import "MPFullscreenAdAdapter+Testing.h"
 #import "MPFullscreenAdAdapterMock.h"
 #import "MPFullscreenAdViewController+Private.h"
@@ -20,8 +21,10 @@
 #import "MPMockVASTTracking.h"
 #import "MPRewardedFullscreenDelegateHandler.h"
 #import "XCTestCase+MPAddition.h"
+#import "MPViewabilityManager+Testing.h"
 
 static const NSTimeInterval kDefaultTimeout = 10;
+static const NSTimeInterval kTestTimeout   = 2; // seconds
 
 @interface MPFullscreenAdAdapterTests : XCTestCase
 
@@ -35,6 +38,12 @@ static const NSTimeInterval kDefaultTimeout = 10;
 - (void)setUp {
     self.adAdapterDelegateMock = [MPAdAdapterDelegateMock new];
     self.fullscreenAdAdapterDelegateMock = [MPFullscreenAdAdapterDelegateMock new];
+
+    // Reset Viewability Manager state
+    MPViewabilityManager.sharedManager.isEnabled = YES;
+    MPViewabilityManager.sharedManager.isInitialized = NO;
+    MPViewabilityManager.sharedManager.omidPartner = nil;
+    [MPViewabilityManager.sharedManager clearCachedOMIDLibrary];
 }
 
 - (MPFullscreenAdAdapter *)createTestSubjectWithAdConfig:(MPAdConfiguration *)adConfig {
@@ -143,7 +152,6 @@ static const NSTimeInterval kDefaultTimeout = 10;
                     didTriggerEvent:MPVideoPlayerEvent_Skip
                       videoProgress:3];
     XCTAssertEqual(3, [mockVastTracking countOfSelectorCalls:@selector(handleVideoEvent:videoTimeOffset:)]);
-    XCTAssertEqual(1, [mockVastTracking countOfSelectorCalls:@selector(stopViewabilityTracking)]);
     XCTAssertEqual(1, [mockVastTracking countOfVideoEventCalls:MPVideoEventSkip]);
     XCTAssertEqual(1, [mockVastTracking countOfVideoEventCalls:MPVideoEventClose]);
     XCTAssertEqual(1, [mockVastTracking countOfVideoEventCalls:MPVideoEventCloseLinear]);
@@ -592,6 +600,291 @@ static const NSTimeInterval kDefaultTimeout = 10;
     XCTAssertTrue(handler.rewardGivenToUser.isCurrencyTypeSpecified);
     XCTAssertTrue([handler.rewardGivenToUser.currencyType isEqualToString:@"Selected"]);
     XCTAssertTrue(handler.rewardGivenToUser.amount.integerValue == 9);
+}
+
+#pragma mark - Viewability
+
+- (void)testViewabilityTrackerCreationSuccess {
+    // Initialize Viewability Manager
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expect MPViewabilityManager initialization complete"];
+    [MPViewabilityManager.sharedManager initializeWithCompletion:^(BOOL initialized) {
+        [expectation fulfill];
+    }];
+
+    [self waitForExpectationsWithTimeout:kTestTimeout handler:^(NSError *error) {
+        XCTAssertNil(error);
+    }];
+
+    XCTAssertTrue(MPViewabilityManager.sharedManager.isEnabled);
+    XCTAssertTrue(MPViewabilityManager.sharedManager.isInitialized);
+
+    // View to be tracked
+    CGRect frame = CGRectMake(0, 0, 320, 50);
+    MPWebView * webView = [[MPWebView alloc] initWithFrame:frame];
+    MPAdContainerView * view = [[MPAdContainerView alloc] initWithFrame:frame webContentView:webView];
+    XCTAssertNotNil(view);
+
+    MPFullscreenAdAdapter * adapter = [[MPFullscreenAdAdapter alloc] init];
+    id<MPViewabilityTracker> tracker = [adapter viewabilityTrackerForWebContentInView:view];
+
+    XCTAssertNotNil(tracker);
+    XCTAssertFalse(tracker.isTracking);
+}
+
+- (void)testViewabilityTrackerCreationNoView {
+    // Initialize Viewability Manager
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expect MPViewabilityManager initialization complete"];
+    [MPViewabilityManager.sharedManager initializeWithCompletion:^(BOOL initialized) {
+        [expectation fulfill];
+    }];
+
+    [self waitForExpectationsWithTimeout:kTestTimeout handler:^(NSError *error) {
+        XCTAssertNil(error);
+    }];
+
+    XCTAssertTrue(MPViewabilityManager.sharedManager.isEnabled);
+    XCTAssertTrue(MPViewabilityManager.sharedManager.isInitialized);
+
+    // View to be tracked
+    MPAdContainerView * view = nil;
+
+    MPFullscreenAdAdapter * adapter = [[MPFullscreenAdAdapter alloc] init];
+    id<MPViewabilityTracker> tracker = [adapter viewabilityTrackerForWebContentInView:view];
+
+    XCTAssertNil(tracker);
+}
+
+- (void)testViewabilityTrackerCreationNoWebView {
+    // Initialize Viewability Manager
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expect MPViewabilityManager initialization complete"];
+    [MPViewabilityManager.sharedManager initializeWithCompletion:^(BOOL initialized) {
+        [expectation fulfill];
+    }];
+
+    [self waitForExpectationsWithTimeout:kTestTimeout handler:^(NSError *error) {
+        XCTAssertNil(error);
+    }];
+
+    XCTAssertTrue(MPViewabilityManager.sharedManager.isEnabled);
+    XCTAssertTrue(MPViewabilityManager.sharedManager.isInitialized);
+
+    // View to be tracked
+    CGRect frame = CGRectMake(0, 0, 320, 50);
+    MPWebView * webView = nil;
+    MPAdContainerView * view = [[MPAdContainerView alloc] initWithFrame:frame webContentView:webView];
+    XCTAssertNotNil(view);
+
+    MPFullscreenAdAdapter * adapter = [[MPFullscreenAdAdapter alloc] init];
+    id<MPViewabilityTracker> tracker = [adapter viewabilityTrackerForWebContentInView:view];
+
+    XCTAssertNil(tracker);
+}
+
+- (void)testViewabilityVideoTrackerCreationSuccess {
+    // Initialize Viewability Manager
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expect MPViewabilityManager initialization complete"];
+    [MPViewabilityManager.sharedManager initializeWithCompletion:^(BOOL initialized) {
+        [expectation fulfill];
+    }];
+
+    [self waitForExpectationsWithTimeout:kTestTimeout handler:^(NSError *error) {
+        XCTAssertNil(error);
+    }];
+
+    XCTAssertTrue(MPViewabilityManager.sharedManager.isEnabled);
+    XCTAssertTrue(MPViewabilityManager.sharedManager.isInitialized);
+
+    // Ad config
+    MPAdConfiguration *adConfig = [MPAdConfigurationFactory defaultRewardedVideoConfiguration];
+
+    // Video config
+    MPVASTResponse *vastResponse = [self vastResponseFromXMLFile:@"vast-4.1-adverifications-inline"];
+    MPVideoConfig *videoConfig = [[MPVideoConfig alloc] initWithVASTResponse:vastResponse additionalTrackers:nil];
+    XCTAssertNotNil(videoConfig);
+
+    // View to be tracked
+    NSURL * url = [NSURL URLWithString:@"https://www.mopub.com"];
+    MPAdContainerView * view = [[MPAdContainerView alloc] initWithVideoURL:url videoConfig:videoConfig];
+    XCTAssertNotNil(view);
+
+    MPFullscreenAdAdapter * adapter = [[MPFullscreenAdAdapter alloc] init];
+    id<MPViewabilityTracker> tracker = [adapter viewabilityTrackerForVideoConfig:videoConfig containedInContainerView:view adConfiguration:adConfig];
+
+    XCTAssertNotNil(tracker);
+    XCTAssertFalse(tracker.isTracking);
+}
+
+- (void)testViewabilityVideoTrackerCreationNoVerificationNode {
+    // Initialize Viewability Manager
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expect MPViewabilityManager initialization complete"];
+    [MPViewabilityManager.sharedManager initializeWithCompletion:^(BOOL initialized) {
+        [expectation fulfill];
+    }];
+
+    [self waitForExpectationsWithTimeout:kTestTimeout handler:^(NSError *error) {
+        XCTAssertNil(error);
+    }];
+
+    XCTAssertTrue(MPViewabilityManager.sharedManager.isEnabled);
+    XCTAssertTrue(MPViewabilityManager.sharedManager.isInitialized);
+
+    // Ad config
+    MPAdConfiguration *adConfig = [MPAdConfigurationFactory defaultRewardedVideoConfiguration];
+
+    // Video config
+    MPVASTResponse *vastResponse = [self vastResponseFromXMLFile:@"vast_3.0-wrapper-no-linear"];
+    MPVideoConfig *videoConfig = [[MPVideoConfig alloc] initWithVASTResponse:vastResponse additionalTrackers:nil];
+    XCTAssertNotNil(videoConfig);
+
+    // View to be tracked
+    NSURL * url = [NSURL URLWithString:@"https://www.mopub.com"];
+    MPAdContainerView * view = [[MPAdContainerView alloc] initWithVideoURL:url videoConfig:videoConfig];
+    XCTAssertNotNil(view);
+
+    MPFullscreenAdAdapter * adapter = [[MPFullscreenAdAdapter alloc] init];
+    id<MPViewabilityTracker> tracker = [adapter viewabilityTrackerForVideoConfig:videoConfig containedInContainerView:view adConfiguration:adConfig];
+
+    XCTAssertNotNil(tracker);
+    XCTAssertFalse(tracker.isTracking);
+}
+
+- (void)testViewabilityVideoTrackerCreationNoView {
+    // Initialize Viewability Manager
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expect MPViewabilityManager initialization complete"];
+    [MPViewabilityManager.sharedManager initializeWithCompletion:^(BOOL initialized) {
+        [expectation fulfill];
+    }];
+
+    [self waitForExpectationsWithTimeout:kTestTimeout handler:^(NSError *error) {
+        XCTAssertNil(error);
+    }];
+
+    XCTAssertTrue(MPViewabilityManager.sharedManager.isEnabled);
+    XCTAssertTrue(MPViewabilityManager.sharedManager.isInitialized);
+
+    // Ad config
+    MPAdConfiguration *adConfig = [MPAdConfigurationFactory defaultRewardedVideoConfiguration];
+
+    // Video config
+    MPVASTResponse *vastResponse = [self vastResponseFromXMLFile:@"vast-4.1-adverifications-inline"];
+    MPVideoConfig *videoConfig = [[MPVideoConfig alloc] initWithVASTResponse:vastResponse additionalTrackers:nil];
+    XCTAssertNotNil(videoConfig);
+
+    // View to be tracked
+    MPAdContainerView * view = nil;
+
+    MPFullscreenAdAdapter * adapter = [[MPFullscreenAdAdapter alloc] init];
+    id<MPViewabilityTracker> tracker = [adapter viewabilityTrackerForVideoConfig:videoConfig containedInContainerView:view adConfiguration:adConfig];
+
+    XCTAssertNil(tracker);
+}
+
+- (void)testViewabilityVideoTrackerCreationNoVideoConfig {
+    // Initialize Viewability Manager
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Expect MPViewabilityManager initialization complete"];
+    [MPViewabilityManager.sharedManager initializeWithCompletion:^(BOOL initialized) {
+        [expectation fulfill];
+    }];
+
+    [self waitForExpectationsWithTimeout:kTestTimeout handler:^(NSError *error) {
+        XCTAssertNil(error);
+    }];
+
+    XCTAssertTrue(MPViewabilityManager.sharedManager.isEnabled);
+    XCTAssertTrue(MPViewabilityManager.sharedManager.isInitialized);
+
+    // Ad config
+    MPAdConfiguration *adConfig = [MPAdConfigurationFactory defaultRewardedVideoConfiguration];
+
+    // Video config
+    MPVideoConfig *videoConfig = nil;
+
+    // View to be tracked
+    NSURL * url = [NSURL URLWithString:@"https://www.mopub.com"];
+    MPAdContainerView * view = [[MPAdContainerView alloc] initWithVideoURL:url videoConfig:videoConfig];
+    XCTAssertNotNil(view);
+
+    MPFullscreenAdAdapter * adapter = [[MPFullscreenAdAdapter alloc] init];
+    id<MPViewabilityTracker> tracker = [adapter viewabilityTrackerForVideoConfig:videoConfig containedInContainerView:view adConfiguration:adConfig];
+
+    XCTAssertNil(tracker);
+}
+
+#pragma mark - Viewability
+
+- (void)testViewabilitySamplingLogicMergedWithVast {
+    // Preconditions
+    MPAdConfiguration *adConfig = [MPAdConfigurationFactory defaultRewardedVideoConfiguration];
+    XCTAssertNotNil(adConfig.viewabilityContext);
+    XCTAssertTrue(adConfig.viewabilityContext.omidResources.count == 1);
+
+    MPVASTResponse *vastResponseInline = [self vastResponseFromXMLFile:@"vast-4.1-adverifications-inline"];
+    MPVideoConfig *videoConfig = [[MPVideoConfig alloc] initWithVASTResponse:vastResponseInline additionalTrackers:nil];
+    XCTAssertNotNil(videoConfig);
+    XCTAssertNotNil(videoConfig.viewabilityContext);
+    XCTAssertTrue(videoConfig.viewabilityContext.omidResources.count == 1);
+
+    // View to be tracked
+    NSURL *url = [NSURL URLWithString:@"https://www.mopub.com"];
+    MPAdContainerView *view = [[MPAdContainerView alloc] initWithVideoURL:url videoConfig:videoConfig];
+    XCTAssertNotNil(view);
+
+    // Generating the Viewability tracker will merge the `MPAdConfiguration.viewabilityContext` into
+    // `MPVideoConfig.viewabilityContext`.
+    MPFullscreenAdAdapter *adapter = [[MPFullscreenAdAdapter alloc] init];
+    [adapter viewabilityTrackerForVideoConfig:videoConfig containedInContainerView:view adConfiguration:adConfig];
+
+    XCTAssertTrue(videoConfig.viewabilityContext.omidResources.count == 2);
+}
+
+- (void)testNoViewabilitySamplingLogicMergedWithVast {
+    // Preconditions
+    MPAdConfiguration *adConfig = [MPAdConfigurationFactory defaultInterstitialConfiguration];
+    XCTAssertNotNil(adConfig.viewabilityContext);
+    XCTAssertTrue(adConfig.viewabilityContext.omidResources.count == 0);
+
+    MPVASTResponse *vastResponseInline = [self vastResponseFromXMLFile:@"vast-4.1-adverifications-inline"];
+    MPVideoConfig *videoConfig = [[MPVideoConfig alloc] initWithVASTResponse:vastResponseInline additionalTrackers:nil];
+    XCTAssertNotNil(videoConfig);
+    XCTAssertNotNil(videoConfig.viewabilityContext);
+    XCTAssertTrue(videoConfig.viewabilityContext.omidResources.count == 1);
+
+    // View to be tracked
+    NSURL *url = [NSURL URLWithString:@"https://www.mopub.com"];
+    MPAdContainerView *view = [[MPAdContainerView alloc] initWithVideoURL:url videoConfig:videoConfig];
+    XCTAssertNotNil(view);
+
+    // Generating the Viewability tracker will merge the `MPAdConfiguration.viewabilityContext` into
+    // `MPVideoConfig.viewabilityContext`.
+    MPFullscreenAdAdapter *adapter = [[MPFullscreenAdAdapter alloc] init];
+    [adapter viewabilityTrackerForVideoConfig:videoConfig containedInContainerView:view adConfiguration:adConfig];
+
+    XCTAssertTrue(videoConfig.viewabilityContext.omidResources.count == 1);
+}
+
+- (void)testViewabilitySamplingLogicMergedWithVastContainingNoViewability {
+    // Preconditions
+    MPAdConfiguration *adConfig = [MPAdConfigurationFactory defaultRewardedVideoConfiguration];
+    XCTAssertNotNil(adConfig.viewabilityContext);
+    XCTAssertTrue(adConfig.viewabilityContext.omidResources.count == 1);
+
+    MPVASTResponse *vastResponseInline = [self vastResponseFromXMLFile:@"VAST_3.0_linear_ad_comprehensive"];
+    MPVideoConfig *videoConfig = [[MPVideoConfig alloc] initWithVASTResponse:vastResponseInline additionalTrackers:nil];
+    XCTAssertNotNil(videoConfig);
+    XCTAssertNotNil(videoConfig.viewabilityContext);
+    XCTAssertTrue(videoConfig.viewabilityContext.omidResources.count == 0);
+
+    // View to be tracked
+    NSURL *url = [NSURL URLWithString:@"https://www.mopub.com"];
+    MPAdContainerView *view = [[MPAdContainerView alloc] initWithVideoURL:url videoConfig:videoConfig];
+    XCTAssertNotNil(view);
+
+    // Generating the Viewability tracker will merge the `MPAdConfiguration.viewabilityContext` into
+    // `MPVideoConfig.viewabilityContext`.
+    MPFullscreenAdAdapter *adapter = [[MPFullscreenAdAdapter alloc] init];
+    [adapter viewabilityTrackerForVideoConfig:videoConfig containedInContainerView:view adConfiguration:adConfig];
+
+    XCTAssertTrue(videoConfig.viewabilityContext.omidResources.count == 1);
 }
 
 @end

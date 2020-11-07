@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "MPInlineAdAdapterDelegate.h"
+#import "MPScheduledDeallocationAdAdapter.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -18,13 +19,12 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @c MPInlineAdAdapter is a base class for adapters that support banners. By implementing
  * subclasses of @c MPInlineAdAdapter you can enable the MoPub SDK to natively support a wide
- * variety of third-party ad networks. Note that subclasses must also conform to the
- * @c MPThirdPartyInlineAdAdapter protocol.
+ * variety of third-party ad networks.
  *
  * At runtime, the MoPub SDK will find and instantiate an @c MPInlineAdAdapter subclass as needed and
  * invoke its @c requestAdWithSize:adapterInfo:adMarkup: method.
  */
-@protocol MPInlineAdAdapter <NSObject>
+@protocol MPInlineAdAdapter <MPScheduledDeallocationAdAdapter>
 
 /** @name Requesting a Banner Ad */
 
@@ -103,8 +103,9 @@ NS_ASSUME_NONNULL_BEGIN
 #pragma mark -
 
 /**
- * This is for differentiating adapters implemented for mediating third party SDKs. Adapters
- * MUST implement this protocol, rather than @c MPFullscreenAdAdapter.
+ * This is here for backwards compatibility only.
+ *
+ * Third party adapters are no longer required to conform to this protocol.
  */
 @protocol MPThirdPartyInlineAdAdapter <MPInlineAdAdapter>
 @end

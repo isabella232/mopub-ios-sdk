@@ -16,7 +16,6 @@
 @class MPAdConfiguration;
 @class CLLocation;
 @class MPWebView;
-@class MPViewabilityTracker;
 
 /**
  * The `MRController` class is used to load and interact with MRAID ads.
@@ -25,7 +24,7 @@
  * native calls such as expand(), resize(), close(), and open().
  */
 @interface MRController : NSObject
-
+@property (nonatomic, readonly) MPAdContainerView *mraidAdView;
 @property (nonatomic, weak) id<MRControllerDelegate> delegate;
 @property (nonatomic, weak) id<MPCountdownTimerDelegate> countdownTimerDelegate;
 
@@ -49,8 +48,6 @@
 - (void)handleMRAIDInterstitialDidPresentWithViewController:(MPFullscreenAdViewController *)viewController;
 - (void)enableRequestHandling;
 - (void)disableRequestHandling;
-
-- (void)startViewabilityTracking;
 
 /**
  When a click-through happens, do not open a web browser.
@@ -87,9 +84,25 @@
 // Called when the ad has dismissed any modal content (removing any on-screen takeovers).
 - (void)appShouldResumeFromMRAIDAd:(MPAdContainerView *)adView;
 
+/**
+ Customize the HTML content that will be loaded into the webview. This hook is provided for Viewability injection purposes.
+ If no customization is required, return the passed in HTML string.
+ @param html HTML string that will be loaded into @c webView.
+ @param webView The target web view.
+ @param adView The MRAID container of the web view.
+ @return The modified HTML string.
+ */
+- (NSString *)customizeHTML:(NSString *)html inWebView:(MPWebView *)webView forContainerView:(MPAdContainerView *)adView;
+
 #pragma mark - Optional
 
 @optional
+
+// Called when the webview has been created and about to load the HTML.
+- (void)mraidWebSessionStarted:(MPAdContainerView *)adView;
+
+// Called when the webview has successfully finished loading the HTML.
+- (void)mraidWebSessionReady:(MPAdContainerView *)adView;
 
 // Called when the ad loads successfully.
 - (void)mraidAdDidLoad:(MPAdContainerView *)adView;

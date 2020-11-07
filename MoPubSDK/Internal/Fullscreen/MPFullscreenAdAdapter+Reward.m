@@ -51,9 +51,9 @@
     self.isUserRewarded = YES;
 
     // Server side reward tracking:
-    // The original URL comes from the value of "x-rewarded-video-completion-url" in ad response.
-    NSURL *url = self.rewardedVideoCompletionUrlByAppendingClientParams;
-    if (url != nil) {
+    // The original URLs come from the value of "x-rewarded-video-completion-url" in ad response.
+    NSArray<NSURL *> * urls = self.rewardedVideoCompletionUrlsByAppendingClientParams;
+    for (NSURL * url in urls) {
         [[MPRewardedVideo sharedInstance] startRewardedVideoConnectionWithUrl:url];
     }
 

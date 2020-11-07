@@ -21,7 +21,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  For mocking 3rd parth ad adapters (a.k.a. "custom event").
  */
-@interface MPThirdPartyFullscreenAdAdapterMock : MPFullscreenAdAdapterMock <MPThirdPartyFullscreenAdAdapter>
+@interface MPThirdPartyFullscreenAdAdapterMock : MPFullscreenAdAdapterMock
 @end
 
 NS_ASSUME_NONNULL_END

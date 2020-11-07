@@ -63,7 +63,7 @@ static NSTimeInterval const kDefaultTimeout = 10;
 
     NSString * viewabilityValue = [url stringForPOSTDataKey:kViewabilityStatusKey];
     XCTAssertNotNil(viewabilityValue);
-    XCTAssertTrue([viewabilityValue isEqualToString:@"1"]);
+    XCTAssertTrue([viewabilityValue isEqualToString:@"4"]);
 }
 
 #pragma mark - Ad Sizing

@@ -10,7 +10,12 @@
 
 NSString * const kMPVASTErrorDomain = @"com.mopub.VASTError";
 
-NSTimeInterval const kVASTMinimumDurationOfSkippableVideo = 15;
+// The minimum skip interval means that videos that are 16.0 seconds in length
+// are allowed to be skipped. The official MoPub documentation says the the minimum
+// skip length is 15 seconds, but that is inclusive of 15.1 seconds and 15.7 seconds.
+// Thus we need to use a rounded up number.
+NSTimeInterval const kVASTMinimumDurationOfSkippableVideo = 16; // seconds
+
 NSTimeInterval const kVASTVideoOffsetToShowSkipButtonForSkippableVideo = 5;
 NSTimeInterval const kVASTDefaultVideoOffsetToShowSkipButtonForRewardedVideo = 30;
 

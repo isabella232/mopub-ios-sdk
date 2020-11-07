@@ -7,8 +7,9 @@
 //
 
 #import "MPInlineAdAdapter.h"
+#import "MPInlineAdAdapterWebSessionDelegate.h"
 
-@interface MPInlineAdAdapter (Internal)
+@interface MPInlineAdAdapter (Internal) <MPInlineAdAdapterWebSessionDelegate>
 
 /**
  * Track impressions for trackers that are included in the creative's markup.
@@ -17,11 +18,5 @@
  * Mediated networks track impressions via their own means.
  */
 - (void)trackImpressionsIncludedInMarkup;
-
-/**
- * Start viewability tracker. The default implementation of this method does nothing.
- * Subclasses can override this method if necessary.
- */
-- (void)startViewabilityTracker;
 
 @end

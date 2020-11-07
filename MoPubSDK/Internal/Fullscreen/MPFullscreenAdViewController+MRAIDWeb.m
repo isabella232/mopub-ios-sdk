@@ -8,6 +8,8 @@
 
 #import "MPFullscreenAdViewController+MRAIDWeb.h"
 #import "MPFullscreenAdViewController+Private.h"
+
+#import "MPAdContainerView+Private.h"
 #import "MPLogging.h"
 #import "UIView+MPAdditions.h"
 
@@ -22,7 +24,7 @@
     CGFloat width = MAX(configuration.preferredSize.width, 1);
     CGFloat height = MAX(configuration.preferredSize.height, 1);
     CGRect frame = CGRectMake(0, 0, width, height);
-    
+
     self.mraidController = [[MRController alloc] initWithAdViewFrame:frame
                                                supportedOrientations:configuration.orientationType
                                                      adPlacementType:MRAdViewPlacementTypeInterstitial
@@ -92,11 +94,23 @@
     // no op
 }
 
+- (NSString *)customizeHTML:(NSString *)html inWebView:(MPWebView *)webView forContainerView:(MPAdContainerView *)adView {
+    return [self.webAdDelegate fullscreenAdViewController:self willLoadHTML:html inWebView:adView.webContentView];
+}
+
 #pragma mark - Optional
+
+- (void)mraidWebSessionStarted:(MPAdContainerView *)adView {
+    [self.webAdDelegate fullscreenAdViewController:self webSessionWillStartInView:adView];
+}
+
+- (void)mraidWebSessionReady:(MPAdContainerView *)adView {
+    [self.webAdDelegate fullscreenWebAdSessionReady:self];
+}
 
 - (void)mraidAdDidLoad:(MPAdContainerView *)adView {
     [self.adContainerView removeFromSuperview];
-    
+
     [self.view addSubview:adView];
     self.adContainerView = adView;
     self.adContainerView.translatesAutoresizingMaskIntoConstraints = NO;
@@ -136,6 +150,14 @@
     else {
         MPLogInfo(@"`webAdDelegate` does not response to `fullscreenWebAdDidFulfillRewardRequirement:`");
     }
+}
+
+- (void)mraidAdWillExpand:(MPAdContainerView *)adView {
+    // MRAID expand() from fullscreen ads is disallowed; there is no need to track.
+}
+
+- (void)mraidAdDidCollapse:(MPAdContainerView *)adView {
+    // MRAID collapse() from fullscreen ads is disallowed; there is no need to track.
 }
 
 @end

@@ -27,6 +27,7 @@ static NSString *const kMoPubExtensionType = @"MoPub";
 @property (nonatomic, strong) MPVASTDurationOffset *skipOffset;
 @property (nonatomic, strong) NSString *callToActionButtonTitle;
 @property (nonatomic, strong) NSArray<MPVASTCompanionAd *> *companionAds;
+@property (nonatomic, strong) MPViewabilityContext *viewabilityContext;
 
 @end
 
@@ -66,6 +67,7 @@ static NSString *const kMoPubExtensionType = @"MoPub";
  VAST video Event trackers for the Linear playback candidate.
  */
 @property (nonatomic, strong) NSDictionary<MPVideoEvent, NSArray<MPVASTTrackingEvent *> *> *trackingEventTable;
+@property (nonatomic, strong) MPViewabilityContext *viewabilityContext;
 @end
 
 @implementation MPVideoConfig
@@ -104,6 +106,7 @@ additionalTrackers:(NSDictionary<MPVideoEvent, NSArray<MPVASTTrackingEvent *> *>
 
     _skipOffset = candidate.skipOffset;
     _companionAds = candidate.companionAds;
+    _viewabilityContext = candidate.viewabilityContext;
 
     if (candidate.callToActionButtonTitle.length > 0) {
         _callToActionButtonTitle = candidate.callToActionButtonTitle;
@@ -144,6 +147,7 @@ additionalTrackers:(NSDictionary<MPVideoEvent, NSArray<MPVASTTrackingEvent *> *>
             MPVASTInline *inlineAd = ad.inlineAd;
             MPVideoPlaybackCandidate *candidate = [[MPVideoPlaybackCandidate alloc] init];
             candidate.callToActionButtonTitle = [self moPubExtensionFromInlineAd:inlineAd forKey:kVASTMoPubCTATextKey][kVASTAdTextKey];
+            candidate.viewabilityContext = [[MPViewabilityContext alloc] initWithAdVerificationsXML:ad.inlineAd.adVerifications];
 
             for (MPVASTCreative *creative in inlineAd.creatives) {
                 if (creative.linearAd && [creative.linearAd.mediaFiles count]) {
@@ -229,6 +233,9 @@ additionalTrackers:(NSDictionary<MPVideoEvent, NSArray<MPVASTTrackingEvent *> *>
                     // Set the merged industry icons if there are any, otherwise `nil`.
                     mergedIndustryIcons.count > 0 ? mergedIndustryIcons : nil;
                 });
+
+                // Merge Viewability resources
+                [candidate.viewabilityContext addAdVerificationsXML:ad.wrapper.adVerifications];
             } // end for
 
             [candidates addObjectsFromArray:candidatesFromWrapper];

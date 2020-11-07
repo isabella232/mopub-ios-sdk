@@ -8,12 +8,12 @@
 
 #import "MPAdViewOverlay.h"
 #import "MPCountdownTimerView.h"
-#import "MPExtendedHitBoxButton.h"
 #import "MPGlobal.h"
 #import "MPLogging.h"
 #import "MPTimer.h"
 #import "MPVASTConstant.h"
 #import "MPVideoPlayer.h"
+#import "MPViewableButton.h"
 #import "UIButton+MPAdditions.h"
 #import "UIImage+MPAdditions.h"
 #import "UIView+MPAdditions.h"
@@ -30,9 +30,11 @@ static CGFloat const kSkipButtonDimension = 50; // 50x50, same size as the Close
 @property (nonatomic, strong) MPTimer *clickThroughEnablingTimer;
 @property (nonatomic, strong) NSNotificationCenter *notificationCenter;
 
-@property (nonatomic, strong) MPExtendedHitBoxButton *callToActionButton; // located at the bottom-right corner
-@property (nonatomic, strong) MPExtendedHitBoxButton *closeButton; // located at the top-right corner by default, created during `init`
-@property (nonatomic, strong) MPExtendedHitBoxButton *skipButton; // located at the top-right corner
+// UI elements that are considered friendly Viewability obstructions.
+// All of the views must conform to `MPViewabilityObstruction`.
+@property (nonatomic, strong) MPViewableButton *callToActionButton; // located at the bottom-right corner
+@property (nonatomic, strong) MPViewableButton *closeButton; // located at the top-right corner by default, created during `init`
+@property (nonatomic, strong) MPViewableButton *skipButton; // located at the top-right corner
 @property (nonatomic, strong) MPVASTIndustryIconView *iconView; // located at the top-left corner
 @property (nonatomic, strong) NSArray<NSLayoutConstraint *> *closeButtonConstraints;
 @property (nonatomic, strong) NSLayoutConstraint *iconViewWidthConstraint;
@@ -59,8 +61,10 @@ static CGFloat const kSkipButtonDimension = 50; // 50x50, same size as the Close
 - (instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
         _allowPassthroughForTouches = YES;
-        
-        _closeButton = [MPExtendedHitBoxButton buttonWithType:UIButtonTypeCustom];
+
+        _closeButton = [MPViewableButton buttonWithType:UIButtonTypeCustom
+                                        obstructionType:MPViewabilityObstructionTypeClose
+                                        obstructionName:MPViewabilityObstructionNameCloseButton];
         _closeButton.backgroundColor = [UIColor clearColor];
         _closeButton.accessibilityLabel = @"Close ad";
         _closeButton.translatesAutoresizingMaskIntoConstraints = NO; // use Autolayout
@@ -74,7 +78,7 @@ static CGFloat const kSkipButtonDimension = 50; // 50x50, same size as the Close
 
 + (CGRect)closeButtonFrameForAdSize:(CGSize)adSize atLocation:(MPAdViewCloseButtonLocation)location {
     CGRect closeButtonFrame = CGRectMake(0, 0, kMPAdViewCloseButtonSize.width, kMPAdViewCloseButtonSize.height);
-    
+
     switch (location) {
         case MPAdViewCloseButtonLocationBottomCenter:
             closeButtonFrame.origin = CGPointMake((adSize.width - kMPAdViewCloseButtonSize.width) / 2,
@@ -101,13 +105,13 @@ static CGFloat const kSkipButtonDimension = 50; // 50x50, same size as the Close
             closeButtonFrame.origin = CGPointMake(adSize.width - kMPAdViewCloseButtonSize.width, 0);
             break;
     }
-    
+
     return closeButtonFrame;
 }
 
 - (void)setCloseButtonLocation:(MPAdViewCloseButtonLocation)closeButtonLocation {
     _closeButtonLocation = closeButtonLocation;
-    
+
     if (self.closeButtonConstraints.count == 0) {
         self.closeButtonConstraints = @[
             [self.closeButton.mp_safeWidthAnchor constraintEqualToConstant:kMPAdViewCloseButtonSize.width],
@@ -123,7 +127,7 @@ static CGFloat const kSkipButtonDimension = 50; // 50x50, same size as the Close
     else {
         [NSLayoutConstraint deactivateConstraints:self.closeButtonConstraints];
     }
-    
+
     NSMutableArray<NSLayoutConstraint *> *constraintsToActivate = [NSMutableArray arrayWithArray:@[
         [self.closeButton.mp_safeWidthAnchor constraintEqualToConstant:kMPAdViewCloseButtonSize.width],
         [self.closeButton.mp_safeHeightAnchor constraintEqualToConstant:kMPAdViewCloseButtonSize.height]
@@ -159,13 +163,13 @@ static CGFloat const kSkipButtonDimension = 50; // 50x50, same size as the Close
             break;
     }
     [NSLayoutConstraint activateConstraints:constraintsToActivate];
-    
+
     [self setNeedsLayout];
 }
 
 - (void)setCloseButtonType:(MPAdViewCloseButtonType)closeButtonType {
     _closeButtonType = closeButtonType;
-    
+
     switch (closeButtonType) {
         case MPAdViewCloseButtonTypeNone:
             self.closeButton.hidden = YES;
@@ -188,7 +192,7 @@ static CGFloat const kSkipButtonDimension = 50; // 50x50, same size as the Close
 
 - (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event {
     _wasTapped = YES;
-    
+
     /*
      When the video is playing, this overlay intercepts all touch events. After the video is
      finished, we might need to pass through the touch events to the companion ad underneath,
@@ -220,7 +224,7 @@ static CGFloat const kSkipButtonDimension = 50; // 50x50, same size as the Close
     if (self.timerView) {
         return;
     }
-    
+
     __weak __typeof__(self) weakSelf = self;
     MPCountdownTimerView *timerView = [[MPCountdownTimerView alloc] initWithDuration:skipOffset timerCompletion:^(BOOL hasElapsed) {
         if (skipOffset < totalDuration) {
@@ -231,14 +235,14 @@ static CGFloat const kSkipButtonDimension = 50; // 50x50, same size as the Close
         [weakSelf.timerView removeFromSuperview];
         [weakSelf.delegate videoPlayerViewOverlayDidFinishCountdown:weakSelf];
     }];
-    
+
     self.timerView = timerView;
-    
+
     [self addSubview:timerView];
     timerView.translatesAutoresizingMaskIntoConstraints = NO;
     [[timerView.topAnchor constraintEqualToAnchor:self.mp_safeTopAnchor] setActive:YES];
     [[timerView.trailingAnchor constraintEqualToAnchor:self.mp_safeTrailingAnchor] setActive:YES];
-    
+
     [timerView start];
 }
 
@@ -248,7 +252,7 @@ static CGFloat const kSkipButtonDimension = 50; // 50x50, same size as the Close
     if (self.config.isClickthroughAllowed == NO) {
         return;
     }
-    
+
     // See click-through timing definition at https://developers.mopub.com/dsps/ad-formats/video/
     __typeof__(self) __weak weakSelf = self;
     self.clickThroughEnablingTimer = [MPTimer timerWithTimeInterval:MIN(skipOffset, videoDuration) repeats:NO block:^(MPTimer * _Nonnull timer) {
@@ -262,7 +266,7 @@ static CGFloat const kSkipButtonDimension = 50; // 50x50, same size as the Close
     if (self.config.isClickthroughAllowed == NO) {
         return;
     }
-    
+
     [self addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleClickThrough)]];
     [self showCallToActionButton];
 }
@@ -270,22 +274,24 @@ static CGFloat const kSkipButtonDimension = 50; // 50x50, same size as the Close
 - (void)showCallToActionButton {
     // Per Format Unification Phase 2 item 1.2.1, for rewarded video, do not consider companion
     // ad for showing the CTA button - just show it after the skip threshold }
-    
+
     if (self.config.isClickthroughAllowed == NO || self.config.callToActionButtonTitle.length == 0) {
         return;
     }
-    
+
     if (self.callToActionButton) {
         [self.callToActionButton setHidden:NO];
         return;
     }
-    
-    MPExtendedHitBoxButton *button = [MPExtendedHitBoxButton buttonWithType:UIButtonTypeCustom];
+
+    MPViewableButton *button = [MPViewableButton buttonWithType:UIButtonTypeCustom
+                                                obstructionType:MPViewabilityObstructionTypeOther
+                                                obstructionName:MPViewabilityObstructionNameCallToActionButton];
     self.callToActionButton = button;
     button.accessibilityLabel = @"Call To Action Button";
     [button addTarget:self action:@selector(handleClickThrough) forControlEvents:UIControlEventTouchUpInside];
     [button applyMPVideoPlayerBorderedStyleWithTitle:self.config.callToActionButtonTitle];
-    
+
     [self addSubview:button];
     button.translatesAutoresizingMaskIntoConstraints = NO;
     [[button.bottomAnchor constraintEqualToAnchor:self.mp_safeBottomAnchor constant:-kRectangleButtonPadding] setActive:YES];
@@ -310,13 +316,15 @@ static CGFloat const kSkipButtonDimension = 50; // 50x50, same size as the Close
     if (self.skipButton) {
         return;
     }
-    
-    MPExtendedHitBoxButton *button = [MPExtendedHitBoxButton buttonWithType:UIButtonTypeCustom];
+
+    MPViewableButton *button = [MPViewableButton buttonWithType:UIButtonTypeCustom
+                                                obstructionType:MPViewabilityObstructionTypeMediaControls
+                                                obstructionName:MPViewabilityObstructionNameSkipButton];
     self.skipButton = button;
     button.accessibilityLabel = @"Skip Button";
     [button addTarget:self action:@selector(didHitSkipButton) forControlEvents:UIControlEventTouchUpInside];
     [button setImage:[UIImage imageForAsset:kMPImageAssetSkipButton] forState:UIControlStateNormal];
-    
+
     [self addSubview:button];
     button.translatesAutoresizingMaskIntoConstraints = NO;
     [[button.topAnchor constraintEqualToAnchor:self.mp_safeTopAnchor] setActive:YES];
@@ -337,6 +345,16 @@ static CGFloat const kSkipButtonDimension = 50; // 50x50, same size as the Close
 
 - (void)showCloseButton {
     self.closeButtonType = MPAdViewCloseButtonTypeImageButton;
+}
+
+#pragma mark - MPViewabilityObstruction
+
+- (MPViewabilityObstructionType)viewabilityObstructionType {
+    return MPViewabilityObstructionTypeNotVisible;
+}
+
+- (MPViewabilityObstructionName)viewabilityObstructionName {
+    return MPViewabilityObstructionNameOverlay;
 }
 
 @end
@@ -369,10 +387,10 @@ static CGFloat const kSkipButtonDimension = 50; // 50x50, same size as the Close
     // Invalidate the timers
     [self.clickThroughEnablingTimer invalidate];
     [self.timerView stopAndSignalCompletion:NO];
-    
+
     // Remove the timer view from the view hierarchy
     [self.timerView removeFromSuperview];
-    
+
     // Immediately deallocate the timers
     self.clickThroughEnablingTimer = nil;
     self.timerView = nil;
@@ -388,7 +406,7 @@ static CGFloat const kSkipButtonDimension = 50; // 50x50, same size as the Close
         MPLogError(@"Video duration [%.2f] is not positive" ,videoDuration);
         return;
     }
-    
+
     // Watch out for the case of the actual video duration being less than the skip offset.
     NSTimeInterval actualSkipOffset = MIN(skipOffset, videoDuration);
     if (actualSkipOffset <= 0) { // Invalid `skipOffset`: need a valid one
@@ -397,11 +415,11 @@ static CGFloat const kSkipButtonDimension = 50; // 50x50, same size as the Close
              For rewarded ads, the rule is simple: respect the provided `skipOffset` if it's valid.
              The skip offset is provided in the ad response as the value of "x-rewarded-duration"
              from backend business logic.
-             
+
              Interestingly, while a fixed 30 seconds skip offset is typically provided for rewarded
              video ads, they are "non-skippable" in the MoPub definition (cannot skip before reaching
              the typical 30 seconds video duration).
-             
+
              See https://developers.mopub.com/dsps/ad-formats/rewarded-video/ for more details.
             */
             actualSkipOffset = kVASTDefaultVideoOffsetToShowSkipButtonForRewardedVideo;
@@ -413,7 +431,7 @@ static CGFloat const kSkipButtonDimension = 50; // 50x50, same size as the Close
              a result, non-rewarded ads skip offset business logic is still defined in the client based
              on the actual video length. See https://developers.mopub.com/dsps/ad-formats/video/ for
              the MoPub definition of "skippable" and "non-skippable".
-             
+
              Note: Since backend is not providing the skip offset in the non-rewarded ad respond yet,
              the SDK code path is supposed to always run through here with `skipOffset` being 0.
              Rewrite this part after backend starts providing skip offset for non-rewarded ads.
@@ -426,10 +444,10 @@ static CGFloat const kSkipButtonDimension = 50; // 50x50, same size as the Close
             }
         }
     }
-    
+
     // for Skip button
     [self showTimerViewForSkipOffset:actualSkipOffset totalDuration:videoDuration];
-    
+
     // for Call To Action button ("Learn More") and enabling clickability
     if (self.config.isRewardExpected) {
         /*
@@ -445,7 +463,7 @@ static CGFloat const kSkipButtonDimension = 50; // 50x50, same size as the Close
             [self setUpClickthroughForOffset:actualSkipOffset videoDuration:videoDuration];
         }
     }
-    
+
     [self.notificationCenter addObserver:self
                                 selector:@selector(pauseTimer)
                                     name:UIApplicationDidEnterBackgroundNotification
@@ -458,14 +476,14 @@ static CGFloat const kSkipButtonDimension = 50; // 50x50, same size as the Close
 
 - (void)handleVideoComplete {
     [self showCloseButton];
-    
+
     if (self.config.hasCompanionAd) {
         self.allowPassthroughForTouches = YES;
-        
+
         // companion ad and CTA button are mutually exclusive
         [self.callToActionButton removeFromSuperview];
         self.callToActionButton = nil;
-        
+
         // companion ad and industry icon are mutually exclusive
         [self.iconView removeFromSuperview];
         self.iconView = nil;
@@ -478,7 +496,7 @@ static CGFloat const kSkipButtonDimension = 50; // 50x50, same size as the Close
         self.iconView.iconViewDelegate = self;
         self.iconViewWidthConstraint = [self.iconView.mp_safeWidthAnchor constraintEqualToConstant:icon.width];
         self.iconViewHeightConstraint = [self.iconView.mp_safeHeightAnchor constraintEqualToConstant:icon.height];
-        
+
         [self addSubview:self.iconView];
         self.iconView.translatesAutoresizingMaskIntoConstraints = NO;
         [[self.iconView.mp_safeTopAnchor constraintEqualToAnchor:self.mp_safeTopAnchor] setActive:YES];
@@ -490,7 +508,7 @@ static CGFloat const kSkipButtonDimension = 50; // 50x50, same size as the Close
         self.iconViewWidthConstraint.constant = icon.width;
         self.iconViewHeightConstraint.constant = icon.height;
     }
-    
+
     [self.iconView setHidden:YES]; // hidden by default, only show after loaded
     [self.iconView loadIcon:icon]; // delegate will handle load status updates
 }
@@ -521,23 +539,13 @@ static CGFloat const kSkipButtonDimension = 50; // 50x50, same size as the Close
             break;
         }
     }
-    
+
     [self.delegate industryIconView:iconView didTriggerEvent:event];
 }
 
 - (void)industryIconView:(MPVASTIndustryIconView *)iconView
 didTriggerOverridingClickThrough:(NSURL *)url {
     [self.delegate industryIconView:iconView didTriggerOverridingClickThrough:url];
-}
-
-@end
-
-#pragma mark -
-
-@implementation MPAdViewOverlay (Viewability)
-
-- (NSSet<UIView *> *)viewabilityFriendlyObstructionViews {
-    return [NSSet setWithArray:self.subviews];
 }
 
 @end

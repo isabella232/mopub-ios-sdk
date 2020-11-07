@@ -405,7 +405,7 @@ static const NSUInteger kIndexPathItemIndex = 1;
             } while (sectionCountNumber && sectionItemCount == 0);
 
             // We can exit and use the last known valid index path if we can't get a section count number.
-            if (!sectionCountNumber) {
+            if (sectionCountNumber == nil) {
                 break;
             } else {
                 // Otherwise we move onto the next non-zero section.
@@ -443,7 +443,7 @@ static const NSUInteger kIndexPathItemIndex = 1;
             } while (sectionCountNumber && trySectionCount == 0);
 
             // Exit and use the last known valid index path.
-            if (!sectionCountNumber) {
+            if (sectionCountNumber == nil) {
                 break;
             } else {
                 // Otherwise we move backwards.

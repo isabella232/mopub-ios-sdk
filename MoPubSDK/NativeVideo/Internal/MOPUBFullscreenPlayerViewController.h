@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
+@class MPAdConfiguration;
 @class MOPUBPlayerViewController;
 @class MOPUBPlayerView;
 @class MOPUBFullscreenPlayerViewController;
@@ -17,6 +18,8 @@
 - (void)playerDidProgressToTime:(NSTimeInterval)playbackTime;
 - (void)ctaTapped:(MOPUBFullscreenPlayerViewController *)viewController;
 - (void)fullscreenPlayerWillLeaveApplication:(MOPUBFullscreenPlayerViewController *)viewController;
+
+- (MPAdConfiguration *)adConfiguration;
 
 @end
 

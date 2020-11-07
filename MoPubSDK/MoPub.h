@@ -10,6 +10,7 @@
 
 #import "MOPUBDisplayAgentType.h"
 #import "MPAdapterConfiguration.h"
+#import "MPAdAdapterError.h"
 #import "MPAdConversionTracker.h"
 #import "MPAdImpressionTimer.h"
 #import "MPAdTargeting.h"
@@ -43,7 +44,6 @@
 #import "MPRewardedVideo.h"
 #import "MPRewardedVideoReward.h" // deprecated: use `MPReward` instead
 #import "MPRewardedVideoError.h"
-#import "MPViewabilityAdapter.h"
 #import "MPViewabilityOption.h"
 
 #if __has_include("MPNativeAds.h")
@@ -93,17 +93,6 @@ NS_ASSUME_NONNULL_BEGIN
  * @return A Boolean value indicating whether the SDK should listen for location updates.
  */
 @property (nonatomic, assign) BOOL locationUpdatesEnabled;
-
-/**
- * A Boolean value indicating whether the MoPub SDK should create a MoPub ID that can be used
- * for frequency capping when Limit ad tracking is on & the IDFA we get is
- * 00000000-0000-0000-0000-000000000000.
- *
- * When set to NO, the SDK will not create a MoPub ID in the above case. When set to YES, the
- * SDK will generate a MoPub ID. The default value is YES.
- *
- */
-@property (nonatomic) BOOL frequencyCappingIdUsageEnabled;
 
 /**
  * Forces the usage of @c WKWebView.
@@ -156,10 +145,16 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Disables viewability measurement via the specified vendor(s) for the rest of the app session. A given vendor cannot
  * be re-enabled after being disabled.
+ * @deprecated This method is deprecated and will be removed in a future update.
  *
  * @param vendors The viewability vendor(s) to be disabled. This is a bitmask value; ORing vendors together is okay.
  */
-- (void)disableViewability:(MPViewabilityOption)vendors;
+- (void)disableViewability:(MPViewabilityOption)vendors __attribute((deprecated("This method is deprecated. Use `disableViewability` instead.")));
+
+/**
+ Disables viewability measurement for the rest of the app session.
+*/
+- (void)disableViewability;
 
 /**
  Sets the engine that is using this MoPub SDK.

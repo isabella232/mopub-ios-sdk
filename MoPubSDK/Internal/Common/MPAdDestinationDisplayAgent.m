@@ -31,6 +31,7 @@ static NSString * const kDisplayAgentErrorDomain = @"com.mopub.displayagent";
 @property (nonatomic) MOPUBDisplayAgentType displayAgentType;
 @property (nonatomic, strong) SKStoreProductViewController *storeKitController;
 @property (nonatomic, strong) SFSafariViewController *safariController;
+@property (nonatomic, strong) MPSKAdNetworkClickthroughData *clickthroughData;
 
 @property (nonatomic, strong) MPActivityViewControllerHelper *activityViewControllerHelper;
 
@@ -84,7 +85,7 @@ static NSString * const kDisplayAgentErrorDomain = @"com.mopub.displayagent";
     }
 }
 
-- (void)displayDestinationForURL:(NSURL *)URL
+- (void)displayDestinationForURL:(NSURL *)URL skAdNetworkClickthroughData:(MPSKAdNetworkClickthroughData *)clickthroughData
 {
     if (self.isLoadingDestination) return;
     self.isLoadingDestination = YES;
@@ -95,6 +96,10 @@ static NSString * const kDisplayAgentErrorDomain = @"com.mopub.displayagent";
     [self.resolver cancel];
     [self.enhancedDeeplinkFallbackResolver cancel];
 
+    // Save clickthrough data (or nil) for later
+    self.clickthroughData = clickthroughData;
+
+    // For other clickthroughs, follow the URL and suggested action
     __weak __typeof__(self) weakSelf = self;
     self.resolver = [MPURLResolver resolverWithURL:URL completion:^(MPURLActionInfo *suggestedAction, NSError *error) {
         __typeof__(self) strongSelf = weakSelf;
@@ -240,7 +245,12 @@ static NSString * const kDisplayAgentErrorDomain = @"com.mopub.displayagent";
         return;
     }
 
-    [self presentStoreKitControllerWithProductParameters:parameters fallbackURL:URL];
+    // SKAdNetwork:
+    // If clickthrough data was sent as part of the ad response, use that rather than
+    // the clickthrough data generated from the URL.
+    NSDictionary *productParameters = self.clickthroughData != nil ? self.clickthroughData.dictionaryForStoreProductViewController : parameters;
+
+    [self presentStoreKitControllerWithProductParameters:productParameters];
 }
 
 - (void)openURLInApplication:(NSURL *)URL
@@ -280,7 +290,7 @@ static NSString * const kDisplayAgentErrorDomain = @"com.mopub.displayagent";
     [self.delegate displayAgentDidDismissModal];
 }
 
-- (void)presentStoreKitControllerWithProductParameters:(NSDictionary *)parameters fallbackURL:(NSURL *)URL
+- (void)presentStoreKitControllerWithProductParameters:(NSDictionary *)parameters
 {
     self.storeKitController = [[SKStoreProductViewController alloc] init];
     self.storeKitController.modalPresentationStyle = UIModalPresentationFullScreen;
@@ -313,6 +323,11 @@ static NSString * const kDisplayAgentErrorDomain = @"com.mopub.displayagent";
     else {
         [self hideModalAndNotifyDelegate];
     }
+
+    // *Note* Failure to dispose of @c storeKitController immediately after its use has been
+    // known to cause an issue in iOS 13+ where videos played via MoVideo fail to unpause.
+    // Disposing here fixes that issue.
+    self.storeKitController = nil;
 }
 
 #pragma mark - <SFSafariViewControllerDelegate>

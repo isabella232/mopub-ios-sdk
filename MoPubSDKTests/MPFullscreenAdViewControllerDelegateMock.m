@@ -46,6 +46,21 @@
 
 @implementation MPFullscreenAdViewControllerDelegateMock (WebAd)
 
+- (void)fullscreenAdViewController:(nonnull id<MPFullscreenAdViewController>)fullscreenAdViewController
+         webSessionWillStartInView:(nonnull MPAdContainerView *)containerView {
+    // no op
+}
+
+- (NSString *)fullscreenAdViewController:(id<MPFullscreenAdViewController>)fullscreenAdViewController
+                            willLoadHTML:(NSString *)html
+                               inWebView:(MPWebView *)webView {
+    return html;
+}
+
+- (void)fullscreenWebAdSessionReady:(nonnull id<MPFullscreenAdViewController>)fullscreenAdViewController {
+    // no op
+}
+
 - (void)fullscreenWebAdDidFailToLoad:(id<MPFullscreenAdViewController>)fullscreenAdViewController {
     // no op
 }

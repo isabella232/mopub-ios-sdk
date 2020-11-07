@@ -10,7 +10,8 @@
 #import "MPAdViewConstant.h"
 #import "MPVASTIndustryIconView.h"
 #import "MPVideoPlayerViewOverlay.h"
-#import "MPViewabilityInfoProvider.h"
+#import "MPViewabilityObstruction.h"
+#import "MPViewableView.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -25,14 +26,14 @@ MPVideoPlayerViewOverlayDelegate
  This is an overlay of @c MPAdContainerView for full screen VAST ad, which should be added as the
  top-most subview that covers the whole area of the @c MPAdContainerView. Timer related activities
  are affected by app life cycle events.
- 
+
  See documentation at https://developers.mopub.com/dsps/ad-formats/video/
- 
+
  Note: Industry icon placing logic is different from the VAST spec per MoPub video format
  documentation: "We will ignore x/y coordinates for the icon and will always place it in the top
  left corner to ensure a consistent user experience."
  */
-@interface MPAdViewOverlay : UIView
+@interface MPAdViewOverlay : MPViewableView <MPViewabilityObstruction>
 
 @property (nonatomic, readonly) BOOL wasTapped;
 @property (nonatomic, weak) id<MPAdViewOverlayDelegate> delegate;
@@ -41,7 +42,7 @@ MPVideoPlayerViewOverlayDelegate
  Provided the ad size and Close button location, returns the frame of the Close button.
  Note: The provided ad size is assumed to be at least 50x50 (@c kMPAdViewCloseButtonSize), otherwise
  the return value is undefined.
- 
+
  @param adSize The size of the ad.
  @param location The location of the close button.
  */
@@ -62,11 +63,6 @@ MPVideoPlayerViewOverlayDelegate
 #pragma mark -
 
 @interface MPAdViewOverlay (MPVideoPlayerViewOverlay) <MPVideoPlayerViewOverlay>
-@end
-
-#pragma mark -
-
-@interface MPAdViewOverlay (Viewability) <MPViewabilityFriendlyObstructionViewInfoProvider>
 @end
 
 NS_ASSUME_NONNULL_END

@@ -8,6 +8,7 @@
 
 import MoPub
 import UIKit
+import AppTrackingTransparency
 
 private let kAppId = "112358"
 private let kAdUnitId = "0ac59b0996d947309c33f59d6676399f"
@@ -160,7 +161,7 @@ class SceneDelegate: UIResponder {
             if shouldSave {
                 savedAdsManager.addSavedAd(adUnit: adUnit)
             }
-            containerViewController.savedAdSplitViewController.showDetailViewController(destination, sender: self)
+            containerViewController.savedAdsNavigationController.pushViewController(destination, animated: true)
         }
         return true
     }
@@ -215,40 +216,106 @@ private extension SceneDelegate {
      - Parameter userDefaults: the target `UserDefaults` instance
      */
     func checkAndInitializeSdk(containerViewController: ContainerViewController, userDefaults: UserDefaults = .standard) {
-        #if DEBUG
-        // Already have a valid cached ad unit ID for consent. Just initialize the SDK.
-        if userDefaults.cachedAdUnitId.isEmpty {
-            // Need to prompt for an ad unit.
-            let prompt = UIAlertController(title: "MoPub SDK initialization",
-                                           message: "Enter an ad unit ID to use for consent:",
-                                           preferredStyle: .alert)
-            var adUnitIdTextField: UITextField?
-            prompt.addTextField { textField in
-                textField.placeholder = "Ad Unit ID"
-                adUnitIdTextField = textField       // Capture the text field so we can later read the value
-            }
-            prompt.addAction(UIAlertAction(title: "Use default ID", style: .destructive) { _ in
-                userDefaults.cachedAdUnitId = kAdUnitId;
-                self.initializeMoPubSdk(adUnitIdForConsent: kAdUnitId,
-                                        containerViewController: containerViewController)
-            })
-            prompt.addAction(UIAlertAction(title: "Use inputted ID", style: .default) { _ in
-                let adUnitID = adUnitIdTextField?.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "";
-                userDefaults.cachedAdUnitId = adUnitID;
-                self.initializeMoPubSdk(adUnitIdForConsent: adUnitID,
-                containerViewController: containerViewController);
-            })
+        // First, prompt for ID for SDK initialization
+        self.promptForAdUnitIDForSDKInitialization(fromViewController: containerViewController) { [unowned self] in
+            // Next, initialize the SDK
+            self.initializeMoPubSdk(adUnitIdForConsent: userDefaults.cachedAdUnitId, containerViewController: containerViewController)
             
-            DispatchQueue.main.async {
-                containerViewController.present(prompt, animated: true, completion: nil)
-            }
-        } else { // has a cached ad unit ID
-            initializeMoPubSdk(adUnitIdForConsent: userDefaults.cachedAdUnitId,
-                               containerViewController: containerViewController)
+            // Prompt for authorization status after prompting for ID so Canary isn't trying to present two prompts at the same time
+            self.promptForTrackingAuthorizationStatus(fromViewController: containerViewController)
+        }
+    }
+    
+    private func promptForAdUnitIDForSDKInitialization(fromViewController viewController: UIViewController, userDefaults: UserDefaults = .standard, completion: (() -> Void)? = nil) {
+        guard userDefaults.cachedAdUnitId.isEmpty else {
+            // has a cached ad unit ID
+            completion?()
+            return
+        }
+        
+        #if DEBUG
+        // Need to prompt for an ad unit.
+        let prompt = UIAlertController(title: "MoPub SDK initialization",
+                                       message: "Enter an ad unit ID to use for consent:",
+                                       preferredStyle: .alert)
+        var adUnitIdTextField: UITextField?
+        prompt.addTextField { textField in
+            textField.placeholder = "Ad Unit ID"
+            adUnitIdTextField = textField       // Capture the text field so we can later read the value
+        }
+        prompt.addAction(UIAlertAction(title: "Use default ID", style: .destructive) { _ in
+            userDefaults.cachedAdUnitId = kAdUnitId;
+            completion?()
+        })
+        prompt.addAction(UIAlertAction(title: "Use inputted ID", style: .default) { _ in
+            let adUnitID = adUnitIdTextField?.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "";
+            userDefaults.cachedAdUnitId = adUnitID;
+            completion?()
+        })
+        
+        DispatchQueue.main.async {
+            viewController.present(prompt, animated: true, completion: nil)
         }
         #else
-        // Production should only use the default ad unit ID.
-        initializeMoPubSdk(adUnitIdForConsent: kAdUnitId, containerViewController: containerViewController)
+        // Production should only use the default ad unit ID. Cache it and don't prompt.
+        userDefaults.cachedAdUnitId = kAdUnitId
+        completion?()
+        #endif
+    }
+    
+    private func promptForTrackingAuthorizationStatus(fromViewController viewController: UIViewController, completion: (() -> Void)? = nil) {
+        // If tracking authorization status is equal to `.notDetermined`, prompt
+        // to see if Canary should ask for authorization permission.
+        // Doing this check before actually requesting permission allows Canary
+        // to black-box test `.notDetermined` status, as well as `.authorized`
+        // and `.denied`. Not showing the prompt makes it so `.notDetermined`
+        // cannot be properly tested as the call to `requestTrackingAuthorization`
+        // forces a state-change to strictly `.denied` or `.authorized`.
+        
+        guard #available(iOS 14.0, *) else {
+            // Not running iOS 14
+            completion?()
+            return
+        }
+        
+        guard ATTrackingManager.trackingAuthorizationStatus == .notDetermined else {
+            // Already have an authorization status; don't need to reprompt
+            completion?()
+            return
+        }
+        
+        #if INTERNAL
+        let alertController = UIAlertController(title: "Do you want to be prompted to set IDFA permissions now?", message: "IDFA consent", preferredStyle: .alert)
+        
+        alertController.addAction(UIAlertAction(title: "Yes, prompt now.", style: .default, handler: { _ in
+            ATTrackingManager.requestTrackingAuthorization { _ in
+                // Request completed; call completion
+                completion?()
+            }
+        }))
+        
+        alertController.addAction(UIAlertAction(title: "No, prompt in 1 minute.", style: .default, handler: { _ in
+            DispatchQueue.main.asyncAfter(deadline: .now() + 60.0) {
+                ATTrackingManager.requestTrackingAuthorization { _ in
+                    // No-op
+                }
+            }
+            
+            // Don't wait on tracking manager and call completion instead:
+            completion?()
+        }))
+        
+        alertController.addAction(UIAlertAction(title: "No, prompt at next startup.", style: .cancel, handler: { _ in
+            // Not setting an authorization now. Call completion.
+            completion?()
+        }))
+        
+        DispatchQueue.main.async {
+            viewController.present(alertController, animated: true, completion: nil)
+        }
+        #else
+        // Production shouldn't prompt; just call completion.
+        completion?()
         #endif
     }
 

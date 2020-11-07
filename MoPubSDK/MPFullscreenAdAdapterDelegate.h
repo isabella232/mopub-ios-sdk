@@ -176,6 +176,16 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)fullscreenAdAdapterWillLeaveApplication:(MPFullscreenAdAdapter *)adapter;
 
+/**
+ * Call this method when the fullscreen ad will dismiss.
+ *
+ * For example, the user has closed the fullscreen ad.
+ *
+ * @param adapter You should pass @c self to allow the MoPub SDK to associate this event with the correct
+ * instance of your adapter.
+ */
+- (void)fullscreenAdAdapterAdWillDismiss:(MPFullscreenAdAdapter *)adapter;
+
 /** @name Impression and Click Tracking */
 
 /**

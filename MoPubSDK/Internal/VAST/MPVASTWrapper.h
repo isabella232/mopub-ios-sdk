@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "MPVASTAdVerifications.h"
 #import "MPVASTModel.h"
 
 @class MPVASTCreative;
@@ -15,6 +16,11 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface MPVASTWrapper : MPVASTModel
+
+/**
+ Optional Viewability resources.
+ */
+@property (nonatomic, nullable, readonly) MPVASTAdVerifications *adVerifications;
 
 /**
  Optional array of creatives associated with the wrapper.

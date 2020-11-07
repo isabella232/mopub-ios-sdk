@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "MPVASTAdVerifications.h"
 #import "MPVASTModel.h"
 
 @class MPVASTCreative;
@@ -14,6 +15,11 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface MPVASTInline : MPVASTModel
+
+/**
+ Optional Viewability resources.
+ */
+@property (nonatomic, nullable, readonly) MPVASTAdVerifications *adVerifications;
 
 /**
  Optional array of creatives associated with the inline ad.

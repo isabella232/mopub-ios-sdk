@@ -8,16 +8,22 @@
 
 #import "MPHTMLBannerCustomEvent.h"
 #import "MPInlineAdAdapter+MPAdAdapter.h"
-#import "MPWebView.h"
+#import "MPInlineAdAdapter+Internal.h"
+#import "MPInlineAdAdapter+Private.h"
+
+#import "MPAdConfiguration.h"
+#import "MPAdContainerView.h"
+#import "MPAnalyticsTracker.h"
 #import "MPError.h"
 #import "MPLogging.h"
-#import "MPAdConfiguration.h"
-#import "MPAnalyticsTracker.h"
 
 @interface MPHTMLBannerCustomEvent ()
-
 @property (nonatomic, strong) MPAdWebViewAgent *bannerAgent;
 
+// Rather than giving back the raw `MPWebView` back to `MPAdView` through the delegate,
+// the webview is wrapped in a `MPAdContainerView` view so that the Viewability tracker
+// initialization remains consistent between HTML and MRAID creative types.
+@property (nonatomic, strong) MPAdContainerView *adContainer;
 @end
 
 @implementation MPHTMLBannerCustomEvent
@@ -34,12 +40,13 @@
     MPLogAdEvent([MPLogEvent adLoadAttemptForAdapter:NSStringFromClass(configuration.adapterClass) dspCreativeId:configuration.dspCreativeId dspName:nil], self.adUnitId);
 
     CGRect adWebViewFrame = CGRectMake(0, 0, size.width, size.height);
-    self.bannerAgent = [[MPAdWebViewAgent alloc] initWithAdWebViewFrame:adWebViewFrame delegate:self];
+    self.bannerAgent = [[MPAdWebViewAgent alloc] initWithWebViewFrame:adWebViewFrame delegate:self];
     [self.bannerAgent loadConfiguration:configuration];
 }
 
 - (void)dealloc
 {
+    self.adContainer = nil;
     self.bannerAgent.delegate = nil;
 }
 
@@ -50,13 +57,29 @@
     return [self.delegate inlineAdAdapterViewControllerForPresentingModalView:self];
 }
 
-- (void)adDidFinishLoadingAd:(MPWebView *)ad
-{
-    MPLogAdEvent([MPLogEvent adLoadSuccessForAdapter:NSStringFromClass(self.class)], self.adUnitId);
-    [self.delegate inlineAdAdapter:self didLoadAdWithAdView:ad];
+- (void)adSessionStarted:(MPWebView *)webView {
+    // Create the ad container that will house the web view.
+    self.adContainer = [[MPAdContainerView alloc] initWithFrame:webView.frame webContentView:webView];
+    [self.adContainer setCloseButtonType:MPAdViewCloseButtonTypeNone];
+
+    [self inlineAd:self webSessionWillStartInView:self.adContainer];
 }
 
-- (void)adDidFailToLoadAd:(MPWebView *)ad
+- (NSString *)customizeHTML:(NSString *)html inWebView:(MPWebView *)webView {
+    return [self inlineAd:self willLoadHTML:html inWebView:webView];
+}
+
+- (void)adSessionReady:(MPWebView *)ad {
+    [self inlineAdWebAdSessionReady:self];
+}
+
+- (void)adDidLoad:(MPWebView *)ad
+{
+    MPLogAdEvent([MPLogEvent adLoadSuccessForAdapter:NSStringFromClass(self.class)], self.adUnitId);
+    [self.delegate inlineAdAdapter:self didLoadAdWithAdView:self.adContainer];
+}
+
+- (void)adDidFailToLoad:(MPWebView *)ad
 {
     NSString * message = [NSString stringWithFormat:@"Failed to load creative:\n%@", self.configuration.adResponseHTMLString];
     NSError * error = [NSError errorWithCode:MOPUBErrorAdapterFailedToLoadAd localizedDescription:message];
@@ -91,12 +114,7 @@
 
 - (void)trackImpressionsIncludedInMarkup
 {
-    [self.bannerAgent invokeJavaScriptForEvent:MPAdWebViewEventAdDidAppear];
-}
-
-- (void)startViewabilityTracker
-{
-    [self.bannerAgent startViewabilityTracker];
+    [self.bannerAgent didAppear];
 }
 
 @end

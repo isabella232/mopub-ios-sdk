@@ -10,6 +10,7 @@
 #import "MOPUBFullscreenPlayerViewController.h"
 #import "MOPUBPlayerView.h"
 #import "MOPUBPlayerViewController.h"
+#import "MPAdConfiguration.h"
 #import "MPAdDestinationDisplayAgent.h"
 #import "MPCoreInstanceProvider.h"
 #import "MPExtendedHitBoxButton.h"
@@ -327,7 +328,7 @@ static CGFloat const kStallSpinnerSize = 35.0f;
     if ([self.delegate respondsToSelector:@selector(ctaTapped:)]) {
         [self.delegate ctaTapped:self];
     }
-    [self.displayAgent displayDestinationForURL:self.playerController.defaultActionURL];
+    [self.displayAgent displayDestinationForURL:self.playerController.defaultActionURL skAdNetworkClickthroughData:self.delegate.adConfiguration.skAdNetworkClickthroughData];
 }
 
 - (void)privacyButtonTapped
@@ -338,7 +339,8 @@ static CGFloat const kStallSpinnerSize = 35.0f;
         (url != nil ? [NSURL URLWithString:url] : nil);
     });
 
-    [self.displayAgent displayDestinationForURL:(overridePrivacyClickUrl != nil ? overridePrivacyClickUrl : defaultPrivacyClickUrl)];
+    // Since this is the privacy icon, send @c nil for skAdNetworkClickthroughData
+    [self.displayAgent displayDestinationForURL:(overridePrivacyClickUrl != nil ? overridePrivacyClickUrl : defaultPrivacyClickUrl) skAdNetworkClickthroughData:nil];
 }
 
 #pragma mark - MOPUBPlayerViewControllerDelegate

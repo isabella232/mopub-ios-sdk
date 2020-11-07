@@ -1,9 +1,9 @@
 //
 //  MPRewardedFullscreenDelegateHandler.m
-//  MoPubSDKTests
 //
-//  Created by Kelly Dun on 7/8/20.
-//  Copyright © 2020 MoPub. All rights reserved.
+//  Copyright 2018-2020 Twitter, Inc.
+//  Licensed under the MoPub SDK License Agreement
+//  http://www.mopub.com/legal/sdk-license-agreement/
 //
 
 #import "MPRewardedFullscreenDelegateHandler.h"

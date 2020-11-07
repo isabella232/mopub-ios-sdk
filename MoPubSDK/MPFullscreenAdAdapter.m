@@ -8,6 +8,7 @@
 
 #import "MPAdAdapterError.h"
 #import "MPAdConfiguration.h"
+#import "MPAdContainerView+Private.h"
 #import "MPAdServerURLBuilder.h"
 #import "MPAdTargeting.h"
 #import "MPAnalyticsTracker.h"
@@ -26,6 +27,7 @@
 #import "MPFullscreenAdViewController+Video.h"
 #import "MPFullscreenAdViewController+Web.h"
 #import "MPLogging.h"
+#import "MPOpenMeasurementTracker.h"
 #import "NSObject+MPAdditions.h"
 
 static const NSUInteger kExcessiveCustomDataLength = 8196;
@@ -60,16 +62,14 @@ static const NSUInteger kExcessiveCustomDataLength = 8196;
         */
         _delegate = self; // self delegate by default
         _analyticsTracker = [MPAnalyticsTracker sharedTracker];
+
+        // Viewability tracker creation deferred until load time when
+        // more information about the creative is available.
+        // For webview creatives, this will be in `fullscreenAdViewController: webSessionWillStartInView:`.
+        // For VAST video creatives, this will be in `fetchAndLoadVideoAd`.
+        _viewabilityTracker = nil;
     }
     return self;
-}
-
-- (BOOL)hasAdAvailable {
-    return self._hasAdAvailable;
-}
-
-- (void)setHasAdAvailable:(BOOL)hasAdAvailable {
-    self._hasAdAvailable = hasAdAvailable;
 }
 
 - (void)setUpWithAdConfiguration:(MPAdConfiguration *)adConfiguration localExtras:(NSDictionary *)localExtras {
@@ -94,7 +94,7 @@ static const NSUInteger kExcessiveCustomDataLength = 8196;
     NSUInteger customDataLength = customData.length;
     // Only persist the custom data field if it's non-empty and there is a server-to-server
     // callback URL. The persisted custom data will be url encoded.
-    if (customDataLength > 0 && self.configuration.rewardedVideoCompletionUrl != nil) {
+    if (customDataLength > 0 && self.configuration.rewardedVideoCompletionUrls.count > 0) {
         // Warn about excessive custom data length, but allow the custom data to be sent anyway
         if (customDataLength > kExcessiveCustomDataLength) {
             MPLogInfo(@"Custom data length %lu exceeds the receommended maximum length of %lu characters.",
@@ -134,57 +134,52 @@ static const NSUInteger kExcessiveCustomDataLength = 8196;
         return;
     }
 
+    // Update state
     self.hasSuccessfullyLoaded = YES;
     self.hasAdAvailable = YES;
-
     [self didStopLoadingAd];
-    [self.adapterDelegate adAdapter:self handleFullscreenAdEvent:MPFullscreenAdEventDidLoad];
 
-    // Check for MoPub-specific adapters before setting the timer
-    // Adapters for 3rd party SDK have their own timeout and expiration handling
-    if ([self conformsToProtocol:@protocol(MPFullscreenAdAdapter)]
-        && [self conformsToProtocol:@protocol(MPThirdPartyFullscreenAdAdapter)] == NO) {
-        // Set up timer for expiration
-        __weak __typeof__(self) weakSelf = self;
-        self.expirationTimer = [[MPRealTimeTimer alloc] initWithInterval:[MPConstants adsExpirationInterval] block:^(MPRealTimeTimer *timer) {
-            __strong __typeof__(weakSelf) strongSelf = weakSelf;
-            if (strongSelf && !strongSelf.hasTrackedImpression) {
-                [strongSelf.delegate fullscreenAdAdapterDidExpire:strongSelf];
-            }
-            [strongSelf.expirationTimer invalidate];
-        }];
-        [self.expirationTimer scheduleNow];
-    }
+    // Track the ad load event for viewability
+    [self.viewabilityTracker trackAdLoaded];
+
+    // Notify listeners of the ad load event
+    [self.adapterDelegate adAdapter:self handleFullscreenAdEvent:MPFullscreenAdEventDidLoad];
 }
 
 - (void)didStopLoadingAd {
     [self.timeoutTimer invalidate];
 }
 
-- (NSURL *)rewardedVideoCompletionUrlByAppendingClientParams {
-    if (self.configuration.rewardedVideoCompletionUrl.length == 0) {
+- (NSArray<NSURL *> *)rewardedVideoCompletionUrlsByAppendingClientParams {
+    if (self.configuration.rewardedVideoCompletionUrls.count == 0) {
         return nil;
     }
 
-    NSString *sourceCompletionUrl = self.configuration.rewardedVideoCompletionUrl;
-    NSString *adapterClassName = NSStringFromClass(self.configuration.adapterClass);
+    NSMutableArray<NSURL *> * completionUrls = [NSMutableArray arrayWithCapacity:self.configuration.rewardedVideoCompletionUrls.count];
 
-    NSString *customerId = nil;
-    if ([self.adapterDelegate respondsToSelector:@selector(customerId)]) {
-        customerId = self.adapterDelegate.customerId;
+    for (NSString *sourceCompletionUrl in self.configuration.rewardedVideoCompletionUrls) {
+        NSString *adapterClassName = NSStringFromClass(self.configuration.adapterClass);
+
+        NSString *customerId = nil;
+        if ([self.adapterDelegate respondsToSelector:@selector(customerId)]) {
+            customerId = self.adapterDelegate.customerId;
+        }
+
+        MPReward *reward = nil;
+        if (self.configuration.selectedReward.isCurrencyTypeSpecified) {
+            reward = self.configuration.selectedReward;
+        }
+
+        NSURL *completionUrl = [MPAdServerURLBuilder rewardedCompletionUrl:sourceCompletionUrl
+                                                            withCustomerId:customerId
+                                                                rewardType:reward.currencyType
+                                                              rewardAmount:reward.amount
+                                                          adapterClassName:adapterClassName
+                                                            additionalData:self.customData];
+        [completionUrls addObject:completionUrl];
     }
 
-    MPReward *reward = nil;
-    if (self.configuration.selectedReward.isCurrencyTypeSpecified) {
-        reward = self.configuration.selectedReward;
-    }
-
-    return [MPAdServerURLBuilder rewardedCompletionUrl:sourceCompletionUrl
-                                        withCustomerId:customerId
-                                            rewardType:reward.currencyType
-                                          rewardAmount:reward.amount
-                                      adapterClassName:adapterClassName
-                                        additionalData:self.customData];
+    return completionUrls;
 }
 
 - (void)handleAdEvent:(MPFullscreenAdEvent)event {
@@ -220,6 +215,7 @@ static const NSUInteger kExcessiveCustomDataLength = 8196;
         case MPFullscreenAdEventWillDisappear:
         case MPFullscreenAdEventDidDisappear:
         case MPFullscreenAdEventWillLeaveApplication:
+        case MPFullscreenAdEventWillDismiss:
             [self.adapterDelegate adAdapter:self handleFullscreenAdEvent:event];
             break;
     }
@@ -239,10 +235,74 @@ static const NSUInteger kExcessiveCustomDataLength = 8196;
         return;
     }
 
+    // Update state
     self.hasTrackedImpression = YES;
+
+    // Fire trackers
     [self.analyticsTracker trackImpressionForConfiguration:self.configuration];
-    [self.expirationTimer invalidate];
+    [self.viewabilityTracker trackImpression];
+
+    // Notify listeners
     [self.adapterDelegate adDidReceiveImpressionEventForAdapter:self];
+}
+
+#pragma mark - Viewability
+
+// Viewability tracker creation abstracted out in case it needs to be overridden for testing.
+// This interface is defined in `MPFullscreenAdAdapter+Private.h`
+- (id<MPViewabilityTracker> _Nullable)viewabilityTrackerForWebContentInView:(MPAdContainerView *)webContainer {
+    // No view to track
+    if (webContainer == nil) {
+        MPLogEvent([MPLogEvent error:[NSError noViewToTrack] message:@"Failed to initialize Viewability tracker"]);
+        return nil;
+    }
+
+    NSSet<UIView<MPViewabilityObstruction> *> *obstructions = webContainer.friendlyObstructions;
+    MPOpenMeasurementTracker *tracker = [[MPOpenMeasurementTracker alloc] initWithWebView:webContainer.webContentView
+                                                                          containedInView:webContainer
+                                                                     friendlyObstructions:obstructions];
+    if (tracker != nil) {
+        MPLogEvent([MPLogEvent viewabilityTrackerCreated:tracker]);
+    }
+
+    // Update the container with a weak reference to the newly create tracker.
+    // This is to allow friendly obstruction updates to the tracker as the
+    // container's UI changes.
+    webContainer.viewabilityTracker = tracker;
+
+    return tracker;
+}
+
+// Viewability tracker creation abstracted out in case it needs to be overridden for testing.
+// This interface is defined in `MPFullscreenAdAdapter+Private.h`
+- (id<MPViewabilityTracker> _Nullable)viewabilityTrackerForVideoConfig:(MPVideoConfig *)config
+                                              containedInContainerView:(MPAdContainerView *)container
+                                                       adConfiguration:(MPAdConfiguration *)adConfiguration {
+    // No view to track
+    if (container == nil) {
+        MPLogEvent([MPLogEvent error:[NSError noViewToTrack] message:@"Failed to initialize Viewability tracker"]);
+        return nil;
+    }
+
+    // Add the contents of the ad configuration context to the video config context to capture
+    // any additional viewability trackers that need to be fired in addition to the ones in
+    // the VAST XML.
+    MPViewabilityContext *additionalContext = adConfiguration.viewabilityContext;
+    if (additionalContext != nil) {
+        [config.viewabilityContext addObjectsFromContext:additionalContext];
+    }
+
+    MPOpenMeasurementTracker *tracker = [[MPOpenMeasurementTracker alloc] initWithVASTPlayerView:container videoConfig:config];
+    if (tracker != nil) {
+        MPLogEvent([MPLogEvent viewabilityTrackerCreated:tracker]);
+    }
+
+    // Update the container with a weak reference to the newly create tracker.
+    // This is to allow friendly obstruction updates to the tracker as the
+    // container's UI changes.
+    container.viewabilityTracker = tracker;
+
+    return tracker;
 }
 
 @end
@@ -293,16 +353,8 @@ static const NSUInteger kExcessiveCustomDataLength = 8196;
             // Determine whether to display the countdown timer. In general, the timer will be displayed
             // if there is a rewarded duration.
             if (self.isRewardExpected) {
-                // If the ad is a MoVideo Rewarded Video (VAST player version 1), the countdown timer is rendered
-                // by MoVideo instead. This is an explicit no-op case. This use case can be
-                // removed at a later date.
-                if (self.configuration.vastPlayerVersion == 1 && [self.configuration.adType isEqualToString:kAdTypeRewardedVideo]) {
-                    // No-op
-                }
                 // Render the countdown timer.
-                else {
-                    [self.viewController setRewardCountdownDuration:self.rewardCountdownDuration];
-                }
+                [self.viewController setRewardCountdownDuration:self.rewardCountdownDuration];
             }
             break;
     }
@@ -355,6 +407,10 @@ static const NSUInteger kExcessiveCustomDataLength = 8196;
     // The default implementation of this method does nothing. Subclasses must override this method
     // and implement code to handle when another ad unit plays an ad for the same ad network this
     // adapter is representing.
+}
+
+- (void)stopViewabilitySession {
+    [self.viewabilityTracker stopTracking];
 }
 
 @end

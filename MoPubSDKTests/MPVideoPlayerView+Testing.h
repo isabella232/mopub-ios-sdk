@@ -12,20 +12,13 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface MPVideoPlayerView (Testing)
-// Counts the number of times the `playVideo` method has been called
-@property (nonatomic, assign) NSUInteger playVideoCount;
-
-// Counts the number of times the `pauseVideo` method has been called
-@property (nonatomic, assign) NSUInteger pauseVideoCount;
-
-// Resets the method counts
-- (void)resetCounts;
 
 #pragma mark - Exposed private methods
 
 @property (nonatomic, strong) id<NSObject> audioSessionInterruptionObserverToken;
 @property (nonatomic, strong) id<NSObject> boundaryTrackingTimeObserver;
 @property (nonatomic, strong) id<NSObject> endTimeObserverToken;
+@property (nonatomic, readwrite) BOOL hasStartedPlaying;
 @property (nonatomic, strong) id<NSObject> industryIconHideTimeObserver;
 @property (nonatomic, strong) id<NSObject> industryIconShowTimeObserver;
 @property (nonatomic, strong) id<NSObject> progressTrackingTimeObserver;

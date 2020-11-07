@@ -29,14 +29,26 @@
 
             _extensions = extensions.count > 0 ? extensions : nil;
         } // End if
+
+        // Extract the `AdVerifications` node from the extensions if it exists
+        [_extensions enumerateObjectsUsingBlock:^(NSDictionary *extension, NSUInteger idx, BOOL * _Nonnull stop) {
+            NSString *type = extension[@"type"];
+            NSDictionary *adVerficationsDictionary = extension[@"AdVerifications"];
+            if (adVerficationsDictionary != nil && [type isEqualToString:@"AdVerifications"]) {
+                _adVerifications = [[MPVASTAdVerifications alloc] initWithDictionary:adVerficationsDictionary];
+                *stop = YES;
+            }
+        }];
     }
     return self;
 }
 
 + (NSDictionary<NSString *, id> *)modelMap {
-    return @{@"creatives":      @[@"Creatives.Creative", MPParseArrayOf(MPParseClass([MPVASTCreative class]))],
-             @"errorURLs":      @[@"Error.text", MPParseArrayOf(MPParseURLFromString())],
-             @"impressionURLs": @[@"Impression.text", MPParseArrayOf(MPParseURLFromString())]};
+    return @{@"adVerifications": @[@"AdVerifications", MPParseClass([MPVASTAdVerifications class])],
+             @"creatives":       @[@"Creatives.Creative", MPParseArrayOf(MPParseClass([MPVASTCreative class]))],
+             @"errorURLs":       @[@"Error.text", MPParseArrayOf(MPParseURLFromString())],
+             @"impressionURLs":  @[@"Impression.text", MPParseArrayOf(MPParseURLFromString())]
+    };
 }
 
 @end

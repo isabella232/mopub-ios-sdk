@@ -45,6 +45,13 @@ typedef void (^MPWebViewJavascriptEvaluationCompletionHandler)(id result, NSErro
 
 @property (weak, nonatomic) id<MPWebViewDelegate> delegate;
 
+/**
+ Initializes a webview with the given size and user scripts.
+ @param frame The frame rectangle for the view, measured in points. The origin of the frame is relative to the superview in which you plan to add it. This method uses the frame rectangle to set the center and bounds properties accordingly.
+ @param scripts Optional scripts that will be injected into the webview.
+ */
+- (instancetype)initWithFrame:(CGRect)frame scripts:(NSArray<WKUserScript *> *)scripts;
+
 // When set to `YES`, `shouldConformToSafeArea` sets constraints on the WKWebView to always stay within the safe area
 // using the MPWebView's safeAreaLayoutGuide. Otherwise, the WKWebView will be constrained directly to MPWebView's
 // anchors to fill the whole container. Default is `NO`.
@@ -86,7 +93,6 @@ textEncodingName:(NSString *)encodingName
 - (NSString *)stringByEvaluatingJavaScriptFromString:(NSString *)javaScriptString;
 
 @property (nonatomic, readonly) BOOL allowsInlineMediaPlayback;
-@property (nonatomic, readonly) BOOL mediaPlaybackRequiresUserAction;
 @property (nonatomic, readonly) BOOL mediaPlaybackAllowsAirPlay;
 
 - (void)mp_setScrollable:(BOOL)scrollable;

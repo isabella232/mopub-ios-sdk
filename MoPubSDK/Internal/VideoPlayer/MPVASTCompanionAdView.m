@@ -181,6 +181,19 @@ shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherG
     // No op. It's the owner's (such as adapter) responsibility for handling app status changes
 }
 
+- (NSString *)customizeHTML:(NSString *)html inWebView:(MPWebView *)webView forContainerView:(MPAdContainerView *)adView {
+    // No customization needed.
+    return html;
+}
+
+- (void)mraidWebSessionStarted:(MPAdContainerView *)adView {
+    // No op. It's the owner's (such as custom event) responsibility for handling app status changes
+}
+
+- (void)mraidWebSessionReady:(MPAdContainerView *)adView {
+    // No op. It's the owner's (such as custom event) responsibility for handling app status changes
+}
+
 - (void)mraidAdDidLoad:(MPAdContainerView *)adView {
     /*
      Note: Do not apply layout constrains on the ad view, otherwise the layout engine mighe be confused.

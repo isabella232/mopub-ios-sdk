@@ -249,11 +249,20 @@ id<MPObjectMapper> MPParseClass(Class destinationClass)
 
 #pragma mark -
 
+@interface MPVASTModel ()
+// Enable property name caching is specified as a class property to facilitate unit testing.
++ (BOOL)enablePropertyNameCaching;
+@end
+
 @implementation MPVASTModel
 
 + (NSDictionary<NSString *, id> *)modelMap {
     // Must be implemented by subclasses.
     return @{};
+}
+
++ (BOOL)enablePropertyNameCaching {
+    return YES;
 }
 
 - (instancetype _Nullable)initWithDictionary:(NSDictionary<NSString *, id> * _Nullable)dictionary {
@@ -355,18 +364,24 @@ id<MPObjectMapper> MPParseClass(Class destinationClass)
     });
 
     NSString *className = NSStringFromClass([self class]);
-    NSMutableSet *propertyNames = propertyNamesForClass[className];
+    NSMutableSet *propertyNames = nil;
 
-    if (propertyNames == nil) {
-        unsigned int propertyCount;
-        objc_property_t *properties = class_copyPropertyList([self class], &propertyCount);
-        propertyNames = [NSMutableSet setWithCapacity:propertyCount];
-        for (unsigned int i = 0; i < propertyCount; i++) {
-            objc_property_t property = properties[i];
-            [propertyNames addObject:[NSString stringWithUTF8String:property_getName(property)]];
+    // Since `MPVastModel` objects are parsed on a background thread,
+    // synchronize access to `propertyNamesForClass`.
+    @synchronized(propertyNamesForClass) {
+        propertyNames = propertyNamesForClass[className];
+
+        if ([MPVASTModel enablePropertyNameCaching] == NO || propertyNames == nil) {
+            unsigned int propertyCount;
+            objc_property_t *properties = class_copyPropertyList([self class], &propertyCount);
+            propertyNames = [NSMutableSet setWithCapacity:propertyCount];
+            for (unsigned int i = 0; i < propertyCount; i++) {
+                objc_property_t property = properties[i];
+                [propertyNames addObject:[NSString stringWithUTF8String:property_getName(property)]];
+            }
+            propertyNamesForClass[className] = propertyNames;
+            free(properties);
         }
-        propertyNamesForClass[className] = propertyNames;
-        free(properties);
     }
 
     return [propertyNames containsObject:name];

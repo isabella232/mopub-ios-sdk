@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "MPVASTCompanionAd.h"
 #import "MPVASTResponse.h"
+#import "MPViewabilityContext.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -55,6 +56,11 @@ NS_ASSUME_NONNULL_BEGIN
  the user. If no skip offset is specified, the VAST video is immediately skippable.
  */
 @property (nonatomic, nullable, readonly) MPVASTDurationOffset *skipOffset;
+
+/**
+ Viewability context to use with this video asset.
+ */
+@property (nonatomic, nullable, readonly) MPViewabilityContext *viewabilityContext;
 
 #pragma mark - Initialization
 

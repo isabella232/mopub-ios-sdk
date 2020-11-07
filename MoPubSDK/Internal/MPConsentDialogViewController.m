@@ -175,8 +175,7 @@ static NSTimeInterval const kCloseButtonFadeInAfterSeconds = 10.0;
     self.didLoadCompletionBlock = completion;
 
     // Load consent dialog HTML markup
-    [self.webView loadHTMLString:self.dialogHTML
-                         baseURL:[NSURL URLWithString:[MPAPIEndpoints baseURL]]];
+    [self.webView loadHTMLString:self.dialogHTML baseURL:MPAPIEndpoints.baseURL];
 }
 
 #pragma mark - MPWebViewDelegate

@@ -9,6 +9,7 @@
 #import <CoreLocation/CoreLocation.h>
 #import <UIKit/UIKit.h>
 #import "MPFullscreenAdAdapterDelegate.h"
+#import "MPScheduledDeallocationAdAdapter.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -19,13 +20,12 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @c MPFullscreenAdAdapter is a base class for adapters that support full-screen interstitial ads.
  * By implementing subclasses of @c MPFullscreenAdAdapter you can enable the MoPub SDK to
- * natively support a wide variety of third-party ad networks. Note that subclasses must also
- * conform to the @c MPThirdPartyFullscreenAdAdapter protocol.
+ * natively support a wide variety of third-party ad networks.
  *
  * At runtime, the MoPub SDK will find and instantiate an @c MPFullscreenAdAdapter subclass as needed and
  * invoke its @c requestAdWithAdapterInfo:adMarkup: method.
  */
-@protocol MPFullscreenAdAdapter <NSObject>
+@protocol MPFullscreenAdAdapter <MPScheduledDeallocationAdAdapter>
 
 /**
  * Override to opt out of automatic ad level impression and click tracking.
@@ -58,7 +58,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @warning overriding and implementing this property is required for rewarded ads.
  */
-@property (nonatomic, assign) BOOL hasAdAvailable;
+@property (nonatomic, assign, readonly) BOOL hasAdAvailable;
 
 /**
  * An optional dictionary containing extra local data.
@@ -139,8 +139,9 @@ NS_ASSUME_NONNULL_BEGIN
 #pragma mark -
 
 /**
- * This is for differentiating adapters implemented for mediating third party SDKs. Adapters
- * MUST implement this protocol, rather than @c MPFullscreenAdAdapter.
+ * This is here for backwards compatibility only.
+ *
+ * Third party adapters are no longer required to conform to this protocol.
  */
 @protocol MPThirdPartyFullscreenAdAdapter <MPFullscreenAdAdapter>
 @end

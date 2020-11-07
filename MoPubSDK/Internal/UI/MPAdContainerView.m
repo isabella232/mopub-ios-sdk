@@ -7,27 +7,15 @@
 //
 
 #import "MPAdContainerView.h"
+#import "MPAdContainerView+Private.h"
 #import "MPAdViewOverlay.h"
 #import "MPLogging.h"
 #import "MPVideoPlayerView.h"
 #import "MPVideoPlayerViewOverlay.h"
+#import "MPViewableVisualEffectView.h"
 #import "UIView+MPAdditions.h"
 
 static const NSTimeInterval kAnimationTimeInterval = 0.5;
-
-@interface MPAdContainerView ()
-
-@property (nonatomic, strong) MPVideoConfig *videoConfig;
-@property (nonatomic, assign) BOOL isVideoFinished; // default to NO
-
-@property (nonatomic, strong) MPAdViewOverlay *overlay;
-@property (nonatomic, strong) MPWebView *webContentView;
-@property (nonatomic, strong) MPVideoPlayerView *videoPlayerView;
-@property (nonatomic, strong) MPVASTCompanionAdView *companionAdView;
-@property (nonatomic, strong) NSArray<NSLayoutConstraint *> *companionAdViewEdgeConstraints; // see `updateCompanionAdViewEdgeConstraints`
-@property (nonatomic, strong) UIVisualEffectView *blurEffectView; // only show if video ends with no companion ad
-
-@end
 
 #pragma mark -
 
@@ -49,11 +37,11 @@ static const NSTimeInterval kAnimationTimeInterval = 0.5;
         self.backgroundColor = [UIColor clearColor];
         self.opaque = NO;
         self.clipsToBounds = YES;
-        
+
         _webContentView = webContentView;
         webContentView.frame = self.bounds;
         [self addSubview:webContentView];
-        
+
         _overlay = [[MPAdViewOverlay alloc] initWithFrame:CGRectZero];
         _overlay.delegate = self;
         [self addSubview:_overlay]; // add after the content view so that the overlay is on top
@@ -93,7 +81,7 @@ static const NSTimeInterval kAnimationTimeInterval = 0.5;
 - (void)didMoveToWindow
 {
     [super didMoveToWindow];
-    
+
     if ([self.webAdDelegate respondsToSelector:@selector(adContainerView:didMoveToWindow:)]) {
         [self.webAdDelegate adContainerView:self didMoveToWindow:self.window];
     }
@@ -102,13 +90,13 @@ static const NSTimeInterval kAnimationTimeInterval = 0.5;
 
 - (void)updateConstraints {
     [super updateConstraints];
-    
+
     // No companion ad available; do nothing.
     MPVASTCompanionAd *ad = self.companionAdView.ad;
     if (ad == nil) {
         return;
     }
-    
+
     // If the container view size cannot fit the ad size, or if the ad is web content, then activate
     // the edge constraints of the companion ad view so that it becomes small enough to be shown without
     // being cropped.
@@ -132,7 +120,7 @@ static const NSTimeInterval kAnimationTimeInterval = 0.5;
         MPLogDebug(@"video player overlay has been set up");
         return;
     }
-    
+
     MPVideoPlayerViewOverlayConfig *config
     = [[MPVideoPlayerViewOverlayConfig alloc]
        initWithCallToActionButtonTitle:self.videoConfig.callToActionButtonTitle
@@ -143,7 +131,7 @@ static const NSTimeInterval kAnimationTimeInterval = 0.5;
     MPAdViewOverlay *overlay = [[MPAdViewOverlay alloc] initWithVideoOverlayConfig:config];
     overlay.delegate = self;
     self.overlay = overlay;
-    
+
     [self addSubview:overlay];
     overlay.translatesAutoresizingMaskIntoConstraints = NO;
     [[overlay.mp_safeTopAnchor constraintEqualToAnchor:self.mp_safeTopAnchor] setActive:YES];
@@ -159,17 +147,17 @@ static const NSTimeInterval kAnimationTimeInterval = 0.5;
     if (ad == nil) {
         return;
     }
-    
+
     if (self.companionAdView != nil) {
         return; // only show one for once
     }
-    
+
     self.companionAdView = [[MPVASTCompanionAdView alloc] initWithCompanionAd:ad];
     self.companionAdView.delegate = self;
     self.companionAdView.clipsToBounds = YES;
     [self insertSubview:self.companionAdView belowSubview:self.overlay];
     self.companionAdView.translatesAutoresizingMaskIntoConstraints = NO;
-    
+
     // All companion ad types may pin to the edges of the container.
     self.companionAdViewEdgeConstraints = @[
         [self.companionAdView.mp_safeTopAnchor constraintEqualToAnchor:self.mp_safeTopAnchor],
@@ -177,7 +165,7 @@ static const NSTimeInterval kAnimationTimeInterval = 0.5;
         [self.companionAdView.mp_safeBottomAnchor constraintEqualToAnchor:self.mp_safeBottomAnchor],
         [self.companionAdView.mp_safeTrailingAnchor constraintEqualToAnchor:self.mp_safeTrailingAnchor]
     ];
-    
+
     // Non-web content companion ads should retain their aspect ratio scaling.
     if (!self.companionAdView.isWebContent) {
         NSLayoutConstraint *widthContraint = [self.companionAdView.mp_safeWidthAnchor constraintLessThanOrEqualToConstant:ad.width];
@@ -193,7 +181,7 @@ static const NSTimeInterval kAnimationTimeInterval = 0.5;
             aspectRatioConstraint
         ]];
     }
-    
+
     [self.companionAdView setHidden:YES]; // hidden by default, only show after loaded and video finishes
     [self.companionAdView loadCompanionAd]; // delegate will handle load status updates
 }
@@ -205,14 +193,14 @@ static const NSTimeInterval kAnimationTimeInterval = 0.5;
     if (self.isVideoFinished == NO) { // timing guard
         return;
     }
-    
+
     if (self.companionAdView != nil
         && self.companionAdView.isLoaded
         && self.companionAdView.isHidden) {
         // Notify UI that contraints and layout need to be updated
         [self setNeedsUpdateConstraints];
         [self setNeedsLayout];
-        
+
         // make companion ad view transparent but unhidden
         self.companionAdView.alpha = 0;
         [self.companionAdView setHidden:NO];
@@ -223,7 +211,7 @@ static const NSTimeInterval kAnimationTimeInterval = 0.5;
             [self.videoPlayerView removeFromSuperview];
             self.videoPlayerView = nil;
         }];
-        
+
         [self.videoPlayerDelegate videoPlayer:self didShowCompanionAdView:self.companionAdView];
     } else {
         [self makeVideoBlurry];
@@ -237,16 +225,16 @@ static const NSTimeInterval kAnimationTimeInterval = 0.5;
     if (self.blurEffectView != nil) {
         return; // only show one for once
     }
-    
-    self.blurEffectView = [UIVisualEffectView new];
+
+    self.blurEffectView = [MPViewableVisualEffectView new];
     [self.videoPlayerView addSubview:self.blurEffectView];
-    
+
     self.blurEffectView.translatesAutoresizingMaskIntoConstraints = NO;
     [[self.blurEffectView.mp_safeTopAnchor constraintEqualToAnchor:self.videoPlayerView.mp_safeTopAnchor] setActive:YES];
     [[self.blurEffectView.mp_safeLeadingAnchor constraintEqualToAnchor:self.videoPlayerView.mp_safeLeadingAnchor] setActive:YES];
     [[self.blurEffectView.mp_safeBottomAnchor constraintEqualToAnchor:self.videoPlayerView.mp_safeBottomAnchor] setActive:YES];
     [[self.blurEffectView.mp_safeTrailingAnchor constraintEqualToAnchor:self.videoPlayerView.mp_safeTrailingAnchor] setActive:YES];
-    
+
     [UIView animateWithDuration:kAnimationTimeInterval animations:^{
         self.blurEffectView.effect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleLight];
     }];
@@ -265,7 +253,7 @@ static const NSTimeInterval kAnimationTimeInterval = 0.5;
                                                            videoConfig:videoConfig];
         _videoPlayerView.delegate = self;
         self.backgroundColor = UIColor.blackColor;
-        
+
         [self addSubview:self.videoPlayerView];
         self.videoPlayerView.translatesAutoresizingMaskIntoConstraints = NO;
         [[self.videoPlayerView.mp_safeTopAnchor constraintEqualToAnchor:self.mp_safeTopAnchor] setActive:YES];
@@ -280,7 +268,7 @@ static const NSTimeInterval kAnimationTimeInterval = 0.5;
     if (self.videoPlayerView.didLoadVideo) {
         return;
     }
-    
+
     [self.videoPlayerView loadVideo];
     [self setUpOverlay];
 }
@@ -291,9 +279,9 @@ static const NSTimeInterval kAnimationTimeInterval = 0.5;
         [self.overlay handleVideoStartForSkipOffset:self.skipOffset
                                       videoDuration:self.videoPlayerView.videoDuration];
     }
-    
+
     [self.videoPlayerView playVideo];
-    
+
     if ([self.overlay respondsToSelector:@selector(resumeTimer)]) {
         [self.overlay resumeTimer];
     }
@@ -301,7 +289,7 @@ static const NSTimeInterval kAnimationTimeInterval = 0.5;
 
 - (void)pauseVideo {
     [self.videoPlayerView pauseVideo];
-    
+
     if ([self.overlay respondsToSelector:@selector(pauseTimer)]) {
         [self.overlay pauseTimer];
     }
@@ -309,7 +297,7 @@ static const NSTimeInterval kAnimationTimeInterval = 0.5;
 
 - (void)stopVideo {
     [self.videoPlayerView stopVideo];
-    
+
     if ([self.overlay respondsToSelector:@selector(stopTimer)]) {
         [self.overlay stopTimer];
     }
@@ -324,40 +312,6 @@ static const NSTimeInterval kAnimationTimeInterval = 0.5;
 }
 
 
-
-@end
-
-#pragma mark -
-
-@implementation MPAdContainerView (MPViewabilityInfoProvider)
-
-- (MPViewabilityAdType)viewabilityAdType {
-    return MPViewabilityAdTypeWeb;
-}
-
-- (UIView *)adContentView {
-    return self.webContentView;
-}
-
-- (NSSet<UIView *> *)viewabilityFriendlyObstructionViews {
-    // register all subviews except the ad content view
-    NSMutableSet *viewSet = [NSMutableSet setWithArray:@[self.subviews]];
-    for (UIView *view in self.subviews) {
-        if ([view conformsToProtocol:@protocol(MPViewabilityFriendlyObstructionViewInfoProvider)]) {
-            [viewSet unionSet:((id<MPViewabilityFriendlyObstructionViewInfoProvider>)view).viewabilityFriendlyObstructionViews];
-        }
-    }
-    
-    if (self.adContentView != nil) { // prevent a `[__NSSetM removeObject:]`  crash
-        [viewSet removeObject:self.adContentView];
-    }
-    
-    if (self.videoPlayerView != nil) { // prevent a `[__NSSetM removeObject:]`  crash
-        [viewSet removeObject:self.videoPlayerView];
-    }
-    
-    return viewSet;
-}
 
 @end
 

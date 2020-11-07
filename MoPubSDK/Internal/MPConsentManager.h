@@ -251,6 +251,11 @@
 @interface MPConsentManager (PersonalDataHandler)
 
 /**
+ IDFA from @c ASIdentiferManager. The all zero IDFA @c 00000000-0000-0000-0000-000000000000 will be translated to @c nil.
+ */
+@property (nonatomic, copy, readonly, nullable) NSString * rawIfa;
+
+/**
  * Clean up personal data and add additonal logic for personal data when consent state changes.
  */
 

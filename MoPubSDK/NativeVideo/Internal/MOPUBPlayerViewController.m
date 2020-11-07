@@ -17,7 +17,7 @@
 #import "MPGlobal.h"
 #import "MPLogging.h"
 #import "MOPUBNativeVideoAdConfigValues.h"
-#import "MPVastTracking.h"
+#import "MPVASTTracking.h"
 #import "MPVideoConfig.h"
 #import "UIView+MPAdditions.h"
 #import "MOPUBNativeVideoAdConfigValues.h"

@@ -243,3 +243,17 @@ static NSString * const kAnimationKey = @"Timer";
 }
 
 @end
+
+#pragma mark - MPViewabilityObstruction
+
+@implementation MPCountdownTimerView (MPViewabilityObstruction)
+
+- (MPViewabilityObstructionType)viewabilityObstructionType {
+    return MPViewabilityObstructionTypeOther;
+}
+
+- (MPViewabilityObstructionName)viewabilityObstructionName {
+    return MPViewabilityObstructionNameCountdownTimer;
+}
+
+@end

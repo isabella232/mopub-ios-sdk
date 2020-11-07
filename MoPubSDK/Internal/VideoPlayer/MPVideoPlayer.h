@@ -16,7 +16,9 @@ NS_ASSUME_NONNULL_BEGIN
 typedef NS_ENUM(NSInteger, MPVideoPlayerEvent) {
     MPVideoPlayerEvent_ClickThrough,
     MPVideoPlayerEvent_Close,
-    MPVideoPlayerEvent_Skip
+    MPVideoPlayerEvent_Skip,
+    MPVideoPlayerEvent_Pause,
+    MPVideoPlayerEvent_Resume
 };
 
 @protocol MPVideoPlayer <NSObject>

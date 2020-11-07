@@ -60,10 +60,8 @@ class AdUnitTableViewController: UIViewController {
             return
         }
         
-        // Embed the destination ad view controller into a navigation controller so that
-        // pushing onto the navigation stack will work.
-        let navigationController: UINavigationController = UINavigationController(rootViewController: destination)
-        splitViewController?.showDetailViewController(navigationController, sender: self)
+        // Push the destination ad view controller onto the navigation stack.
+        navigationController?.pushViewController(destination, animated: true)
     }
     
     /**

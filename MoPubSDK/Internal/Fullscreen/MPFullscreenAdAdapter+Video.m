@@ -10,6 +10,7 @@
 #import "MPFullscreenAdAdapter+Private.h"
 #import "MPFullscreenAdAdapter+Reward.h"
 #import "MPFullscreenAdAdapter+Video.h"
+#import "MPFullscreenAdViewController+Private.h"
 #import "MPFullscreenAdViewController+Video.h"
 #import "MPHTTPNetworkSession.h"
 #import "MPURLRequest.h"
@@ -33,25 +34,25 @@
     void (^errorHandler)(NSError *) = ^(NSError *error) {
         [self.delegate fullscreenAdAdapter:self didFailToLoadAdWithError:error];
     };
-    
+
     [MPVASTManager fetchVASTWithData:self.adConfig.adResponseData completion:^(MPVASTResponse *response, NSError *error) {
         if (error) {
             errorHandler(error);
             return;
         }
-        
+
         MPVideoConfig *videoConfig = [[MPVideoConfig alloc] initWithVASTResponse:response
                                                               additionalTrackers:self.adConfig.vastVideoTrackers];
         videoConfig.isRewardExpected = self.adConfig.hasValidRewardFromMoPubSDK;
         videoConfig.enableEarlyClickthroughForNonRewardedVideo = self.adConfig.enableEarlyClickthroughForNonRewardedVideo;
-        
+
         if (videoConfig == nil || videoConfig.mediaFiles == nil) {
             errorHandler([NSError errorWithDomain:kMPVASTErrorDomain
                                              code:MPVASTErrorUnableToFindLinearAdOrMediaFileFromURI
                                          userInfo:nil]);
             return;
         }
-        
+
         self.videoConfig = videoConfig;
         CGSize windowSize = [UIApplication sharedApplication].keyWindow.bounds.size;
         MPVASTMediaFile *remoteMediaFile = [MPVASTMediaFile bestMediaFileFromCandidates:videoConfig.mediaFiles
@@ -63,12 +64,12 @@
                                          userInfo:nil]);
             return;
         }
-        
+
         self.remoteMediaFileToPlay = remoteMediaFile;
         self.vastTracking = [[MPVASTTracking alloc] initWithVideoConfig:videoConfig
                                                                videoURL:remoteMediaFile.URL];
         NSURL *cacheFileURL = [self.mediaFileCache cachedFileURLForRemoteFileURL:remoteMediaFile.URL];
-        
+
         void (^loadVideo)(void) = ^() {
             self.viewController = [[MPFullscreenAdViewController alloc]  initWithVideoURL:cacheFileURL
                                                                               videoConfig:videoConfig];
@@ -78,10 +79,23 @@
             if (self.isRewardExpected) {
                 [self.viewController setRewardCountdownDuration:self.rewardCountdownDuration];
             }
-            [self.vastTracking registerVideoViewForViewabilityTracking:self.viewController.view];
+
+            // Initialize the Viewability tracker now there is a view hierarchy
+            // for it to track, and the video is about to load.
+            // The Viewability session is okay to start immediately since there is
+            // no web view involved.
+            self.viewabilityTracker = [self viewabilityTrackerForVideoConfig:self.videoConfig
+                                                    containedInContainerView:self.viewController.adContainerView
+                                                             adConfiguration:self.configuration];
+            [self.viewabilityTracker startTracking];
+
+            // Now that the viewability tracker is ready, set the weak reference to it
+            // in the `VASTTracking` object, so it can track the VAST media events.
+            self.vastTracking.viewabilityTracker = self.viewabilityTracker;
+
             [self.viewController loadVideo];
         };
-        
+
         // `MPVideoPlayerViewController.init` automatically loads the video and triggers delegate callback
         if ([self.mediaFileCache isRemoteFileCached:remoteMediaFile.URL]) {
             [self.mediaFileCache touchCachedFileForRemoteFile:remoteMediaFile.URL]; // for LRU
@@ -156,7 +170,7 @@
 
 - (void)videoPlayerDidCompleteVideo:(id<MPVideoPlayer>)videoPlayer duration:(NSTimeInterval)duration {
     [self.vastTracking handleVideoEvent:MPVideoEventComplete videoTimeOffset:duration];
-    
+
     // Note: Do not hold back the reward if `isRewardExpected` is NO, because it's possible that
     // the rewarded is not defined in the ad response / ad configuration, but is defined after
     // the reward condition has been satisfied (for 3rd party ad SDK's).
@@ -176,13 +190,13 @@ videoDidReachProgressTime:(NSTimeInterval)videoProgress
       videoProgress:(NSTimeInterval)videoProgress {
     switch (event) {
         case MPVideoPlayerEvent_ClickThrough: {
-            [self.adDestinationDisplayAgent displayDestinationForURL:self.videoConfig.clickThroughURL];
-            
+            [self.adDestinationDisplayAgent displayDestinationForURL:self.videoConfig.clickThroughURL skAdNetworkClickthroughData:self.configuration.skAdNetworkClickthroughData];
+
             // need to take care of both VAST level and ad level click tracking
             [self.vastTracking handleVideoEvent:MPVideoEventClick videoTimeOffset:videoProgress];
-            
+
             // ad level click tracking
-            // Note: Do not call `[self.vastTracking uniquelySendURLs:@[self.adConfig.clickTrackingURL]]`
+            // Note: Do not call `[self.vastTracking uniquelySendURLs:self.adConfig.clickTrackingURLs]`
             // because the ad level click trackers are sent by `handleAdEvent:MPFullscreenAdEventDidReceiveTap`.
             [self.delegate fullscreenAdAdapterDidReceiveTap:self];
             break;
@@ -192,8 +206,17 @@ videoDidReachProgressTime:(NSTimeInterval)videoProgress
             // tracker. If it has both trackers, we send both as it asks for.
             [self.vastTracking handleVideoEvent:MPVideoEventClose videoTimeOffset:videoProgress];
             [self.vastTracking handleVideoEvent:MPVideoEventCloseLinear videoTimeOffset:videoProgress];
-            [self.vastTracking stopViewabilityTracking];
             [self dismissPlayerViewController];
+            break;
+        }
+        case MPVideoPlayerEvent_Pause: {
+            // Forward the event to the VAST tracker
+            [self.vastTracking handleVideoEvent:MPVideoEventPause videoTimeOffset:videoProgress];
+            break;
+        }
+        case MPVideoPlayerEvent_Resume: {
+            // Forward the event to the VAST tracker
+            [self.vastTracking handleVideoEvent:MPVideoEventResume videoTimeOffset:videoProgress];
             break;
         }
         case MPVideoPlayerEvent_Skip: {
@@ -202,13 +225,12 @@ videoDidReachProgressTime:(NSTimeInterval)videoProgress
             // reference after the fullscreen has dismissed (causing the audio playback of the
             // video player to continue).
             [videoPlayer stopVideo];
-            
+
             // Typically the creative only has one of the "close" tracker and the "closeLinear"
             // tracker. If it has both trackers, we send both as it asks for.
             [self.vastTracking handleVideoEvent:MPVideoEventSkip videoTimeOffset:videoProgress];
             [self.vastTracking handleVideoEvent:MPVideoEventClose videoTimeOffset:videoProgress];
             [self.vastTracking handleVideoEvent:MPVideoEventCloseLinear videoTimeOffset:videoProgress];
-            [self.vastTracking stopViewabilityTracking];
             [self dismissPlayerViewController];
             break;
         }
@@ -225,17 +247,18 @@ didShowIndustryIconView:(MPVASTIndustryIconView *)iconView {
 - (void)videoPlayer:(id<MPVideoPlayer>)videoPlayerView
 didClickIndustryIconView:(MPVASTIndustryIconView *)iconView
 overridingClickThroughURL:(NSURL * _Nullable)url {
+    // Since this is the privacy icon, send @c nil for skAdNetworkClickthroughData
     if (url.absoluteString.length > 0) {
-        [self.adDestinationDisplayAgent displayDestinationForURL:url];
+        [self.adDestinationDisplayAgent displayDestinationForURL:url skAdNetworkClickthroughData:nil];
     } else {
-        [self.adDestinationDisplayAgent displayDestinationForURL:iconView.icon.clickThroughURL];
+        [self.adDestinationDisplayAgent displayDestinationForURL:iconView.icon.clickThroughURL skAdNetworkClickthroughData:nil];
     }
-    
+
     [self.viewController disableAppLifeCycleEventObservationForAutoPlayPause];
     [self.vastTracking uniquelySendURLs:iconView.icon.clickTrackingURLs];
-    
+
     // ad level click tracking
-    // Note: Do not call `[self.vastTracking uniquelySendURLs:@[self.adConfig.clickTrackingURL]]`
+    // Note: Do not call `[self.vastTracking uniquelySendURLs:self.adConfig.clickTrackingURLs]`
     // because the ad level click trackers are sent by `handleAdEvent:MPFullscreenAdEventDidReceiveTap`.
     [self.delegate fullscreenAdAdapterDidReceiveTap:self];
 }
@@ -249,13 +272,13 @@ didShowCompanionAdView:(MPVASTCompanionAdView *)companionAdView {
     for (MPVASTTrackingEvent *event in companionAdView.ad.creativeViewTrackers) {
         [urls addObject:event.URL];
     }
-    
+
     // Additional trackers
     NSArray<MPVASTTrackingEvent *> *additionalTrackingUrls = self.adConfig.vastVideoTrackers[MPVideoEventCompanionAdView];
     [additionalTrackingUrls enumerateObjectsUsingBlock:^(MPVASTTrackingEvent * _Nonnull event, NSUInteger idx, BOOL * _Nonnull stop) {
         [urls addObject:event.URL];
     }];
-    
+
     [self.vastTracking uniquelySendURLs:urls.allObjects];
 }
 
@@ -265,32 +288,32 @@ overridingClickThroughURL:(NSURL * _Nullable)url {
     // Navigation to destination. Priority is given to the override clickthrough URL.
     // Otherwise the clickthrough URL specified in the companion ad will be used.
     NSURL *clickthroughDestinationUrl = url ?: companionAdView.ad.clickThroughURL;
-    
+
     // In the event that there is no clickthrough, do not continue.
     if (clickthroughDestinationUrl == nil) {
         return;
     }
-    
+
     // Begin navigating to the clickthrough destination.
-    [self.adDestinationDisplayAgent displayDestinationForURL:clickthroughDestinationUrl];
-    
+    [self.adDestinationDisplayAgent displayDestinationForURL:clickthroughDestinationUrl skAdNetworkClickthroughData:self.configuration.skAdNetworkClickthroughData];
+
     [self.viewController disableAppLifeCycleEventObservationForAutoPlayPause];
-    
+
     // Aggregate trackers with additional trackers
     NSMutableSet<NSURL *> *urls = [NSMutableSet set];
     if (companionAdView.ad.clickTrackingURLs != nil) {
         [urls addObjectsFromArray:companionAdView.ad.clickTrackingURLs];
     }
-    
+
     NSArray<MPVASTTrackingEvent *> *additionalTrackingUrls = self.adConfig.vastVideoTrackers[MPVideoEventCompanionAdClick];
     [additionalTrackingUrls enumerateObjectsUsingBlock:^(MPVASTTrackingEvent * _Nonnull event, NSUInteger idx, BOOL * _Nonnull stop) {
         [urls addObject:event.URL];
     }];
-    
+
     [self.vastTracking uniquelySendURLs:urls.allObjects];
-    
+
     // ad level click tracking
-    // Note: Do not call `[self.vastTracking uniquelySendURLs:@[self.adConfig.clickTrackingURL]]`
+    // Note: Do not call `[self.vastTracking uniquelySendURLs:self.adConfig.clickTrackingURLs]`
     // because the ad level click trackers are sent by `handleAdEvent:MPFullscreenAdEventDidReceiveTap`.
     [self.delegate fullscreenAdAdapterDidReceiveTap:self];
 }

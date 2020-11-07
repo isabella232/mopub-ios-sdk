@@ -18,6 +18,8 @@
 @interface MPVASTIndustryIconView (MPVASTResourceViewDelegate) <MPVASTResourceViewDelegate>
 @end
 
+#pragma mark - MPVASTIndustryIconView
+
 @implementation MPVASTIndustryIconView
 
 - (instancetype)init {
@@ -38,6 +40,8 @@
 
 @end
 
+#pragma mark - MPVASTResourceViewDelegate
+
 @implementation MPVASTIndustryIconView (MPVASTResourceViewDelegate)
 
 - (void)vastResourceView:(MPVASTResourceView *)vastResourceView
@@ -52,6 +56,20 @@
 - (void)vastResourceView:(MPVASTResourceView *)vastResourceView
 didTriggerOverridingClickThrough:(NSURL *)url {
     [self.iconViewDelegate industryIconView:self didTriggerOverridingClickThrough:url];
+}
+
+@end
+
+#pragma mark - MPViewabilityObstruction
+
+@implementation MPVASTIndustryIconView (MPViewabilityObstruction)
+
+- (MPViewabilityObstructionType)viewabilityObstructionType {
+    return MPViewabilityObstructionTypeOther;
+}
+
+- (MPViewabilityObstructionName)viewabilityObstructionName {
+    return MPViewabilityObstructionNameIndustryIcon;
 }
 
 @end

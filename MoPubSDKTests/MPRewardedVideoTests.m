@@ -12,6 +12,7 @@
 #import "MPAdServerKeys.h"
 #import "MPFullscreenAdAdapter.h"
 #import "MPMockAdServerCommunicator.h"
+#import "MPMoPubFullscreenAdAdapter.h"
 #import "MPProxy.h"
 #import "MPRewardedVideo+Testing.h"
 #import "MPRewardedVideoDelegateMock.h"
@@ -886,7 +887,7 @@ static const NSTimeInterval kTestTimeout = 2; // seconds
 
     MPURL * s2sMoPubUrl = [s2sUrl isKindOfClass:[MPURL class]] ? (MPURL *)s2sUrl : nil;
     XCTAssertNotNil(s2sMoPubUrl);
-    XCTAssert([[s2sMoPubUrl stringForPOSTDataKey:kRewardedAdapterClassNameKey] isEqualToString:NSStringFromClass(MPFullscreenAdAdapter.class)]);
+    XCTAssert([[s2sMoPubUrl stringForPOSTDataKey:kRewardedAdapterClassNameKey] isEqualToString:NSStringFromClass(MPMoPubFullscreenAdAdapter.class)]);
 }
 
 #pragma mark - Ad Sizing

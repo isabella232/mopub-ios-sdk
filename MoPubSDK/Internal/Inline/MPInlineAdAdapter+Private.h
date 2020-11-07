@@ -7,10 +7,17 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "MPAdImpressionTimer.h"
+
 #import "MPInlineAdAdapter.h"
 #import "MPInlineAdAdapter+MPInlineAdAdapterDelegate.h"
+
+#import "MPAdAdapterDelegate.h"
+#import "MPAdConfiguration.h"
+#import "MPAdContainerView.h"
+#import "MPAdImpressionTimer.h"
+#import "MPAnalyticsTracker.h"
 #import "MPTimer.h"
+#import "MPViewabilityTracker.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -31,6 +38,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) UIView *adView;
 @property (nonatomic, strong) id<MPAnalyticsTracker> analyticsTracker;
 
+// Viewability
+@property (nonatomic, nullable, strong) id<MPViewabilityTracker> viewabilityTracker;
+
 - (void)didStopLoading;
 
 - (void)startTimeoutTimer;
@@ -39,6 +49,14 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)trackImpression;
 - (void)trackClick;
+
+/**
+ Creates a Viewability tracker for webview creatives.
+ @param webContainer The view that contains a web view in the view hierarchy, in addition to other UI elements that are
+ considered friendly obstructions.
+ @return A tracker instance if Viewability is initialized, enabled, and the tracker successfully created; otherwise @c nil.
+ */
+- (id<MPViewabilityTracker> _Nullable)viewabilityTrackerForWebContentInView:(MPAdContainerView *)webContainer;
 
 @end
 

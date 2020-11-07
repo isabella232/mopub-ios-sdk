@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "MPAdAdapterDelegate.h"
+#import "MPAdContainerView.h"
 #import "MPAdEvent.h"
 #import "MPAdDestinationDisplayAgent.h"
 #import "MPAdTargeting.h"
@@ -17,10 +18,11 @@
 #import "MPFullscreenAdAdapter.h"
 #import "MPFullscreenAdAdapterDelegate.h"
 #import "MPFullscreenAdViewController+Web.h"
-#import "MPRealTimeTimer.h"
 #import "MPTimer.h"
 #import "MPVASTTracking.h"
 #import "MPVideoConfig.h"
+#import "MPViewabilityTracker.h"
+#import "MPWebView.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -31,8 +33,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) MPAdContentType adContentType;
 @property (nonatomic, strong) MPAdTargeting *targeting;
 @property (nonatomic, strong) MPTimer *timeoutTimer;
-@property (nonatomic, strong) MPRealTimeTimer *expirationTimer;
-@property (nonatomic, assign) BOOL _hasAdAvailable; // for both `MPAdAdapter` and `MPFullscreenAdAdapter`
+@property (nonatomic, assign, readwrite) BOOL hasAdAvailable;
 
 // Once an ad successfully loads, we want to block sending more successful load events.
 @property (nonatomic, assign) BOOL hasSuccessfullyLoaded;
@@ -46,6 +47,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) BOOL isUserRewarded;
 
 @property (nonatomic, strong) MPFullscreenAdViewController * _Nullable viewController; // set to nil after dismissal
+
+// Viewability
+@property (nonatomic, nullable, strong) id<MPViewabilityTracker> viewabilityTracker;
 
 #pragma mark - (MPAdAdapter) Properties
 
@@ -84,9 +88,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)handleAdEvent:(MPFullscreenAdEvent)event;
 
 /**
- The original URL comes from the value of "x-rewarded-video-completion-url" in ad response.
+ The original URLs come from the value of "x-rewarded-video-completion-url" in ad response.
  */
-- (NSURL *)rewardedVideoCompletionUrlByAppendingClientParams;
+- (NSArray<NSURL *> *)rewardedVideoCompletionUrlsByAppendingClientParams;
 
 /**
  Tracks an impression when called the first time. Any subsequent calls will do nothing.
@@ -97,6 +101,26 @@ NS_ASSUME_NONNULL_BEGIN
  Tracks a click when called the first time. Any subsequent calls will do nothing.
  */
 - (void)trackImpression;
+
+/**
+ Creates a Viewability tracker for webview creatives.
+ @param webContainer The view that contains a web view in the view hierarchy, in addition to other UI elements that are
+ considered friendly obstructions.
+ @return A tracker instance if Viewability is initialized, enabled, and the tracker successfully created; otherwise @c nil.
+ */
+- (id<MPViewabilityTracker> _Nullable)viewabilityTrackerForWebContentInView:(MPAdContainerView *)webContainer;
+
+/**
+ Creates a Viewability tracker for VAST video creatives.
+ @param config The video configuration for the VAST creative.
+ @param container The view that contains the VAST video player in the view hierarchy, in addition to other UI elements that are
+ considered friendly obstructions.
+ @param adConfiguration Ad configuration associated with the video configuration.
+ @return A tracker instance if Viewability is initialized, enabled, and the tracker successfully created; otherwise @c nil.
+*/
+- (id<MPViewabilityTracker> _Nullable)viewabilityTrackerForVideoConfig:(MPVideoConfig *)config
+                                              containedInContainerView:(MPAdContainerView *)container
+                                                       adConfiguration:(MPAdConfiguration *)adConfiguration;
 
 @end
 

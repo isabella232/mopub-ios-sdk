@@ -11,6 +11,7 @@
 #import "MPLogging.h"
 #import "MPVASTTracking.h"
 #import "MPVideoPlayerView.h"
+#import "MPViewableProgressView.h"
 #import "UIColor+MPAdditions.h"
 #import "UIView+MPAdditions.h"
 
@@ -38,7 +39,7 @@ NSTimeInterval const kPlayTimeTolerance = 0.1;
 @property (nonatomic, assign) BOOL didPlayToEndTime; // set to YES after the video ended
 @property (nonatomic, assign) BOOL isAutoPlayPauseEnabled;
 @property (nonatomic, assign) BOOL didFireStartEvent;
-@property (nonatomic, strong) UIProgressView *progressBar;
+@property (nonatomic, strong) MPViewableProgressView *progressBar;
 @property (nonatomic, strong) NSLayoutConstraint *progressBarTopConstraint;
 
 @property (nonatomic, strong) id<NSObject> progressBarTimeObserver;
@@ -123,6 +124,12 @@ NSTimeInterval const kPlayTimeTolerance = 0.1;
 }
 
 - (void)playVideo {
+    // Flag indicating that this `playVideo` call is resuming playback
+    // rather than starting playback. This needs to be set before
+    // `hasStartedPlaying` is set since it is our indication that this is
+    // a resume event.
+    BOOL isResumingPlayback = self.hasStartedPlaying;
+
     if (self.hasStartedPlaying == NO) {
         self.hasStartedPlaying = YES;
 
@@ -134,10 +141,18 @@ NSTimeInterval const kPlayTimeTolerance = 0.1;
     }
 
     [self.player play];
+
+    // Notify that the video player is resuming playback
+    if (isResumingPlayback) {
+        [self.delegate videoPlayerView:self didTriggerEvent:MPVideoPlayerEvent_Resume videoProgress:self.videoProgress];
+    }
 }
 
 - (void)pauseVideo {
     [self.player pause];
+
+    // Notify that the video player is pausing playback.
+    [self.delegate videoPlayerView:self didTriggerEvent:MPVideoPlayerEvent_Pause videoProgress:self.videoProgress];
 }
 
 - (void)stopVideo {
@@ -256,7 +271,7 @@ NSTimeInterval const kPlayTimeTolerance = 0.1;
                           options:0
                           context:KVOContext];
 
-    UIProgressView *progressBar = [[UIProgressView alloc] initWithProgressViewStyle:UIProgressViewStyleDefault];
+    MPViewableProgressView *progressBar = [[MPViewableProgressView alloc] initWithProgressViewStyle:UIProgressViewStyleDefault];
     self.progressBar = progressBar;
     self.progressBar.progressTintColor = [UIColor mp_colorFromHexString:kProgressBarFillColor alpha:1];
 

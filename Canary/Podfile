@@ -1,7 +1,6 @@
 source 'https://github.com/CocoaPods/Specs.git'
 
 platform :ios, '10.0'
-inhibit_all_warnings!
 use_frameworks!
 workspace 'Canary'
 
@@ -58,7 +57,7 @@ if Dir.exists?(mediation_path) && !use_production_mediation
     pod 'MoPub-Chartboost-Adapters', :path => mediation_path
     pod 'MoPub-FacebookAudienceNetwork-Adapters', :path => mediation_path
     pod 'MoPub-IronSource-Adapters', :path => mediation_path
-    pod 'MoPub-Mintegral-Adapters', :path => mediation_path
+    pod 'MoPub-Pangle-Adapters', :path => mediation_path
     pod 'MoPub-TapJoy-Adapters', :path => mediation_path
     pod 'MoPub-UnityAds-Adapters', :path => mediation_path
     pod 'MoPub-Verizon-Adapters', :path => mediation_path
@@ -76,7 +75,7 @@ elsif mediation_remote != nil && !mediation_remote.to_s.empty? && !use_productio
     pod 'MoPub-Chartboost-Adapters', :git => mediation_remote, :branch => branch
     pod 'MoPub-FacebookAudienceNetwork-Adapters', :git => mediation_remote, :branch => branch
     pod 'MoPub-IronSource-Adapters', :git => mediation_remote, :branch => branch
-    pod 'MoPub-Mintegral-Adapters', :git => mediation_remote, :branch => branch
+    pod 'MoPub-Pangle-Adapters', :git => mediation_remote, :branch => branch
     pod 'MoPub-TapJoy-Adapters', :git => mediation_remote, :branch => branch
     pod 'MoPub-UnityAds-Adapters', :git => mediation_remote, :branch => branch
     pod 'MoPub-Verizon-Adapters', :git => mediation_remote, :branch => branch
@@ -89,7 +88,7 @@ else
     pod 'MoPub-Chartboost-Adapters'
     pod 'MoPub-FacebookAudienceNetwork-Adapters'
     pod 'MoPub-IronSource-Adapters'
-    pod 'MoPub-Mintegral-Adapters'
+    pod 'MoPub-Pangle-Adapters'
     pod 'MoPub-TapJoy-Adapters'
     pod 'MoPub-UnityAds-Adapters'
     pod 'MoPub-Verizon-Adapters'

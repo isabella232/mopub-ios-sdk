@@ -8,6 +8,7 @@
 
 #import <XCTest/XCTest.h>
 #import "MPVideoPlayerView+Testing.h"
+#import "MPVideoPlayerViewDelegateHandler.h"
 #import "XCTestCase+MPAddition.h"
 
 @interface MPVideoPlayerViewTests : XCTestCase
@@ -147,24 +148,103 @@
     MPVASTResponse *vastResponse = [self vastResponseFromXMLFile:@"linear-mime-types"];
     MPVideoConfig *videoConfig = [[MPVideoConfig alloc] initWithVASTResponse:vastResponse additionalTrackers:nil];
 
-    MPVideoPlayerView *player = [[MPVideoPlayerView alloc] initWithVideoURL:videoUrl videoConfig:videoConfig];
-    XCTAssertNotNil(player);
-    XCTAssertTrue(player.playVideoCount == 0);
-    XCTAssertTrue(player.pauseVideoCount == 0);
+    __block BOOL didPause = NO;
+    __block BOOL didResume = NO;
+    MPVideoPlayerViewDelegateHandler *handler = [MPVideoPlayerViewDelegateHandler new];
+    handler.videoPlayerDidTriggerEvent = ^(id<MPVideoPlayer>  _Nonnull videoPlayer, MPVideoPlayerEvent event, NSTimeInterval videoProgress) {
+        if (event == MPVideoPlayerEvent_Pause) {
+            didPause = YES;
+        }
+        else if (event == MPVideoPlayerEvent_Resume) {
+            didResume = YES;
+        }
+    };
 
+    MPVideoPlayerView *player = [[MPVideoPlayerView alloc] initWithVideoURL:videoUrl videoConfig:videoConfig];
+    player.delegate = handler;
+    XCTAssertNotNil(player);
+
+    // Load the video and fake start playback
     [player loadVideo];
+    player.hasStartedPlaying = YES;
 
     // Fake backgrounding the app
     NSNotification *backgroundNotification = [NSNotification notificationWithName:UIApplicationDidEnterBackgroundNotification object:nil];
     [player handleBackgroundNotification:backgroundNotification];
-    XCTAssertTrue(player.playVideoCount == 0);
-    XCTAssertTrue(player.pauseVideoCount == 1);
+    XCTAssertTrue(didPause);
+    XCTAssertFalse(didResume);
 
     // Fake foregrounding the app
     NSNotification *foregroundNotification = [NSNotification notificationWithName:UIApplicationWillEnterForegroundNotification object:nil];
     [player handleForegroundNotification:foregroundNotification];
-    XCTAssertTrue(player.playVideoCount == 1);
-    XCTAssertTrue(player.pauseVideoCount == 1);
+    XCTAssertTrue(didPause);
+    XCTAssertTrue(didResume);
+}
+
+#pragma mark - Pause and Resume
+
+- (void)testPauseTriggersEvent {
+    // Setup
+    NSURL *videoUrl = [NSURL URLWithString:@"https://www.host.com/fake.mp4"];
+    MPVASTResponse *vastResponse = [self vastResponseFromXMLFile:@"linear-mime-types"];
+    MPVideoConfig *videoConfig = [[MPVideoConfig alloc] initWithVASTResponse:vastResponse additionalTrackers:nil];
+
+    __block BOOL didPause = NO;
+    MPVideoPlayerViewDelegateHandler *handler = [MPVideoPlayerViewDelegateHandler new];
+    handler.videoPlayerDidTriggerEvent = ^(id<MPVideoPlayer>  _Nonnull videoPlayer, MPVideoPlayerEvent event, NSTimeInterval videoProgress) {
+        if (event == MPVideoPlayerEvent_Pause) {
+            didPause = YES;
+        }
+    };
+
+    MPVideoPlayerView *player = [[MPVideoPlayerView alloc] initWithVideoURL:videoUrl videoConfig:videoConfig];
+    player.delegate = handler;
+    XCTAssertNotNil(player);
+
+    // Load the video and fake start playback
+    [player loadVideo];
+    player.hasStartedPlaying = YES;
+
+    // Trigger pause
+    [player pauseVideo];
+
+    XCTAssertTrue(didPause);
+}
+
+- (void)testResumeTriggersEvent {
+    NSURL *videoUrl = [NSURL URLWithString:@"https://www.host.com/fake.mp4"];
+    MPVASTResponse *vastResponse = [self vastResponseFromXMLFile:@"linear-mime-types"];
+    MPVideoConfig *videoConfig = [[MPVideoConfig alloc] initWithVASTResponse:vastResponse additionalTrackers:nil];
+
+    __block BOOL didPause = NO;
+    __block BOOL didResume = NO;
+    MPVideoPlayerViewDelegateHandler *handler = [MPVideoPlayerViewDelegateHandler new];
+    handler.videoPlayerDidTriggerEvent = ^(id<MPVideoPlayer>  _Nonnull videoPlayer, MPVideoPlayerEvent event, NSTimeInterval videoProgress) {
+        if (event == MPVideoPlayerEvent_Pause) {
+            didPause = YES;
+        }
+        else if (event == MPVideoPlayerEvent_Resume) {
+            didResume = YES;
+        }
+    };
+
+    MPVideoPlayerView *player = [[MPVideoPlayerView alloc] initWithVideoURL:videoUrl videoConfig:videoConfig];
+    player.delegate = handler;
+    XCTAssertNotNil(player);
+
+    // Load the video and fake start playback
+    [player loadVideo];
+    player.hasStartedPlaying = YES;
+
+    // Trigger pause
+    [player pauseVideo];
+    XCTAssertTrue(didPause);
+    XCTAssertFalse(didResume);
+
+    // Trigger resume
+    [player playVideo];
+    XCTAssertTrue(didPause);
+    XCTAssertTrue(didResume);
 }
 
 @end

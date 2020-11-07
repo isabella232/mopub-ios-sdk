@@ -9,6 +9,7 @@
 #import <CoreTelephony/CTCarrier.h>
 #import <CoreTelephony/CTTelephonyNetworkInfo.h>
 #import "MPDeviceInformation.h"
+#import "MPLogging.h"
 #import "NSDictionary+MPAdditions.h"
 
 // ATS Constants
@@ -42,7 +43,7 @@ static NSString *const kMoPubCarrierMobileNetworkCodeKey = @"mobileNetworkCode";
     });
 }
 
-#pragma mark - ATS
+#pragma mark - Application Metadata
 
 + (MPATSSetting)appTransportSecuritySettings {
     // Keep track of ATS settings statically, as they'll never change in the lifecycle of the application.
@@ -96,6 +97,16 @@ static NSString *const kMoPubCarrierMobileNetworkCodeKey = @"mobileNetworkCode";
 
     gCheckedAppTransportSettings = YES;
     return gSetting;
+}
+
++ (NSString *)applicationVersion {
+    static NSString * gApplicationVersion;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        gApplicationVersion = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
+    });
+
+    return gApplicationVersion;
 }
 
 #pragma mark - Connectivity
@@ -160,6 +171,86 @@ static NSString *const kMoPubCarrierMobileNetworkCodeKey = @"mobileNetworkCode";
 + (NSString *)mobileNetworkCode {
     NSDictionary *carrierInfo = [NSUserDefaults.standardUserDefaults objectForKey:kMoPubCarrierInfoDictionaryKey];
     return [carrierInfo mp_stringForKey:kMoPubCarrierMobileNetworkCodeKey];
+}
+
+#pragma mark - Location
+
+// Backing storage for the enabled flag.
+static BOOL sEnableLocation = YES;
+
++ (BOOL)enableLocation {
+    return sEnableLocation;
+}
+
++ (void)setEnableLocation:(BOOL)enabled {
+    sEnableLocation = enabled;
+}
+
+// Cached last known good location
+static CLLocation *sCachedLastGoodLocation = nil;
+
++ (CLLocation *)lastLocation {
+    // Location has been disabled by the Publisher
+    if (!sEnableLocation) {
+        return nil;
+    }
+
+    // Fetch the cached location from `CLLocationManager` and see if it's valid and fresher than
+    // what we currently have.
+    // Validity check is ensuring that the horizontal accuracy is greater than or equal to zero.
+    // Freshness check is timestamp.
+    CLLocation *freshLocation = MPDeviceInformation.locationManager.location;
+    if (freshLocation != nil && freshLocation.horizontalAccuracy >= 0 && freshLocation.timestamp.timeIntervalSince1970 > sCachedLastGoodLocation.timestamp.timeIntervalSince1970) {
+        sCachedLastGoodLocation = freshLocation;
+    }
+
+    MPLogDebug(@"Location: %@", sCachedLastGoodLocation);
+
+    return sCachedLastGoodLocation;
+}
+
+// Clears the cached last known good location to facilitate unit testing.
++ (void)clearCachedLastLocation {
+    sCachedLastGoodLocation = nil;
+}
+
++ (MPLocationAuthorizationStatus)locationAuthorizationStatus {
+    CLAuthorizationStatus status = MPDeviceInformation.locationManagerAuthorizationStatus;
+    BOOL isLocationEnabledInSystem = MPDeviceInformation.locationManagerLocationServiceEnabled;
+    BOOL isLocationAllowedByPublisher = sEnableLocation;
+
+    switch (status) {
+        case kCLAuthorizationStatusNotDetermined: return kMPLocationAuthorizationStatusNotDetermined;
+        case kCLAuthorizationStatusRestricted: return kMPLocationAuthorizationStatusRestricted;
+        case kCLAuthorizationStatusDenied: return (isLocationEnabledInSystem ? kMPLocationAuthorizationStatusUserDenied : kMPLocationAuthorizationStatusSettingsDenied);
+        case kCLAuthorizationStatusAuthorizedAlways: return (isLocationAllowedByPublisher ? kMPLocationAuthorizationStatusAuthorizedAlways : kMPLocationAuthorizationStatusPublisherDenied);
+        case kCLAuthorizationStatusAuthorizedWhenInUse: return (isLocationAllowedByPublisher ? kMPLocationAuthorizationStatusAuthorizedWhenInUse : kMPLocationAuthorizationStatusPublisherDenied);
+    }
+}
+
+// Location manager is specified as a class property to facilitate
+// unit testing.
++ (CLLocationManager *)locationManager {
+    // Lazily initialize the location manager
+    static CLLocationManager *locationManager = nil;
+    if (locationManager == nil) {
+        locationManager = [[CLLocationManager alloc] init];
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest;
+    }
+
+    return locationManager;
+}
+
+// Class property to wrap `CLLocationManager.authorizationStatus` in order to
+// facilitate unit testing.
++ (CLAuthorizationStatus)locationManagerAuthorizationStatus {
+    return CLLocationManager.authorizationStatus;
+}
+
+// Class property to wrap `CLLocationManager.locationServicesEnabled` in order to
+// facilitate unit testing.
++ (BOOL)locationManagerLocationServiceEnabled {
+    return CLLocationManager.locationServicesEnabled;
 }
 
 @end

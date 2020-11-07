@@ -47,13 +47,13 @@
         }
         return;
     }
-    
+
     // Rewarded content should not initially show the close button since
     // the countdown timer will be shown.
     if (self.rewardCountdownDuration > 0) {
         [self.adContainerView setCloseButtonType:MPAdViewCloseButtonTypeNone];
     }
-    
+
     // Notify any listeners that presentation of the view controller
     // is about to begin.
     [self viewControllerWillPresent];
@@ -64,7 +64,7 @@
         if (strongSelf == nil) {
             return;
         }
-        
+
         switch (strongSelf.adContentType) {
             case MPAdContentTypeUndefined:
             case MPAdContentTypeVideo: {
@@ -79,11 +79,11 @@
                 }
                 break;
         }
-        
+
         // Notify any listeners that presentation of the view controller
         // is complete.
         [self viewControllerDidPresent];
-        
+
         if (complete != nil) {
             complete(nil);
         }
@@ -116,7 +116,7 @@
         && [[UIApplication sharedApplication] mp_supportsOrientationMask:self.supportedOrientationMask]) {
         return self.supportedOrientationMask;
     }
-    
+
     switch (self.adContentType) {
         case MPAdContentTypeUndefined:
         case MPAdContentTypeVideo: {
@@ -221,7 +221,7 @@
             [self fullscreenMRAIDWebAdWillAppear];
             break;
     }
-    
+
     [self.appearanceDelegate fullscreenAdWillAppear:self];
 }
 
@@ -239,7 +239,7 @@
             [self fullscreenMRAIDWebAdDidAppear];
             break;
     }
-    
+
     [self.appearanceDelegate fullscreenAdDidAppear:self];
 }
 
@@ -257,7 +257,7 @@
             [self fullscreenMRAIDWebAdWillDisappear];
             break;
     }
-    
+
     [self.appearanceDelegate fullscreenAdWillDisappear:self];
 }
 
@@ -275,7 +275,7 @@
             [self fullscreenMRAIDWebAdDidDisappear];
             break;
     }
-    
+
     [self.appearanceDelegate fullscreenAdDidDisappear:self];
 }
 
@@ -337,7 +337,7 @@
             [self willDismissFullscreenMRAIDWebAd];
             break;
     }
-    
+
     [self.appearanceDelegate fullscreenAdWillDismiss:self];
 }
 
@@ -357,10 +357,9 @@
             [self didDismissFullscreenMRAIDWebAd];
             break;
     }
-    
+
     [self.appearanceDelegate fullscreenAdDidDismiss:self];
 }
-
 
 @end
 

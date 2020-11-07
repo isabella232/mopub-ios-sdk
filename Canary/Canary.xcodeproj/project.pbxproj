@@ -36,17 +36,21 @@
 		BC04944320F904F200CFD9C2 /* AdUnitTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC04944220F904F200CFD9C2 /* AdUnitTableViewController.swift */; };
 		BC04944420F904F200CFD9C2 /* AdUnitTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC04944220F904F200CFD9C2 /* AdUnitTableViewController.swift */; };
 		BC04944820F91BF400CFD9C2 /* Internal.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BC04944620F91BF400CFD9C2 /* Internal.storyboard */; };
-		BC04945020F91BFC00CFD9C2 /* NetworkAdsSplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC04944A20F91BFC00CFD9C2 /* NetworkAdsSplitViewController.swift */; };
+		BC04945020F91BFC00CFD9C2 /* NetworkAdsNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC04944A20F91BFC00CFD9C2 /* NetworkAdsNavigationController.swift */; };
 		BC04945220F91BFC00CFD9C2 /* NetworkAds.plist in Resources */ = {isa = PBXBuildFile; fileRef = BC04944B20F91BFC00CFD9C2 /* NetworkAds.plist */; };
 		BC04945420F91BFC00CFD9C2 /* NetworkAdsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC04944C20F91BFC00CFD9C2 /* NetworkAdsViewController.swift */; };
 		BC04945A20F91C9E00CFD9C2 /* StoryboardInstantiable.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC04945920F91C9E00CFD9C2 /* StoryboardInstantiable.swift */; };
 		BC04945B20F91C9E00CFD9C2 /* StoryboardInstantiable.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC04945920F91C9E00CFD9C2 /* StoryboardInstantiable.swift */; };
 		BC04945E20F9266A00CFD9C2 /* InternalState.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC04945C20F9266A00CFD9C2 /* InternalState.swift */; };
+		BC0E204524F6B5DC00F72055 /* XCTestCase+Regex.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC0E204424F6B5DC00F72055 /* XCTestCase+Regex.swift */; };
+		BC163DB225154203006CD07F /* ViewabilityMenuDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC163DB125154203006CD07F /* ViewabilityMenuDataSource.swift */; };
+		BC163E05251554CA006CD07F /* ViewabilityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC163E04251554CA006CD07F /* ViewabilityTests.swift */; };
 		BC16904D201F8F8E000EA77F /* AdFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC16904C201F8F8E000EA77F /* AdFormat.swift */; };
 		BC16904E201F8F8E000EA77F /* AdFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC16904C201F8F8E000EA77F /* AdFormat.swift */; };
 		BC23DC5F234BA15400948AEF /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = BC23DC5E234BA15400948AEF /* GoogleService-Info.plist */; };
 		BC243C3D20A9F5B800DE6EA9 /* MenuViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC243C3C20A9F5B800DE6EA9 /* MenuViewController.swift */; };
 		BC243C3E20A9F5B800DE6EA9 /* MenuViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC243C3C20A9F5B800DE6EA9 /* MenuViewController.swift */; };
+		BC2814EF250A935200325BE8 /* OpenMeasurementVASTSkipTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC2814EE250A935200325BE8 /* OpenMeasurementVASTSkipTests.swift */; };
 		BC2B97E720F41D3E00D58F79 /* AdUnitTableViewHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC2B97E620F41D3E00D58F79 /* AdUnitTableViewHeader.swift */; };
 		BC2B97E820F41D3E00D58F79 /* AdUnitTableViewHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC2B97E620F41D3E00D58F79 /* AdUnitTableViewHeader.swift */; };
 		BC2B97EA20F41D7800D58F79 /* AdUnitTableViewHeader.xib in Resources */ = {isa = PBXBuildFile; fileRef = BC2B97E920F41D7800D58F79 /* AdUnitTableViewHeader.xib */; };
@@ -115,11 +119,13 @@
 		BC5F735E221F4C1D00EED041 /* FilteredAdUnitDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC5F735C221F4C1D00EED041 /* FilteredAdUnitDataSource.swift */; };
 		BC5F73602220AF6800EED041 /* FilterableAdUnitTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC5F735F2220AF6800EED041 /* FilterableAdUnitTableViewController.swift */; };
 		BC5F73612220AF6800EED041 /* FilterableAdUnitTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC5F735F2220AF6800EED041 /* FilterableAdUnitTableViewController.swift */; };
+		BC61B61E24EDD74D0053AD64 /* ConsoleLogViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC61B61D24EDD74D0053AD64 /* ConsoleLogViewController.swift */; };
+		BC61B62124EDDC420053AD64 /* ConsoleLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC61B62024EDDC420053AD64 /* ConsoleLog.swift */; };
+		BC61B62324EEE5D20053AD64 /* OpenMeasurementVASTTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC61B62224EEE5D20053AD64 /* OpenMeasurementVASTTests.swift */; };
+		BC61B62524F036010053AD64 /* OpenMeasurementFullscreenVASTSkip.plist in Resources */ = {isa = PBXBuildFile; fileRef = BC61B62424F036010053AD64 /* OpenMeasurementFullscreenVASTSkip.plist */; };
 		BC63B9221FBD14A00033ACD6 /* AdUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC63B9211FBD14A00033ACD6 /* AdUnit.swift */; };
 		BC63B9231FBD14A00033ACD6 /* AdUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC63B9211FBD14A00033ACD6 /* AdUnit.swift */; };
-		BC647D9A20F967C800FAA12C /* BaseSplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC647D9920F967C800FAA12C /* BaseSplitViewController.swift */; };
-		BC647D9B20F967C800FAA12C /* BaseSplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC647D9920F967C800FAA12C /* BaseSplitViewController.swift */; };
-		BC713BAE21700BBC003655B2 /* ReleaseTestingSplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC713BAD21700BBC003655B2 /* ReleaseTestingSplitViewController.swift */; };
+		BC713BAE21700BBC003655B2 /* ReleaseTestingNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC713BAD21700BBC003655B2 /* ReleaseTestingNavigationController.swift */; };
 		BC713BB121700C9B003655B2 /* ReleaseTestingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC713BB021700C9B003655B2 /* ReleaseTestingViewController.swift */; };
 		BC7892E9220B9C22007A6218 /* AccessibilityIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC7892E8220B9C22007A6218 /* AccessibilityIdentifier.swift */; };
 		BC7892EA220B9C22007A6218 /* AccessibilityIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC7892E8220B9C22007A6218 /* AccessibilityIdentifier.swift */; };
@@ -151,14 +157,25 @@
 		BCB4DF32211CC27D005BD171 /* StatusTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = BCB4DF30211CC27D005BD171 /* StatusTableViewCell.xib */; };
 		BCB4DF34211CD970005BD171 /* TableViewCellRegisterable.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCB4DF33211CD970005BD171 /* TableViewCellRegisterable.swift */; };
 		BCB4DF35211CD970005BD171 /* TableViewCellRegisterable.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCB4DF33211CD970005BD171 /* TableViewCellRegisterable.swift */; };
+		BCB5EF8824F066EA00E6A508 /* ReleaseTestingAds.plist in Resources */ = {isa = PBXBuildFile; fileRef = BCF6F7E321752DDF00FDE594 /* ReleaseTestingAds.plist */; };
 		BCB63FDF20AA426300C22C7F /* MenuDisplayable.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCB63FDE20AA426300C22C7F /* MenuDisplayable.swift */; };
 		BCB63FE020AA426300C22C7F /* MenuDisplayable.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCB63FDE20AA426300C22C7F /* MenuDisplayable.swift */; };
 		BCB63FE220AA442B00C22C7F /* MenuDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCB63FE120AA442B00C22C7F /* MenuDataSource.swift */; };
 		BCB63FE320AA442B00C22C7F /* MenuDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCB63FE120AA442B00C22C7F /* MenuDataSource.swift */; };
 		BCB8CFB321C06230007F7F6C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BC33E03F1FBB627B0060ECBE /* Assets.xcassets */; };
 		BCB8CFB421C06237007F7F6C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BC33E03F1FBB627B0060ECBE /* Assets.xcassets */; };
+		BCC6648724F590F200B4A090 /* OpenMeasurementInlineDisplay.plist in Resources */ = {isa = PBXBuildFile; fileRef = BCC6648624F590F200B4A090 /* OpenMeasurementInlineDisplay.plist */; };
+		BCC6648924F5A62300B4A090 /* OpenMeasurementNativeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCC6648824F5A62300B4A090 /* OpenMeasurementNativeTests.swift */; };
+		BCC6648B24F5A87E00B4A090 /* OpenMeasurementNative.plist in Resources */ = {isa = PBXBuildFile; fileRef = BCC6648A24F5A87E00B4A090 /* OpenMeasurementNative.plist */; };
 		BCD0506C2003F1FF00FFC36D /* UIView+Nib.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCD0506B2003F1FF00FFC36D /* UIView+Nib.swift */; };
 		BCD0506D2003F20400FFC36D /* UIView+Nib.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCD0506B2003F1FF00FFC36D /* UIView+Nib.swift */; };
+		BCD300FC24F579C100AA82ED /* OpenMeasurementInlineDisplayTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCD300FB24F579C100AA82ED /* OpenMeasurementInlineDisplayTests.swift */; };
+		BCE6DDC024F414E70094BEA6 /* OpenMeasurementRewardedVAST.plist in Resources */ = {isa = PBXBuildFile; fileRef = BCE6DDBF24F414E70094BEA6 /* OpenMeasurementRewardedVAST.plist */; };
+		BCE6DDC224F43C9C0094BEA6 /* XCTestCase+Waiting.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCE6DDC124F43C9C0094BEA6 /* XCTestCase+Waiting.swift */; };
+		BCE6DDC524F461AD0094BEA6 /* XCTestCase+Dates.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCE6DDC424F461AD0094BEA6 /* XCTestCase+Dates.swift */; };
+		BCE6DDC724F463820094BEA6 /* OpenMeasurementFullscreenDisplayTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCE6DDC624F463820094BEA6 /* OpenMeasurementFullscreenDisplayTests.swift */; };
+		BCE6DDC924F464000094BEA6 /* XCTest+ReleaseTestingAds.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCE6DDC824F464000094BEA6 /* XCTest+ReleaseTestingAds.swift */; };
+		BCE6DDCB24F467A70094BEA6 /* OpenMeasurementFullscreenDisplay.plist in Resources */ = {isa = PBXBuildFile; fileRef = BCE6DDCA24F467A70094BEA6 /* OpenMeasurementFullscreenDisplay.plist */; };
 		BCE7078120B3392100DA4BCB /* PrivacyInfoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCE7077F20B3392100DA4BCB /* PrivacyInfoViewController.swift */; };
 		BCE7078420B3424E00DA4BCB /* PrivacyInfoDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCE7078220B3424E00DA4BCB /* PrivacyInfoDataSource.swift */; };
 		BCE7078620B34C3400DA4BCB /* MPBool+Description.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCE7078520B34C3400DA4BCB /* MPBool+Description.swift */; };
@@ -306,14 +323,18 @@
 		BC01F65220042BD600D6898B /* RewardedAdViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RewardedAdViewController.swift; sourceTree = "<group>"; };
 		BC04944220F904F200CFD9C2 /* AdUnitTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdUnitTableViewController.swift; sourceTree = "<group>"; };
 		BC04944620F91BF400CFD9C2 /* Internal.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Internal.storyboard; sourceTree = "<group>"; };
-		BC04944A20F91BFC00CFD9C2 /* NetworkAdsSplitViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkAdsSplitViewController.swift; sourceTree = "<group>"; };
+		BC04944A20F91BFC00CFD9C2 /* NetworkAdsNavigationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkAdsNavigationController.swift; sourceTree = "<group>"; };
 		BC04944B20F91BFC00CFD9C2 /* NetworkAds.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = NetworkAds.plist; sourceTree = "<group>"; };
 		BC04944C20F91BFC00CFD9C2 /* NetworkAdsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkAdsViewController.swift; sourceTree = "<group>"; };
 		BC04945920F91C9E00CFD9C2 /* StoryboardInstantiable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StoryboardInstantiable.swift; sourceTree = "<group>"; };
 		BC04945C20F9266A00CFD9C2 /* InternalState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InternalState.swift; sourceTree = "<group>"; };
+		BC0E204424F6B5DC00F72055 /* XCTestCase+Regex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCTestCase+Regex.swift"; sourceTree = "<group>"; };
+		BC163DB125154203006CD07F /* ViewabilityMenuDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewabilityMenuDataSource.swift; sourceTree = "<group>"; };
+		BC163E04251554CA006CD07F /* ViewabilityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewabilityTests.swift; sourceTree = "<group>"; };
 		BC16904C201F8F8E000EA77F /* AdFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdFormat.swift; sourceTree = "<group>"; };
 		BC23DC5E234BA15400948AEF /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		BC243C3C20A9F5B800DE6EA9 /* MenuViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuViewController.swift; sourceTree = "<group>"; };
+		BC2814EE250A935200325BE8 /* OpenMeasurementVASTSkipTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenMeasurementVASTSkipTests.swift; sourceTree = "<group>"; };
 		BC2B97E620F41D3E00D58F79 /* AdUnitTableViewHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdUnitTableViewHeader.swift; sourceTree = "<group>"; };
 		BC2B97E920F41D7800D58F79 /* AdUnitTableViewHeader.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = AdUnitTableViewHeader.xib; sourceTree = "<group>"; };
 		BC2CEFB5211CF12C00EAA99D /* TextEntryTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEntryTableViewCell.swift; sourceTree = "<group>"; };
@@ -352,9 +373,12 @@
 		BC59F25C20F524E30051DA00 /* AdUnitDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AdUnitDataSource.swift; sourceTree = "<group>"; };
 		BC5F735C221F4C1D00EED041 /* FilteredAdUnitDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilteredAdUnitDataSource.swift; sourceTree = "<group>"; };
 		BC5F735F2220AF6800EED041 /* FilterableAdUnitTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterableAdUnitTableViewController.swift; sourceTree = "<group>"; };
+		BC61B61D24EDD74D0053AD64 /* ConsoleLogViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsoleLogViewController.swift; sourceTree = "<group>"; };
+		BC61B62024EDDC420053AD64 /* ConsoleLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsoleLog.swift; sourceTree = "<group>"; };
+		BC61B62224EEE5D20053AD64 /* OpenMeasurementVASTTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenMeasurementVASTTests.swift; sourceTree = "<group>"; };
+		BC61B62424F036010053AD64 /* OpenMeasurementFullscreenVASTSkip.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = OpenMeasurementFullscreenVASTSkip.plist; sourceTree = "<group>"; };
 		BC63B9211FBD14A00033ACD6 /* AdUnit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdUnit.swift; sourceTree = "<group>"; };
-		BC647D9920F967C800FAA12C /* BaseSplitViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseSplitViewController.swift; sourceTree = "<group>"; };
-		BC713BAD21700BBC003655B2 /* ReleaseTestingSplitViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReleaseTestingSplitViewController.swift; sourceTree = "<group>"; };
+		BC713BAD21700BBC003655B2 /* ReleaseTestingNavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReleaseTestingNavigationController.swift; sourceTree = "<group>"; };
 		BC713BB021700C9B003655B2 /* ReleaseTestingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReleaseTestingViewController.swift; sourceTree = "<group>"; };
 		BC7892E8220B9C22007A6218 /* AccessibilityIdentifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityIdentifier.swift; sourceTree = "<group>"; };
 		BC8D8EC4222F234B003BE094 /* Default.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Default.xcconfig; sourceTree = "<group>"; };
@@ -374,7 +398,17 @@
 		BCB4DF33211CD970005BD171 /* TableViewCellRegisterable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableViewCellRegisterable.swift; sourceTree = "<group>"; };
 		BCB63FDE20AA426300C22C7F /* MenuDisplayable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuDisplayable.swift; sourceTree = "<group>"; };
 		BCB63FE120AA442B00C22C7F /* MenuDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuDataSource.swift; sourceTree = "<group>"; };
+		BCC6648624F590F200B4A090 /* OpenMeasurementInlineDisplay.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = OpenMeasurementInlineDisplay.plist; sourceTree = "<group>"; };
+		BCC6648824F5A62300B4A090 /* OpenMeasurementNativeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenMeasurementNativeTests.swift; sourceTree = "<group>"; };
+		BCC6648A24F5A87E00B4A090 /* OpenMeasurementNative.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = OpenMeasurementNative.plist; sourceTree = "<group>"; };
 		BCD0506B2003F1FF00FFC36D /* UIView+Nib.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "UIView+Nib.swift"; path = "Canary/Extensions/UIView+Nib.swift"; sourceTree = SOURCE_ROOT; };
+		BCD300FB24F579C100AA82ED /* OpenMeasurementInlineDisplayTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenMeasurementInlineDisplayTests.swift; sourceTree = "<group>"; };
+		BCE6DDBF24F414E70094BEA6 /* OpenMeasurementRewardedVAST.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = OpenMeasurementRewardedVAST.plist; sourceTree = "<group>"; };
+		BCE6DDC124F43C9C0094BEA6 /* XCTestCase+Waiting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCTestCase+Waiting.swift"; sourceTree = "<group>"; };
+		BCE6DDC424F461AD0094BEA6 /* XCTestCase+Dates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCTestCase+Dates.swift"; sourceTree = "<group>"; };
+		BCE6DDC624F463820094BEA6 /* OpenMeasurementFullscreenDisplayTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenMeasurementFullscreenDisplayTests.swift; sourceTree = "<group>"; };
+		BCE6DDC824F464000094BEA6 /* XCTest+ReleaseTestingAds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCTest+ReleaseTestingAds.swift"; sourceTree = "<group>"; };
+		BCE6DDCA24F467A70094BEA6 /* OpenMeasurementFullscreenDisplay.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = OpenMeasurementFullscreenDisplay.plist; sourceTree = "<group>"; };
 		BCE7077F20B3392100DA4BCB /* PrivacyInfoViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyInfoViewController.swift; sourceTree = "<group>"; };
 		BCE7078220B3424E00DA4BCB /* PrivacyInfoDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyInfoDataSource.swift; sourceTree = "<group>"; };
 		BCE7078520B34C3400DA4BCB /* MPBool+Description.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MPBool+Description.swift"; sourceTree = "<group>"; };
@@ -534,7 +568,6 @@
 				BC63B9211FBD14A00033ACD6 /* AdUnit.swift */,
 				BC59F25C20F524E30051DA00 /* AdUnitDataSource.swift */,
 				BC04944220F904F200CFD9C2 /* AdUnitTableViewController.swift */,
-				BC647D9920F967C800FAA12C /* BaseSplitViewController.swift */,
 				BC5F735F2220AF6800EED041 /* FilterableAdUnitTableViewController.swift */,
 				BC5F735C221F4C1D00EED041 /* FilteredAdUnitDataSource.swift */,
 			);
@@ -544,11 +577,19 @@
 		BC04944920F91BFC00CFD9C2 /* NetworkAds */ = {
 			isa = PBXGroup;
 			children = (
-				BC04944A20F91BFC00CFD9C2 /* NetworkAdsSplitViewController.swift */,
+				BC04944A20F91BFC00CFD9C2 /* NetworkAdsNavigationController.swift */,
 				BC04944B20F91BFC00CFD9C2 /* NetworkAds.plist */,
 				BC04944C20F91BFC00CFD9C2 /* NetworkAdsViewController.swift */,
 			);
 			path = NetworkAds;
+			sourceTree = "<group>";
+		};
+		BC163DEF25154209006CD07F /* Viewability */ = {
+			isa = PBXGroup;
+			children = (
+				BC163DB125154203006CD07F /* ViewabilityMenuDataSource.swift */,
+			);
+			path = Viewability;
 			sourceTree = "<group>";
 		};
 		BC33E02A1FBB627B0060ECBE = {
@@ -618,18 +659,29 @@
 			path = AdapterVersions;
 			sourceTree = "<group>";
 		};
+		BC61B61F24EDD7570053AD64 /* Logging */ = {
+			isa = PBXGroup;
+			children = (
+				BC61B61D24EDD74D0053AD64 /* ConsoleLogViewController.swift */,
+				BC61B62024EDDC420053AD64 /* ConsoleLog.swift */,
+			);
+			path = Logging;
+			sourceTree = "<group>";
+		};
 		BC7057B620F81396007E292E /* Internal */ = {
 			isa = PBXGroup;
 			children = (
-				BC23DC5E234BA15400948AEF /* GoogleService-Info.plist */,
 				2A4D35E0211D06ED00BE9377 /* APIEndpoint */,
+				BC23DC5E234BA15400948AEF /* GoogleService-Info.plist */,
 				B2564EE020AB4F2B000B9F7A /* Internal-Info.plist */,
 				BC04944620F91BF400CFD9C2 /* Internal.storyboard */,
 				BC04945C20F9266A00CFD9C2 /* InternalState.swift */,
-				BC713BAF21700BC6003655B2 /* ReleaseTesting */,
-				2A49E1FE229876310049B61B /* Testing */,
+				BC61B61F24EDD7570053AD64 /* Logging */,
 				BC04944920F91BFC00CFD9C2 /* NetworkAds */,
 				BCE7078B20B373A500DA4BCB /* Privacy */,
+				BC713BAF21700BC6003655B2 /* ReleaseTesting */,
+				2A49E1FE229876310049B61B /* Testing */,
+				BC163DEF25154209006CD07F /* Viewability */,
 			);
 			path = Internal;
 			sourceTree = "<group>";
@@ -637,7 +689,7 @@
 		BC713BAF21700BC6003655B2 /* ReleaseTesting */ = {
 			isa = PBXGroup;
 			children = (
-				BC713BAD21700BBC003655B2 /* ReleaseTestingSplitViewController.swift */,
+				BC713BAD21700BBC003655B2 /* ReleaseTestingNavigationController.swift */,
 				BC713BB021700C9B003655B2 /* ReleaseTestingViewController.swift */,
 				BCF6F7E321752DDF00FDE594 /* ReleaseTestingAds.plist */,
 			);
@@ -661,6 +713,32 @@
 				BC243C3C20A9F5B800DE6EA9 /* MenuViewController.swift */,
 			);
 			path = Menu;
+			sourceTree = "<group>";
+		};
+		BCC6648C24F5B25F00B4A090 /* Expected Results */ = {
+			isa = PBXGroup;
+			children = (
+				BCE6DDCA24F467A70094BEA6 /* OpenMeasurementFullscreenDisplay.plist */,
+				BC61B62424F036010053AD64 /* OpenMeasurementFullscreenVASTSkip.plist */,
+				BCC6648624F590F200B4A090 /* OpenMeasurementInlineDisplay.plist */,
+				BCC6648A24F5A87E00B4A090 /* OpenMeasurementNative.plist */,
+				BCE6DDBF24F414E70094BEA6 /* OpenMeasurementRewardedVAST.plist */,
+			);
+			path = "Expected Results";
+			sourceTree = "<group>";
+		};
+		BCE6DDC324F45C9E0094BEA6 /* Viewability */ = {
+			isa = PBXGroup;
+			children = (
+				BCC6648C24F5B25F00B4A090 /* Expected Results */,
+				BCE6DDC624F463820094BEA6 /* OpenMeasurementFullscreenDisplayTests.swift */,
+				BCD300FB24F579C100AA82ED /* OpenMeasurementInlineDisplayTests.swift */,
+				BCC6648824F5A62300B4A090 /* OpenMeasurementNativeTests.swift */,
+				BC2814EE250A935200325BE8 /* OpenMeasurementVASTSkipTests.swift */,
+				BC61B62224EEE5D20053AD64 /* OpenMeasurementVASTTests.swift */,
+				BC163E04251554CA006CD07F /* ViewabilityTests.swift */,
+			);
+			path = Viewability;
 			sourceTree = "<group>";
 		};
 		BCE7078B20B373A500DA4BCB /* Privacy */ = {
@@ -873,6 +951,7 @@
 				EC728C55233561B10020AEBD /* NativeVideoTableTests.swift */,
 				EC728C5B233561B10020AEBD /* RewardedRichMediaTests.swift */,
 				EC85D08923BFE87900D5E72F /* RewardedVideoTests.swift */,
+				BCE6DDC324F45C9E0094BEA6 /* Viewability */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -888,6 +967,10 @@
 		EC728C61233561B10020AEBD /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				BCE6DDC824F464000094BEA6 /* XCTest+ReleaseTestingAds.swift */,
+				BCE6DDC424F461AD0094BEA6 /* XCTestCase+Dates.swift */,
+				BC0E204424F6B5DC00F72055 /* XCTestCase+Regex.swift */,
+				BCE6DDC124F43C9C0094BEA6 /* XCTestCase+Waiting.swift */,
 				EC728C62233561B10020AEBD /* XCUIElement+Utility.swift */,
 			);
 			path = Extensions;
@@ -1145,6 +1228,12 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BCC6648B24F5A87E00B4A090 /* OpenMeasurementNative.plist in Resources */,
+				BCC6648724F590F200B4A090 /* OpenMeasurementInlineDisplay.plist in Resources */,
+				BCE6DDCB24F467A70094BEA6 /* OpenMeasurementFullscreenDisplay.plist in Resources */,
+				BCE6DDC024F414E70094BEA6 /* OpenMeasurementRewardedVAST.plist in Resources */,
+				BCB5EF8824F066EA00E6A508 /* ReleaseTestingAds.plist in Resources */,
+				BC61B62524F036010053AD64 /* OpenMeasurementFullscreenVASTSkip.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1210,7 +1299,6 @@
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Internal Application/Pods-Internal Application-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/FBSDKCoreKit/FBSDKCoreKit.framework",
-				"${BUILT_PRODUCTS_DIR}/Flurry-iOS-SDK/Flurry_iOS_SDK.framework",
 				"${BUILT_PRODUCTS_DIR}/GoogleUtilities/GoogleUtilities.framework",
 				"${BUILT_PRODUCTS_DIR}/LoremIpsum/LoremIpsum.framework",
 				"${BUILT_PRODUCTS_DIR}/PromisesObjC/FBLPromises.framework",
@@ -1237,7 +1325,6 @@
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FBSDKCoreKit.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Flurry_iOS_SDK.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleUtilities.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/LoremIpsum.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FBLPromises.framework",
@@ -1274,7 +1361,6 @@
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-AppStore Application/Pods-AppStore Application-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/FBSDKCoreKit/FBSDKCoreKit.framework",
-				"${BUILT_PRODUCTS_DIR}/Flurry-iOS-SDK/Flurry_iOS_SDK.framework",
 				"${BUILT_PRODUCTS_DIR}/GoogleUtilities/GoogleUtilities.framework",
 				"${BUILT_PRODUCTS_DIR}/LoremIpsum/LoremIpsum.framework",
 				"${BUILT_PRODUCTS_DIR}/PromisesObjC/FBLPromises.framework",
@@ -1301,7 +1387,6 @@
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FBSDKCoreKit.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Flurry_iOS_SDK.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleUtilities.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/LoremIpsum.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FBLPromises.framework",
@@ -1337,13 +1422,15 @@
 			);
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Internal Application/Pods-Internal Application-resources.sh",
-				"${PODS_ROOT}/AppLovinSDK/applovin-ios-sdk-6.11.6/AppLovinSDKResources.bundle",
-				"${PODS_ROOT}/TapjoySDK/TapjoySDK_iOS_v12.4.2/Libraries/Tapjoy.embeddedframework/Resources/TapjoyResources.bundle",
-				"${PODS_ROOT}/TapjoySDK/TapjoySDK_iOS_v12.4.2/Libraries/Tapjoy.embeddedframework/Tapjoy.framework/Versions/A/Resources/TapjoyResources.bundle",
+				"${PODS_ROOT}/AppLovinSDK/applovin-ios-sdk-6.14.2/AppLovinSDKResources.bundle",
+				"${PODS_ROOT}/Bytedance-UnionAD/Bytedance-UnionAd/Frameworks/BUAdSDK.bundle",
+				"${PODS_ROOT}/TapjoySDK/TapjoySDK_iOS_v12.6.1/Libraries/Tapjoy.embeddedframework/Resources/TapjoyResources.bundle",
+				"${PODS_ROOT}/TapjoySDK/TapjoySDK_iOS_v12.6.1/Libraries/Tapjoy.embeddedframework/Tapjoy.framework/Versions/A/Resources/TapjoyResources.bundle",
 			);
 			name = "[CP] Copy Pods Resources";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/AppLovinSDKResources.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/BUAdSDK.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/TapjoyResources.bundle",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1358,13 +1445,15 @@
 			);
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-AppStore Application/Pods-AppStore Application-resources.sh",
-				"${PODS_ROOT}/AppLovinSDK/applovin-ios-sdk-6.11.6/AppLovinSDKResources.bundle",
-				"${PODS_ROOT}/TapjoySDK/TapjoySDK_iOS_v12.4.2/Libraries/Tapjoy.embeddedframework/Resources/TapjoyResources.bundle",
-				"${PODS_ROOT}/TapjoySDK/TapjoySDK_iOS_v12.4.2/Libraries/Tapjoy.embeddedframework/Tapjoy.framework/Versions/A/Resources/TapjoyResources.bundle",
+				"${PODS_ROOT}/AppLovinSDK/applovin-ios-sdk-6.14.2/AppLovinSDKResources.bundle",
+				"${PODS_ROOT}/Bytedance-UnionAD/Bytedance-UnionAd/Frameworks/BUAdSDK.bundle",
+				"${PODS_ROOT}/TapjoySDK/TapjoySDK_iOS_v12.6.1/Libraries/Tapjoy.embeddedframework/Resources/TapjoyResources.bundle",
+				"${PODS_ROOT}/TapjoySDK/TapjoySDK_iOS_v12.6.1/Libraries/Tapjoy.embeddedframework/Tapjoy.framework/Versions/A/Resources/TapjoyResources.bundle",
 			);
 			name = "[CP] Copy Pods Resources";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/AppLovinSDKResources.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/BUAdSDK.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/TapjoyResources.bundle",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1440,7 +1529,6 @@
 				BC4FE3032208C57000B5D240 /* AdapterVersionsMenuDataSource.swift in Sources */,
 				BC3B0C952007DAA5002D28B1 /* NativeAdCollectionViewController.swift in Sources */,
 				BCFE5B371FE4469200D760E9 /* AdUnitTableViewCell.swift in Sources */,
-				BC647D9A20F967C800FAA12C /* BaseSplitViewController.swift in Sources */,
 				EC32525E225276F500D955C3 /* NSObject+Utility.swift in Sources */,
 				BC5F73602220AF6800EED041 /* FilterableAdUnitTableViewController.swift in Sources */,
 				EC3C659A232020E200D2E15D /* CallbackFunctionNames.swift in Sources */,
@@ -1514,7 +1602,7 @@
 				BC4FE3082208E8E500B5D240 /* CollapsibleAdapterInfoTableViewCell.swift in Sources */,
 				EC32525A225273AD00D955C3 /* TextAndToggleTableViewCell.swift in Sources */,
 				EC3C659B232020E300D2E15D /* CallbackFunctionNames.swift in Sources */,
-				BC04945020F91BFC00CFD9C2 /* NetworkAdsSplitViewController.swift in Sources */,
+				BC04945020F91BFC00CFD9C2 /* NetworkAdsNavigationController.swift in Sources */,
 				BC63B9231FBD14A00033ACD6 /* AdUnit.swift in Sources */,
 				BCE7078720B34C3400DA4BCB /* MPBool+Description.swift in Sources */,
 				BC525ED8212F50E3007B1761 /* RewardedAdDataSource.swift in Sources */,
@@ -1526,10 +1614,9 @@
 				BC713BB121700C9B003655B2 /* ReleaseTestingViewController.swift in Sources */,
 				ECF218132278D5B8008BD940 /* NativeAdRendererMenuDataSource.swift in Sources */,
 				BCFE5B381FE4469200D760E9 /* AdUnitTableViewCell.swift in Sources */,
-				BC647D9B20F967C800FAA12C /* BaseSplitViewController.swift in Sources */,
 				B275DB2E200FD64000F053F8 /* SavedAdsDataSource.swift in Sources */,
 				BCEB5DA72008270300FE5165 /* CGFloat+Random.swift in Sources */,
-				BC713BAE21700BBC003655B2 /* ReleaseTestingSplitViewController.swift in Sources */,
+				BC713BAE21700BBC003655B2 /* ReleaseTestingNavigationController.swift in Sources */,
 				BC003AFE20DC42FE00CD1FEB /* LogingLevelMenuDataSource.swift in Sources */,
 				BC525EEA2135BA4E007B1761 /* PreferredWidthLabel.swift in Sources */,
 				2A35FAAC21B5DA6200DC8805 /* QRCodeCameraInterfaceViewController.swift in Sources */,
@@ -1537,6 +1624,7 @@
 				BC4CE29D2136054500CA0220 /* NativeAdTableDataSource.swift in Sources */,
 				BC04945B20F91C9E00CFD9C2 /* StoryboardInstantiable.swift in Sources */,
 				2A4D35E3211D074800BE9377 /* APIEndpointMenuDataSource.swift in Sources */,
+				BC163DB225154203006CD07F /* ViewabilityMenuDataSource.swift in Sources */,
 				BCE7078420B3424E00DA4BCB /* PrivacyInfoDataSource.swift in Sources */,
 				BC5F73612220AF6800EED041 /* FilterableAdUnitTableViewController.swift in Sources */,
 				BC525ED5212F2D71007B1761 /* InterstitialAdDataSource.swift in Sources */,
@@ -1563,9 +1651,11 @@
 				BC525EC9212F15A5007B1761 /* MediumRectangleAdViewController.swift in Sources */,
 				ECF2181E227900C2008BD940 /* NativeAdRendererManager.swift in Sources */,
 				BC95D23D2097B9180030C230 /* MainTabBarController.swift in Sources */,
+				BC61B62124EDDC420053AD64 /* ConsoleLog.swift in Sources */,
 				BC16904E201F8F8E000EA77F /* AdFormat.swift in Sources */,
 				2A1F52F7221628A000933277 /* ManualEntryInterfaceViewController.swift in Sources */,
 				EC32525F225276F500D955C3 /* NSObject+Utility.swift in Sources */,
+				BC61B61E24EDD74D0053AD64 /* ConsoleLogViewController.swift in Sources */,
 				BCD0506D2003F20400FFC36D /* UIView+Nib.swift in Sources */,
 				BC3B0C932006E168002D28B1 /* NativeAdTableViewController.swift in Sources */,
 				BC33E04E1FBB63260060ECBE /* SampleAdsViewController.swift in Sources */,
@@ -1586,25 +1676,35 @@
 				EC728C73233561B10020AEBD /* MoPubBaseTestCase.swift in Sources */,
 				EC728C70233561B10020AEBD /* RewardedRichMediaTests.swift in Sources */,
 				EC728C72233561B10020AEBD /* HTMLInterstitialAdTests.swift in Sources */,
+				BC61B62324EEE5D20053AD64 /* OpenMeasurementVASTTests.swift in Sources */,
 				EC478D352335363D000B3397 /* CallbackFunctionNames.swift in Sources */,
 				EC728C69233561B10020AEBD /* BasePage.swift in Sources */,
 				EC85D08C23C00BB300D5E72F /* Element.swift in Sources */,
 				EC728C6F233561B10020AEBD /* MRAIDInterstitialAdTests.swift in Sources */,
 				EC728C6C233561B10020AEBD /* MRAIDBannerAdTests.swift in Sources */,
+				BC163E05251554CA006CD07F /* ViewabilityTests.swift in Sources */,
 				EC85D08A23BFE87900D5E72F /* RewardedVideoTests.swift in Sources */,
 				305A5C9E23C664B700A7A31B /* ReleaseMoPubBanners.swift in Sources */,
+				BC2814EF250A935200325BE8 /* OpenMeasurementVASTSkipTests.swift in Sources */,
 				EC728C67233561B10020AEBD /* AdDetailPage.swift in Sources */,
+				BCC6648924F5A62300B4A090 /* OpenMeasurementNativeTests.swift in Sources */,
 				EC728C66233561B10020AEBD /* SafariApp.swift in Sources */,
+				BC0E204524F6B5DC00F72055 /* XCTestCase+Regex.swift in Sources */,
 				EC728C65233561B10020AEBD /* AdListPage.swift in Sources */,
+				BCD300FC24F579C100AA82ED /* OpenMeasurementInlineDisplayTests.swift in Sources */,
 				EC728C6B233561B10020AEBD /* NativeVideoAdTests.swift in Sources */,
 				EC728C75233561B10020AEBD /* XCUIElement+Utility.swift in Sources */,
 				30CA81CD23DF687F0023ABEE /* ReleaseMoPubFullscreen.swift in Sources */,
 				EC728C6E233561B10020AEBD /* NativeTableTests.swift in Sources */,
+				BCE6DDC724F463820094BEA6 /* OpenMeasurementFullscreenDisplayTests.swift in Sources */,
+				BCE6DDC924F464000094BEA6 /* XCTest+ReleaseTestingAds.swift in Sources */,
 				EC728C74233561B10020AEBD /* NativeCollectionTests.swift in Sources */,
 				308F286023FF11BB008B5049 /* ReleaseMoPubMediumRectangle.swift in Sources */,
+				BCE6DDC224F43C9C0094BEA6 /* XCTestCase+Waiting.swift in Sources */,
 				EC728C64233561B10020AEBD /* BannerAdLabels.swift in Sources */,
 				EC728C68233561B10020AEBD /* IPhoneHome.swift in Sources */,
 				EC728C71233561B10020AEBD /* NativeAdTests.swift in Sources */,
+				BCE6DDC524F461AD0094BEA6 /* XCTestCase+Dates.swift in Sources */,
 				EC728C6A233561B10020AEBD /* NativeVideoTableTests.swift in Sources */,
 				EC728C6D233561B10020AEBD /* HTMLBannerAdTests.swift in Sources */,
 			);
@@ -1666,10 +1766,12 @@
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 202010050907;
 				DEVELOPMENT_TEAM = 4S7XS533V3;
 				INFOPLIST_FILE = "CanaryScreenshots/Snapshots-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MARKETING_VERSION = 5.14.1;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				OTHER_SWIFT_FLAGS = "";
@@ -1686,10 +1788,12 @@
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 202010050907;
 				DEVELOPMENT_TEAM = 4S7XS533V3;
 				INFOPLIST_FILE = "CanaryScreenshots/Snapshots-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MARKETING_VERSION = 5.14.1;
 				MTL_FAST_MATH = YES;
 				OTHER_SWIFT_FLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mopub.CanaryScreenshots;
@@ -1819,10 +1923,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5.13.1;
+				CURRENT_PROJECT_VERSION = 202010050907;
 				DEVELOPMENT_TEAM = 4S7XS533V3;
 				INFOPLIST_FILE = Canary/Configuration/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 5.14.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mopub.Canary;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1836,10 +1941,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5.13.1;
+				CURRENT_PROJECT_VERSION = 202010050907;
 				DEVELOPMENT_TEAM = 4S7XS533V3;
 				INFOPLIST_FILE = Canary/Configuration/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 5.14.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mopub.Canary;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1853,10 +1959,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon.Internal;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5.13.1;
+				CURRENT_PROJECT_VERSION = 202010050907;
 				DEVELOPMENT_TEAM = 4S7XS533V3;
 				INFOPLIST_FILE = "Canary/Internal/Internal-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 5.14.1;
 				OTHER_SWIFT_FLAGS = "-DINTERNAL";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mopub.Canary;
 				SWIFT_VERSION = 5.0;
@@ -1871,10 +1978,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon.Internal;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5.13.1;
+				CURRENT_PROJECT_VERSION = 202010050907;
 				DEVELOPMENT_TEAM = 4S7XS533V3;
 				INFOPLIST_FILE = "Canary/Internal/Internal-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 5.14.1;
 				OTHER_SWIFT_FLAGS = "-DINTERNAL";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mopub.Canary;
 				SWIFT_VERSION = 5.0;
@@ -1888,10 +1996,12 @@
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 202010050907;
 				DEVELOPMENT_TEAM = 4S7XS533V3;
 				INFOPLIST_FILE = "CanaryUITests/UITests-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MARKETING_VERSION = 5.14.1;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				OTHER_SWIFT_FLAGS = "";
@@ -1908,10 +2018,12 @@
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 202010050907;
 				DEVELOPMENT_TEAM = 4S7XS533V3;
 				INFOPLIST_FILE = "CanaryUITests/UITests-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MARKETING_VERSION = 5.14.1;
 				MTL_FAST_MATH = YES;
 				OTHER_SWIFT_FLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = com.twitter.CanaryUITests;
@@ -1929,9 +2041,11 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 202010050907;
 				DEVELOPMENT_TEAM = 4S7XS533V3;
 				INFOPLIST_FILE = CanaryUnitTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MARKETING_VERSION = 5.14.1;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				OTHER_SWIFT_FLAGS = "";
@@ -1951,9 +2065,11 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 202010050907;
 				DEVELOPMENT_TEAM = 4S7XS533V3;
 				INFOPLIST_FILE = CanaryUnitTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MARKETING_VERSION = 5.14.1;
 				MTL_FAST_MATH = YES;
 				OTHER_SWIFT_FLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mopub.Canary.UnitTests;

@@ -16,6 +16,7 @@
 #import "MPRewardedVideoError.h"
 #import "MPLogging.h"
 #import "MPStopwatch.h"
+#import "MPViewabilityManager.h"
 #import "MoPub.h"
 #import "NSMutableArray+MPAdditions.h"
 #import "NSDate+MPAdditions.h"
@@ -352,9 +353,8 @@
             [self.delegate rewardedVideoWillDisappearForAdManager:self];
             break;
         case MPFullscreenAdEventDidDisappear:
-            // Successful playback of the rewarded video; reset the internal played state.
-            self.ready = NO;
-            self.playedAd = YES;
+            self.ready = NO;     // This state reset was put back here to accommodate adapters using the wrong event upon dismissal
+            self.playedAd = YES; // This state reset was put back here to accommodate adapters using the wrong event upon dismissal
             MPLogAdEvent(MPLogEvent.adDidDisappear, self.adUnitId);
             [self.delegate rewardedVideoDidDisappearForAdManager:self];
             break;
@@ -366,6 +366,21 @@
             MPLogAdEvent(MPLogEvent.adWillLeaveApplication, self.adUnitId);
             [self.delegate rewardedVideoWillLeaveApplicationForAdManager:self];
             break;
+        case MPFullscreenAdEventWillDismiss: {
+            // End the Viewability session and schedule the previously onscreen adapter for
+            // deallocation if it exists since it is going offscreen. This only applies to
+            // webview-based content.
+            BOOL isWebViewContent = (self.adapter.adContentType == MPAdContentTypeWebNoMRAID || self.adapter.adContentType == MPAdContentTypeWebWithMRAID);
+            if (self.adapter != nil && isWebViewContent) {
+                [MPViewabilityManager.sharedManager scheduleAdapterForDeallocation:self.adapter];
+            }
+
+            // Successful playback of the rewarded video; reset the internal played state.
+            self.ready = NO;
+            self.playedAd = YES;
+            self.loading = NO;
+            break;
+        }
     }
 }
 

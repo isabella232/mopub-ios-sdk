@@ -21,7 +21,7 @@
     [self.adapterDelegate adAdapter:self handleFullscreenAdEvent:MPFullscreenAdEventWillAppear];
     [self.adapterDelegate adAdapter:self handleFullscreenAdEvent:MPFullscreenAdEventDidAppear];
 
-    if (self.configuration.rewardedVideoCompletionUrl == nil) {
+    if (self.configuration.rewardedVideoCompletionUrls == nil) {
         [self.adapterDelegate adShouldRewardUserForAdapter:self reward:self.configuration.selectedReward];
     }
     else {

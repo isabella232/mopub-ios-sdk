@@ -8,12 +8,29 @@
 
 #import <XCTest/XCTest.h>
 #import "MPVASTModel.h"
+#import "MPVASTAd.h"
+#import "MPVASTCompanionAd.h"
+#import "MPVASTCreative.h"
+#import "MPVASTDurationOffset.h"
+#import "MPVASTIndustryIcon.h"
+#import "MPVASTInline.h"
+#import "MPVASTLinearAd.h"
+#import "MPVASTMediaFile.h"
+#import "MPVASTResource.h"
+#import "MPVASTResponse.h"
+#import "MPVASTTrackingEvent.h"
+#import "MPVASTWrapper.h"
+#import "MPVASTModel+Testing.h"
 
 @interface MPVASTModelTests : XCTestCase
 
 @end
 
 @implementation MPVASTModelTests
+
+- (void)setUp {
+    MPVASTModel.enablePropertyNameCaching = YES;
+}
 
 #pragma mark - MPNSStringToNSURLMapper
 
@@ -249,6 +266,61 @@
 - (void)testModelEmptyDictionary {
     MPVASTModel *model = [[MPVASTModel alloc] initWithDictionary:@{}];
     XCTAssertNotNil(model);
+}
+
+- (void)testHasPropertyNamedSynchronization {
+    // Test to stress test the synchronization of `hasPropertyNamed`.
+    // Disable property caching so that the `propertyNamesForClass` is
+    // constantly being read from and written to.
+    MPVASTModel.enablePropertyNameCaching = NO;
+
+    NSArray * classes = @[
+        MPVASTAd.class,
+        MPVASTCompanionAd.class,
+        MPVASTCreative.class,
+        MPVASTDurationOffset.class,
+        MPVASTIndustryIcon.class,
+        MPVASTInline.class,
+        MPVASTLinearAd.class,
+        MPVASTMediaFile.class,
+        MPVASTResource.class,
+        MPVASTResponse.class,
+        MPVASTTrackingEvent.class,
+        MPVASTWrapper.class,
+    ];
+
+    NSUInteger numThreads = 10;
+    NSUInteger limit = 10000;
+
+    NSMutableArray * expectations = [NSMutableArray arrayWithCapacity:numThreads];
+
+    for (int i = 0; i < numThreads; i++) {
+        NSString * queueLabel = [NSString stringWithFormat:@"queue-%d", i];
+        dispatch_queue_t queue = dispatch_queue_create(queueLabel.UTF8String, DISPATCH_QUEUE_SERIAL);
+
+        NSString * expectationDescription = [NSString stringWithFormat:@"Wait for %@ to finish", queueLabel];
+        XCTestExpectation * expectation = [self expectationWithDescription:expectationDescription];
+        [expectations addObject:expectation];
+
+        dispatch_async(queue, ^{
+            for (int j = 0; j < limit; j++) {
+                NSUInteger random = arc4random_uniform((int)classes.count);
+                Class randomClass = classes[random];
+                // Creating a random MPVASTModel subclass will invoke `hasPropertyNamed`.
+                MPVASTModel * obj __attribute__((unused)) = [[randomClass alloc] initWithDictionary:@{}];
+            }
+
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [expectations[i] fulfill];
+            });
+        });
+    }
+
+    [self waitForExpectationsWithTimeout:10.0 handler:^(NSError * _Nullable error) {
+        if (error != nil) {
+            XCTFail(@"Timed out");
+        }
+    }];
 }
 
 @end

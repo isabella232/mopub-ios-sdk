@@ -10,7 +10,9 @@
 #import "MPAdViewConstant.h"
 #import "MPGlobal.h"
 #import "MPImpressionData.h"
+#import "MPSKAdNetworkClickthroughData.h"
 #import "MPVideoEvent.h"
+#import "MPViewabilityContext.h"
 
 @class MPReward;
 @class MPVASTTrackingEvent;
@@ -70,6 +72,7 @@ extern NSString * const kAdTypeVAST;
 extern NSString * const kClickthroughExperimentBrowserAgent;
 
 extern NSString * const kViewabilityDisableMetadataKey;
+extern NSString * const kViewabilityVerificationResourcesKey;
 
 extern NSString * const kBannerImpressionVisableMsMetadataKey;
 extern NSString * const kBannerImpressionMinPixelMetadataKey;
@@ -84,10 +87,10 @@ extern NSString * const kBannerImpressionMinPixelMetadataKey;
 // and there is no need to hit ad server again.
 @property (nonatomic) BOOL isEndOfWaterfall;
 @property (nonatomic, assign) CGSize preferredSize;
-@property (nonatomic, strong) NSURL *clickTrackingURL;
-@property (nonatomic, strong) NSArray<NSURL *> * impressionTrackingURLs;
+@property (nonatomic, strong) NSArray<NSURL *> *clickTrackingURLs;
+@property (nonatomic, strong) NSArray<NSURL *> *impressionTrackingURLs;
 @property (nonatomic, strong) NSURL *nextURL;
-@property (nonatomic, strong) NSURL *beforeLoadURL;
+@property (nonatomic, strong) NSArray<NSURL *> *beforeLoadURLs;
 @property (nonatomic, assign) NSTimeInterval refreshInterval;
 @property (nonatomic, assign) NSTimeInterval adTimeoutInterval;
 @property (nonatomic, copy) NSData *adResponseData;
@@ -110,12 +113,15 @@ extern NSString * const kBannerImpressionMinPixelMetadataKey;
 @property (nonatomic) NSDictionary<MPVideoEvent, NSArray<MPVASTTrackingEvent *> *> *vastVideoTrackers;
 @property (nonatomic, readonly) NSArray<MPReward *> *availableRewards;
 @property (nonatomic, strong) MPReward *selectedReward;
-@property (nonatomic, copy) NSString *rewardedVideoCompletionUrl;
+@property (nonatomic, strong) NSArray<NSString *> *rewardedVideoCompletionUrls;
 @property (nonatomic, assign) NSTimeInterval rewardedDuration;
 @property (nonatomic, assign) BOOL rewardedPlayableShouldRewardOnClick;
 @property (nonatomic, copy) NSString *advancedBidPayload;
 @property (nonatomic, strong) MPImpressionData *impressionData;
+@property (nonatomic, strong) MPSKAdNetworkClickthroughData *skAdNetworkClickthroughData;
 @property (nonatomic, assign) BOOL enableEarlyClickthroughForNonRewardedVideo;
+
+@property (nonatomic, strong, readonly) MPViewabilityContext *viewabilityContext;
 
 /**
  MRAID `useCustomClose()` functionality is available for use.
@@ -131,11 +137,6 @@ extern NSString * const kBannerImpressionMinPixelMetadataKey;
  The ad is capable of rewarding users.
  */
 @property (nonatomic, readonly) BOOL isRewarded;
-
-/**
- Indicates the VAST video player version meant to render this ad.
- */
-@property (nonatomic, readonly) NSInteger vastPlayerVersion;
 
 // viewable impression tracking
 @property (nonatomic) NSTimeInterval impressionMinVisibleTimeInSec;

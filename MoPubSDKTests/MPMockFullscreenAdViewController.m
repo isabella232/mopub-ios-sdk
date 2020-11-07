@@ -18,10 +18,12 @@
 }
 
 - (void)loadConfigurationForWebAd:(MPAdConfiguration *)configuration {
+    [self.webAdDelegate fullscreenWebAdSessionReady:self];
     [self.webAdDelegate fullscreenWebAdDidLoad:self];
 }
 
 - (void)loadConfigurationForMRAIDAd:(MPAdConfiguration *)configuration {
+    [self.webAdDelegate fullscreenWebAdSessionReady:self];
     [self.webAdDelegate fullscreenWebAdDidLoad:self];
 }
 

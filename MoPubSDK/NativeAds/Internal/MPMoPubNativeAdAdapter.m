@@ -157,7 +157,7 @@ static const CGFloat kMoPubRequiredViewVisibilityPercentage = 0.5;
         return;
     }
 
-    [self.destinationDisplayAgent displayDestinationForURL:URL];
+    [self.destinationDisplayAgent displayDestinationForURL:URL skAdNetworkClickthroughData:self.adConfiguration.skAdNetworkClickthroughData];
 }
 
 #pragma mark - Privacy Icon
@@ -176,7 +176,8 @@ static const CGFloat kMoPubRequiredViewVisibilityPercentage = 0.5;
         (url != nil ? [NSURL URLWithString:url] : nil);
     });
 
-    [self.destinationDisplayAgent displayDestinationForURL:(overridePrivacyClickUrl != nil ? overridePrivacyClickUrl : defaultPrivacyClickUrl)];
+    // Since this is the privacy icon, send @c nil for skAdNetworkClickthroughData
+    [self.destinationDisplayAgent displayDestinationForURL:(overridePrivacyClickUrl != nil ? overridePrivacyClickUrl : defaultPrivacyClickUrl) skAdNetworkClickthroughData:nil];
 }
 
 #pragma mark - <MPAdImpressionTimerDelegate>

@@ -25,7 +25,7 @@
     if ([self.adapterDelegate respondsToSelector:@selector(instanceMediationSettingsForClass:)]) {
         return [self.adapterDelegate instanceMediationSettingsForClass:aClass];
     }
-    
+
     return nil;
 }
 
@@ -34,7 +34,7 @@
     // from the underlying network, but we don't want to bubble up the event to the application since we
     // are possibly reporting a timeout here.
     [self handleDidInvalidateAd];
-    
+
     self.hasAdAvailable = NO;
     [self.viewController showCloseButton];
     [self didStopLoadingAd];
@@ -95,6 +95,10 @@
 
 - (void)fullscreenAdAdapterWillLeaveApplication:(MPFullscreenAdAdapter *)adapter {
     [self handleAdEvent:MPFullscreenAdEventWillLeaveApplication];
+}
+
+- (void)fullscreenAdAdapterAdWillDismiss:(MPFullscreenAdAdapter *)adapter {
+    [self handleAdEvent:MPFullscreenAdEventWillDismiss];
 }
 
 @end

@@ -1,7 +1,7 @@
 Pod::Spec.new do |spec|
   spec.name             = 'mopub-ios-sdk'
   spec.module_name      = 'MoPub'
-  spec.version          = '5.13.1-pa'
+  spec.version          = '5.14.1-pa'
   spec.license          = { :type => 'New BSD', :file => 'LICENSE' }
   spec.homepage         = 'https://github.com/mopub/mopub-ios-sdk'
   spec.authors          = { 'MoPub' => 'support@mopub.com' }
@@ -14,7 +14,7 @@ Pod::Spec.new do |spec|
                             To learn more or sign up for an account, go to http://www.mopub.com. \n
                           DESC
   spec.social_media_url = 'http://twitter.com/mopub'
-  spec.source           = { :git => 'https://github.com/mopub/mopub-ios-sdk.git', :tag => '5.13.1' }
+  spec.source           = { :git => 'https://github.com/mopub/mopub-ios-sdk.git', :tag => '5.14.1' }
   spec.requires_arc     = true
   spec.ios.deployment_target = '10.0'
   spec.frameworks       = [
@@ -38,6 +38,9 @@ Pod::Spec.new do |spec|
                           ]
   spec.default_subspecs = 'MoPubSDK'
 
+  spec.pod_target_xcconfig  = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64 arm64e armv7 armv7s', 'EXCLUDED_ARCHS[sdk=iphoneos*]' => 'i386 x86_64' }
+  spec.user_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64 arm64e armv7 armv7s', 'EXCLUDED_ARCHS[sdk=iphoneos*]' => 'i386 x86_64' }
+
   spec.subspec 'MoPubSDK' do |sdk|
     sdk.dependency              'mopub-ios-sdk/Core'
     sdk.dependency              'mopub-ios-sdk/NativeAds'
@@ -45,8 +48,9 @@ Pod::Spec.new do |spec|
 
   spec.subspec 'Core' do |core|
     core.source_files         = 'MoPubSDK/**/*.{h,m}'
-    core.resource_bundles     = {'MoPubResources' => ['MoPubSDK/Resources/**/*', 'MoPubSDK/**/*.{nib,xib}']}
+    core.resource_bundles     = {'MoPubResources' => ['MoPubSDK/Resources/**/*', 'MoPubSDK/**/*.{nib,xib,js}']}
     core.exclude_files        = ['MoPubSDK/NativeAds', 'MoPubSDK/NativeVideo']
+    core.vendored_libraries   = ['MoPubSDK/Internal/Viewability/OMSDK/*.{a}']
   end
 
   spec.subspec 'NativeAds' do |native|

@@ -328,6 +328,10 @@ static const CGFloat kAutoPlayTimerInterval = 0.25f;
     }
 }
 
+- (MPAdConfiguration *)adConfiguration {
+    return self.adapter.adConfiguration;
+}
+
 // being called from MPNativeAd
 - (void)nativeAdTapped
 {
@@ -376,12 +380,10 @@ static const CGFloat kAutoPlayTimerInterval = 0.25f;
 {
     // If a video controller is nil or it's already been disposed, create/recreate the videoController
     if ([self.adView respondsToSelector:(@selector(nativeVideoView))]) {
-        BOOL createdNewVideoController = NO;
         self.videoConfig = [self.adapter.properties objectForKey:kVideoConfigKey];
         self.nativeVideoAdConfig = [self.adapter.properties objectForKey:kNativeAdConfigKey];
 
         if (!self.videoController || self.videoController.disposed) {
-            createdNewVideoController = YES;
             self.videoController = [[MOPUBPlayerManager sharedInstance] playerViewControllerWithVideoConfig:self.videoConfig
                                                                                         nativeVideoAdConfig:self.nativeVideoAdConfig];
             self.videoController.defaultActionURL = self.adapter.defaultActionURL;

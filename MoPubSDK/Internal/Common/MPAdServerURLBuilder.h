@@ -32,14 +32,12 @@
 
 + (MPURL *)URLWithAdUnitID:(NSString *)adUnitID
                  targeting:(MPAdTargeting *)targeting
-             desiredAssets:(NSArray *)assets
-               viewability:(BOOL)viewability;
+             desiredAssets:(NSArray *)assets;
 
 + (MPURL *)URLWithAdUnitID:(NSString *)adUnitID
                  targeting:(MPAdTargeting *)targeting
              desiredAssets:(NSArray *)assets
-                adSequence:(NSInteger)adSequence
-               viewability:(BOOL)viewability;
+                adSequence:(NSInteger)adSequence;
 
 @end
 
@@ -101,7 +99,7 @@
  @param adapterClassName Optional name of the adapter class used to render the rewarded ad.
  @param additionalData Optional additional data passed in by the publisher to be sent back to
  their reward server.
- @return Expandeded URL if successful; otherwise @c nil.
+ @return Expanded URL if successful; otherwise @c nil.
  */
 + (MPURL *)rewardedCompletionUrl:(NSString *)sourceUrl
                   withCustomerId:(NSString *)customerId
@@ -109,5 +107,16 @@
                     rewardAmount:(NSNumber *)rewardAmount
                 adapterClassName:(NSString *)adapterClassName
                   additionalData:(NSString *)additionalData;
+
+@end
+
+@interface MPAdServerURLBuilder (SKAdNetwork)
+
+/**
+ Constructs URL to synchronize enabled SKAdNetwork networks with ad server.
+ @param skAdNetworkIds List of SKAdNetwork IDs enabled for this app. Must be nonnull, more than one network
+ @return URL to synchronize SKAdNetwork IDs to ad server, or @c nil if requirements for @c skAdNetworkIds are not met
+ */
++ (MPURL *)skAdNetworkSynchronizationURLWithSkAdNetworkIds:(NSArray <NSString *> *)skAdNetworkIds;
 
 @end

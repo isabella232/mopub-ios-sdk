@@ -26,7 +26,13 @@
 - (void)inlineAdAdapter:(MPInlineAdAdapter *)adapter didLoadAdWithAdView:(UIView *)adView {
     [self didStopLoading];
     if (adView) {
+        // Update internally tracked ad view
         self.adView = adView;
+
+        // Track the ad load event for viewability
+        [self.viewabilityTracker trackAdLoaded];
+
+        // Notify listeners of the ad load event
         [self.inlineAdAdapterDelegate inlineAdAdapter:self didLoadAdWithAdView:adView];
     } else {
         NSError * noViewError = [NSError errorWithCode:MOPUBErrorInlineNoViewGivenWhenAdLoaded];
@@ -78,7 +84,7 @@
             [self trackClick];
         }
     }
-    
+
     // Send event to delegate
     [self.inlineAdAdapterDelegate adAdapter:self handleInlineAdEvent:event];
 }

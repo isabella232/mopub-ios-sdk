@@ -19,6 +19,7 @@
 #import "MPNativeAdConstants.h"
 #import "MPNativeCustomEventDelegate.h"
 #import "MPNativeCustomEvent.h"
+#import "MPNativeView.h"
 #import "MOPUBNativeVideoAdConfigValues.h"
 #import "MOPUBNativeVideoCustomEvent.h"
 #import "NSJSONSerialization+MPAdditions.h"
@@ -32,6 +33,7 @@
 #import "MPError.h"
 #import "NSDate+MPAdditions.h"
 #import "NSError+MPAdditions.h"
+#import "MPOpenMeasurementTracker.h"
 
 static NSString * const kNativeAdErrorDomain = @"com.mopub.NativeAd";
 
@@ -88,8 +90,7 @@ static NSString * const kNativeAdErrorDomain = @"com.mopub.NativeAd";
     if (handler) {
         self.URL = [MPAdServerURLBuilder URLWithAdUnitID:self.adUnitId
                                                targeting:self.targeting
-                                           desiredAssets:[self.targeting.desiredAssets allObjects]
-                                             viewability:NO];
+                                           desiredAssets:[self.targeting.desiredAssets allObjects]];
 
         [self assignCompletionHandler:handler];
 
@@ -105,8 +106,7 @@ static NSString * const kNativeAdErrorDomain = @"com.mopub.NativeAd";
         self.URL = [MPAdServerURLBuilder URLWithAdUnitID:self.adUnitId
                                                targeting:self.targeting
                                            desiredAssets:[self.targeting.desiredAssets allObjects]
-                                              adSequence:adSequence
-                                             viewability:NO];
+                                              adSequence:adSequence];
 
         [self assignCompletionHandler:handler];
 
@@ -245,12 +245,30 @@ static NSString * const kNativeAdErrorDomain = @"com.mopub.NativeAd";
     adObject.configuration = self.adConfiguration;
     adObject.adUnitID = self.adUnitId;
 
+    // Create the Viewability tracker if it's a Marketplace native ad.
+    // Note that only native display ads are supported since native video
+    // ads are deprecated and slated for removal.
+    Class customEventClass = self.adConfiguration.adapterClass;
+    if (customEventClass == [MPMoPubNativeCustomEvent class]) {
+        // If Viewability has been disabled or not initialized, `self.tracker` will be `nil`.
+        adObject.tracker = [self viewabilityTrackerForView:adObject.associatedView context:self.adConfiguration.viewabilityContext];
+
+        // Since `completeAdRequestWithAdObject:error:` corresponds with the native ad's
+        // "Ad Load" event, the viewability tracking session should be started
+        // immediately.
+        [adObject.tracker startTracking];
+    }
+
     if ([(id)adObject.adAdapter respondsToSelector:@selector(setAdConfiguration:)]) {
         [(id)adObject.adAdapter performSelector:@selector(setAdConfiguration:) withObject:self.adConfiguration];
     }
 
     if (error == nil) {
         MPLogAdEvent(MPLogEvent.adDidLoad, self.adUnitId);
+
+        // Track that the ad loaded successfully. This will do nothing if there is
+        // no Viewability tracker created.
+        [adObject.tracker trackAdLoaded];
     } else {
         MPLogAdEvent([MPLogEvent adFailedToLoadWithError:error], self.adUnitId);
     }
@@ -283,6 +301,24 @@ static NSString * const kNativeAdErrorDomain = @"com.mopub.NativeAd";
     [self.loadStopwatch start];
 
     [self getAdWithConfiguration:self.adConfiguration];
+}
+
+// Viewability tracker creation abstracted out in case it needs to be overridden for testing.
+- (id<MPViewabilityTracker> _Nullable)viewabilityTrackerForView:(UIView *)view context:(MPViewabilityContext *)context {
+    // No view to track
+    if (view == nil) {
+        MPLogEvent([MPLogEvent error:[NSError noViewToTrack] message:@"Failed to initialize Viewability tracker"]);
+        return nil;
+    }
+
+    MPOpenMeasurementTracker *tracker = [[MPOpenMeasurementTracker alloc] initWithNativeView:view
+                                                                              trackerContext:context
+                                                                        friendlyObstructions:nil];
+    if (tracker != nil) {
+        MPLogEvent([MPLogEvent viewabilityTrackerCreated:tracker]);
+    }
+
+    return tracker;
 }
 
 #pragma mark - <MPAdServerCommunicatorDelegate>
@@ -322,8 +358,8 @@ static NSString * const kNativeAdErrorDomain = @"com.mopub.NativeAd";
     [self.communicator sendAfterLoadUrlWithConfiguration:self.adConfiguration adapterLoadDuration:duration adapterLoadResult:MPAfterLoadResultAdLoaded];
 
     // Add the click tracker url from the header to our set.
-    if (self.adConfiguration.clickTrackingURL) {
-        [adObject.clickTrackerURLs addObject:self.adConfiguration.clickTrackingURL];
+    if (self.adConfiguration.clickTrackingURLs.count > 0) {
+        [adObject.clickTrackerURLs addObjectsFromArray:self.adConfiguration.clickTrackingURLs];
     }
 
     // Add the impression tracker url from the header to our set.
